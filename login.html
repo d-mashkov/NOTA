@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>НОТА — Вход</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="auth-logo-icon">Н</div>
+      <span style="font-size:20px;font-weight:700;">НОТА</span>
+    </div>
+
+    <h1 class="auth-title">Добро пожаловать</h1>
+    <p class="auth-subtitle">Закрытый сервис FMCG-трендов.<br>Введите email для входа.</p>
+
+    <!-- Шаг 1: email -->
+    <div id="step-email">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input
+          type="email"
+          id="input-email"
+          class="form-input"
+          placeholder="you@example.com"
+          autocomplete="email"
+        />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="sendOtp()">
+        Продолжить
+      </button>
+    </div>
+
+    <!-- Шаг 2: OTP-код -->
+    <div id="step-otp" style="display:none;">
+      <p class="auth-subtitle" style="margin-bottom:20px;">
+        Код отправлен на <strong id="otp-email-display"></strong>
+      </p>
+      <div class="form-group">
+        <label class="form-label">Код из письма</label>
+        <input
+          type="text"
+          id="input-otp"
+          class="form-input"
+          placeholder="123456"
+          maxlength="6"
+          style="letter-spacing:0.3em;font-size:20px;text-align:center;"
+        />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="verifyOtp()">
+        Войти
+      </button>
+      <button class="btn btn-ghost btn-full mt-8" onclick="backToEmail()">
+        ← Назад
+      </button>
+    </div>
+
+    <!-- Ошибка доступа -->
+    <div id="step-denied" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-state-icon">🔒</div>
+        <div class="empty-state-title">Доступ закрыт</div>
+        <p class="empty-state-text">Этот email не добавлен в список доступа.<br>Обратитесь к администратору.</p>
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="backToEmail()">← Попробовать другой email</button>
+    </div>
+
+    <!-- Статус / ошибка -->
+    <div id="auth-error" style="display:none;margin-top:14px;padding:12px 14px;background:#FEF2F2;border-radius:8px;color:#EF4444;font-size:14px;"></div>
+
+  </div>
+</div>
+
+<script src="js/supabase-client.js"></script>
+<script>
+  let currentEmail = '';
+
+  async function sendOtp() {
+    const email = document.getElementById('input-email').value.trim();
+    if (!email) return showError('Введите email');
+
+    // Проверяем, есть ли email в белом списке
+    const { data: user } = await supabase
+      .from('users')
+      .select('id, is_active')
+      .eq('email', email)
+      .single();
+
+    if (!user || !user.is_active) {
+      showDenied();
+      return;
+    }
+
+    // Отправляем OTP через Supabase Auth
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) return showError(error.message);
+
+    currentEmail = email;
+    document.getElementById('otp-email-display').textContent = email;
+    document.getElementById('step-email').style.display = 'none';
+    document.getElementById('step-otp').style.display = 'block';
+    hideError();
+  }
+
+  async function verifyOtp() {
+    const token = document.getElementById('input-otp').value.trim();
+    if (!token) return showError('Введите код');
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: currentEmail,
+      token,
+      type: 'email'
+    });
+
+    if (error) return showError('Неверный код. Попробуйте ещё раз.');
+    window.location.href = 'index.html';
+  }
+
+  function backToEmail() {
+    document.getElementById('step-email').style.display = 'block';
+    document.getElementById('step-otp').style.display = 'none';
+    document.getElementById('step-denied').style.display = 'none';
+    hideError();
+  }
+
+  function showDenied() {
+    document.getElementById('step-email').style.display = 'none';
+    document.getElementById('step-denied').style.display = 'block';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideError() {
+    document.getElementById('auth-error').style.display = 'none';
+  }
+</script>
+</body>
+</html>

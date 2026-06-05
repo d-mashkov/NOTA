@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>НОТА — Карточка</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">Н</div>
+      НОТА
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="notes.html" class="nav-link">Лента НОТ</a>
+      <a href="profile.html" class="nav-link">Сохранённые</a>
+      <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-user-name" id="nav-name">...</span>
+      <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <!-- Хлебные крошки -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;font-size:14px;color:var(--text-muted);">
+    <a href="notes.html" style="color:var(--accent);">← Лента НОТ</a>
+    <span>/</span>
+    <span id="breadcrumb-title">...</span>
+  </div>
+
+  <div class="note-layout" id="note-layout" style="display:none;">
+
+    <!-- Основной контент -->
+    <div class="note-main">
+
+      <!-- Герой -->
+      <div class="note-hero">
+        <div class="note-hero-meta" id="hero-meta">
+          <!-- badges -->
+        </div>
+        <h1 class="note-hero-title" id="hero-title">...</h1>
+        <p class="note-hero-desc" id="hero-desc">...</p>
+      </div>
+
+      <!-- Блоки 20 НОТы -->
+      <div id="note-blocks">
+        <!-- JS -->
+      </div>
+
+    </div>
+
+    <!-- Боковая панель -->
+    <aside class="note-sidebar">
+
+      <!-- Скоринг -->
+      <div class="card sidebar-card sidebar-score-big">
+        <div class="sidebar-score-number" id="score-number">—</div>
+        <div class="sidebar-score-label">Скоринг НОТЫ</div>
+        <div style="margin-top:16px;">
+          <div id="score-bar-full" style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:12px;">
+            <div id="score-bar-fill" style="height:100%;border-radius:3px;width:0;transition:width 0.8s ease;"></div>
+          </div>
+          <div id="score-verdict" style="font-size:14px;color:var(--text-secondary);text-align:center;"></div>
+        </div>
+      </div>
+
+      <!-- Рекомендация -->
+      <div class="card sidebar-card" id="rec-card">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;">Рекомендация</div>
+        <div id="rec-badge-big" style="font-size:20px;font-weight:700;"></div>
+        <div id="rec-text" style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;"></div>
+      </div>
+
+      <!-- Действия -->
+      <div class="card sidebar-card">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" onclick="toggleSave()" id="save-btn">
+            ☆ Сохранить
+          </button>
+          <button class="btn btn-secondary" onclick="window.print()">
+            ⬇ Скачать PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Комментарии -->
+      <div class="card sidebar-card">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:14px;">Комментарии</div>
+        <div id="comments-list">
+          <div class="empty-state" style="padding:24px 0;">
+            <div class="empty-state-text">Пока нет комментариев</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <textarea class="comment-input" id="comment-input" placeholder="Добавить комментарий..."></textarea>
+          <button class="btn btn-primary btn-full mt-8" onclick="submitComment()">Отправить</button>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Загрузка -->
+  <div id="loading-state" style="text-align:center;padding:80px 24px;color:var(--text-muted);">
+    Загрузка НОТЫ...
+  </div>
+
+</main>
+
+<script type="module">
+  import { requireAuth, getCurrentUser, getNoteById, addComment, saveNote, unsaveNote, supabase } from './js/supabase-client.js';
+
+  window.signOut = (await import('./js/supabase-client.js')).signOut;
+
+  let currentUser = null;
+  let currentNote = null;
+  let isSaved = false;
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) location.href = 'notes.html';
+
+  function scoreClass(s) {
+    if (s >= 80) return 'high';
+    if (s >= 60) return 'mid';
+    return 'low';
+  }
+  function scoreColor(s) {
+    if (s >= 80) return 'var(--green)';
+    if (s >= 60) return 'var(--yellow)';
+    return 'var(--red)';
+  }
+  function scoreVerdict(s) {
+    if (s >= 80) return '🟢 Сильная НОТА — изучить запуск';
+    if (s >= 60) return '🟡 Перспективно — нужен доп. анализ';
+    if (s >= 40) return '🟠 Наблюдать';
+    return '🔴 Пропустить';
+  }
+
+  function stageBadge(stage) {
+    const map = { emerging:['badge-emerging','Зарождение'], growing:['badge-growing','Рост'], hype:['badge-hype','Хайп'], saturation:['badge-draft','Насыщение'] };
+    const [cls,label] = map[stage] || ['badge-draft', stage || ''];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function recInfo(rec) {
+    return {
+      launch: { text: '🚀 Запускать', desc: 'Ниша перспективна. Спрос растёт, конкуренция низкая. Рекомендуем изучить запуск.' },
+      watch:  { text: '👀 Наблюдать', desc: 'Есть потенциал, но пока недостаточно данных. Следите за развитием тренда.' },
+      skip:   { text: '⛔ Пропустить', desc: 'Ниша насыщена или спрос недостаточен для рентабельного входа.' },
+    }[rec] || { text: '—', desc: '' };
+  }
+
+  function block(icon, title, content, extraClass='') {
+    if (!content) return '';
+    return `
+    <div class="note-block ${extraClass}">
+      <div class="note-block-title">${icon} ${title}</div>
+      <div class="note-block-content">${content}</div>
+    </div>`;
+  }
+
+  function renderBlocks(note, report) {
+    const r = report || {};
+    return [
+      block('📊', 'Почему это тренд', r.foreign_cases),
+      block('🇷🇺', 'Спрос в России', formatDemand(r.demand_russia)),
+      block('🌍', 'Глобальный спрос', formatDemand(r.demand_global)),
+      block('🏪', 'Анализ маркетплейсов', formatMarketplace(r.marketplace_data)),
+      block('⚔️', 'Конкуренты в России', r.russian_market),
+      block('🎯', 'Целевая аудитория', r.target_audience),
+      block('📦', 'Продуктовая гипотеза', r.product_hypothesis),
+      block('🍓', 'Вкусы, форматы, объёмы', r.flavors_formats),
+      block('📈', 'Оценка рынка', r.market_size),
+      block('🛠', 'Сложность запуска', r.launch_difficulty),
+      block('💰', 'Потенциальная маржа', r.potential_margin),
+      block('⚠️', 'Риски', r.risks),
+      block('🚀', 'Каналы выхода на рынок (GTM)', r.gtm),
+      block('🤖', 'AI-вывод', r.ai_output, 'ai-block'),
+      renderSources(r.sources),
+    ].filter(Boolean).join('');
+  }
+
+  function formatDemand(data) {
+    if (!data) return null;
+    if (typeof data === 'string') return data;
+    if (Array.isArray(data)) {
+      return `<table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead><tr style="color:var(--text-muted);font-size:12px;text-transform:uppercase;">
+          ${Object.keys(data[0]||{}).map(k=>`<th style="text-align:left;padding:6px 0;border-bottom:1px solid var(--border);">${k}</th>`).join('')}
+        </tr></thead>
+        <tbody>${data.map(row=>`<tr>${Object.values(row).map(v=>`<td style="padding:6px 0;border-bottom:1px solid var(--border);">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>`;
+    }
+    return JSON.stringify(data);
+  }
+
+  function formatMarketplace(data) {
+    if (!data) return null;
+    if (typeof data === 'string') return data;
+    return `<pre style="font-size:13px;background:var(--surface-2);padding:12px;border-radius:8px;overflow:auto;">${JSON.stringify(data, null, 2)}</pre>`;
+  }
+
+  function renderSources(sources) {
+    if (!sources?.length) return '';
+    return `<div class="note-block">
+      <div class="note-block-title">🔗 Источники</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+        ${sources.map(s=>`<li><a href="${s.url||'#'}" target="_blank" style="color:var(--accent);font-size:14px;">${s.title||s.url}</a><span style="margin-left:8px;font-size:12px;color:var(--text-muted);">${s.type||''}</span></li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  function renderComments(comments) {
+    const el = document.getElementById('comments-list');
+    if (!comments?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="empty-state-text">Пока нет комментариев</div></div>`;
+      return;
+    }
+    el.innerHTML = comments.map(c => `
+      <div class="comment">
+        <div class="comment-meta">
+          <div class="comment-avatar">${(c.users?.name||'?')[0].toUpperCase()}</div>
+          <span class="comment-author">${c.users?.name||'Аналитик'}</span>
+          <span class="comment-date">${new Date(c.created_at).toLocaleDateString('ru')}</span>
+        </div>
+        <div class="comment-text">${c.text}</div>
+      </div>
+    `).join('');
+  }
+
+  window.submitComment = async function() {
+    const input = document.getElementById('comment-input');
+    const text = input.value.trim();
+    if (!text || !currentUser) return;
+    const { error } = await addComment(id, currentUser.id, text);
+    if (!error) {
+      input.value = '';
+      const { data } = await getNoteById(id);
+      renderComments(data?.note_comments);
+    }
+  };
+
+  window.toggleSave = async function() {
+    if (!currentUser) return;
+    if (isSaved) {
+      await unsaveNote(currentUser.id, id);
+      isSaved = false;
+      document.getElementById('save-btn').textContent = '☆ Сохранить';
+    } else {
+      await saveNote(currentUser.id, id);
+      isSaved = true;
+      document.getElementById('save-btn').textContent = '★ Сохранено';
+    }
+  };
+
+  async function init() {
+    await requireAuth();
+    currentUser = await getCurrentUser();
+    if (!currentUser) return;
+
+    document.getElementById('nav-avatar').textContent = currentUser.name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase();
+    document.getElementById('nav-name').textContent = currentUser.name || currentUser.email;
+    if (currentUser.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+
+    const { data: note, error } = await getNoteById(id);
+    if (error || !note) { location.href = 'notes.html'; return; }
+
+    currentNote = note;
+    const report = note.note_reports?.[0] || {};
+
+    document.title = `НОТА — ${note.title}`;
+    document.getElementById('breadcrumb-title').textContent = note.title;
+
+    // Герой
+    document.getElementById('hero-meta').innerHTML = [
+      `<span class="badge badge-draft">${note.categories?.name||''}</span>`,
+      stageBadge(note.trend_stage),
+    ].join('');
+    document.getElementById('hero-title').textContent = note.title;
+    document.getElementById('hero-desc').textContent = note.description || '';
+
+    // Скоринг
+    const sc = note.score || 0;
+    const scEl = document.getElementById('score-number');
+    scEl.textContent = sc;
+    scEl.className = `sidebar-score-number ${scoreClass(sc)}`;
+    document.getElementById('score-bar-fill').style.width = sc + '%';
+    document.getElementById('score-bar-fill').style.background = scoreColor(sc);
+    document.getElementById('score-verdict').textContent = scoreVerdict(sc);
+
+    // Рекомендация
+    const { text: recText, desc: recDesc } = recInfo(note.recommendation);
+    document.getElementById('rec-badge-big').textContent = recText;
+    document.getElementById('rec-text').textContent = report.ai_recommendation || recDesc;
+
+    // Блоки
+    document.getElementById('note-blocks').innerHTML = renderBlocks(note, report);
+
+    // Комментарии
+    renderComments(note.note_comments);
+
+    // Сохранено?
+    const { data: saved } = await supabase.from('saved_notes').select('id').eq('user_id', currentUser.id).eq('note_id', id).single();
+    if (saved) {
+      isSaved = true;
+      document.getElementById('save-btn').textContent = '★ Сохранено';
+    }
+
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('note-layout').style.display = 'grid';
+  }
+
+  init();
+</script>
+</body>
+</html>

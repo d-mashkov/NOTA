@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>НОТА — Лента НОТ</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">Н</div>
+      НОТА
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="notes.html" class="nav-link active">Лента НОТ</a>
+      <a href="profile.html" class="nav-link">Сохранённые</a>
+      <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-user-name" id="nav-name">...</span>
+      <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 class="page-title">Лента НОТ</h1>
+      <p class="page-subtitle" id="notes-count">Загрузка...</p>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Все</button>
+    <button class="filter-btn" data-filter="launch" onclick="setFilter('launch',this)">🟢 Запускать</button>
+    <button class="filter-btn" data-filter="watch" onclick="setFilter('watch',this)">🟡 Наблюдать</button>
+    <button class="filter-btn" data-filter="skip" onclick="setFilter('skip',this)">🔴 Пропустить</button>
+    <span style="width:1px;background:var(--border);margin:0 4px;"></span>
+    <button class="filter-btn" data-stage="emerging" onclick="setStage('emerging',this)">Зарождение</button>
+    <button class="filter-btn" data-stage="growing" onclick="setStage('growing',this)">Рост</button>
+    <button class="filter-btn" data-stage="hype" onclick="setStage('hype',this)">Хайп</button>
+  </div>
+
+  <!-- Категории -->
+  <div class="filters" id="cat-filters">
+    <!-- Динамически из Supabase -->
+  </div>
+
+  <!-- Сетка НОТ -->
+  <div class="grid-3" id="notes-grid">
+    <!-- JS -->
+  </div>
+
+</main>
+
+<script type="module">
+  import { requireAuth, getCurrentUser, getNotes, signOut as _signOut, supabase } from './js/supabase-client.js';
+
+  window.signOut = _signOut;
+
+  let allNotes = [];
+  let activeFilter = 'all';
+  let activeStage = null;
+  let activeCat = null;
+
+  window.setFilter = function(val, btn) {
+    activeFilter = val;
+    document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  };
+
+  window.setStage = function(val, btn) {
+    if (activeStage === val) {
+      activeStage = null;
+      btn.classList.remove('active');
+    } else {
+      activeStage = val;
+      document.querySelectorAll('[data-stage]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    render();
+  };
+
+  window.setCat = function(val, btn) {
+    if (activeCat === val) {
+      activeCat = null;
+      btn.classList.remove('active');
+    } else {
+      activeCat = val;
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    render();
+  };
+
+  function render() {
+    let notes = [...allNotes];
+    if (activeFilter !== 'all') notes = notes.filter(n => n.recommendation === activeFilter);
+    if (activeStage) notes = notes.filter(n => n.trend_stage === activeStage);
+    if (activeCat) notes = notes.filter(n => n.category_id === activeCat);
+
+    document.getElementById('notes-count').textContent = `${notes.length} ${plural(notes.length, 'НОТА', 'НОТЫ', 'НОТ')}`;
+    renderGrid(notes);
+  }
+
+  function plural(n, one, few, many) {
+    if (n % 10 === 1 && n % 100 !== 11) return one;
+    if ([2,3,4].includes(n%10) && ![12,13,14].includes(n%100)) return few;
+    return many;
+  }
+
+  function scoreClass(s) {
+    if (s >= 80) return 'high';
+    if (s >= 60) return 'mid';
+    return 'low';
+  }
+
+  function stageBadge(stage) {
+    const map = { emerging:['badge-emerging','Зарождение'], growing:['badge-growing','Рост'], hype:['badge-hype','Хайп'], saturation:['badge-draft','Насыщение'] };
+    const [cls,label] = map[stage] || ['badge-draft', stage || ''];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function recBadge(rec) {
+    const map = { launch:['badge-launch','Запускать'], watch:['badge-watch','Наблюдать'], skip:['badge-skip','Пропустить'] };
+    const [cls,label] = map[rec] || ['badge-draft', rec || '—'];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function renderGrid(notes) {
+    const grid = document.getElementById('notes-grid');
+    if (!notes.length) {
+      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">НОТ не найдено</div><p class="empty-state-text">Попробуйте изменить фильтры</p></div></div>`;
+      return;
+    }
+    grid.innerHTML = notes.map(n => {
+      const sc = scoreClass(n.score);
+      const date = new Date(n.created_at).toLocaleDateString('ru', {day:'numeric',month:'short'});
+      return `
+      <a href="note.html?id=${n.id}" class="card nota-card card-link">
+        <div class="nota-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="nota-category">${n.categories?.name || ''}</div>
+            <div class="nota-title">${n.title}</div>
+          </div>
+          <div class="score score--${sc}" style="flex-shrink:0;flex-direction:column;align-items:flex-end;gap:4px;">
+            <span class="score-value" style="font-size:20px;font-weight:700;">${n.score}</span>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${n.score}%"></div></div>
+          </div>
+        </div>
+        <div class="nota-card-body">
+          <p class="nota-description">${n.description || ''}</p>
+        </div>
+        <div class="nota-card-footer">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${stageBadge(n.trend_stage)}
+            ${recBadge(n.recommendation)}
+          </div>
+          <span class="text-sm text-muted">${date}</span>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  async function init() {
+    await requireAuth();
+    const user = await getCurrentUser();
+    if (!user) return;
+
+    document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+    document.getElementById('nav-name').textContent = user.name || user.email;
+    if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+
+    // Категории для фильтров
+    const { data: cats } = await supabase.from('categories').select('id,name').eq('is_active', true);
+    if (cats?.length) {
+      const catFilters = document.getElementById('cat-filters');
+      catFilters.innerHTML = cats.map(c =>
+        `<button class="filter-btn" data-cat="${c.id}" onclick="setCat('${c.id}',this)">${c.name}</button>`
+      ).join('');
+    }
+
+    // НОТЫ
+    const { data } = await getNotes();
+    allNotes = data || [];
+    render();
+  }
+
+  init();
+</script>
+</body>
+</html>
