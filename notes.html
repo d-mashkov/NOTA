@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>НОТА — Лента НОТ</title>
+  <title>NOTA — Лента NOTы</title>
   <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -12,11 +12,11 @@
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <div class="nav-logo-icon">Н</div>
-      НОТА
+      NOTA
     </a>
     <div class="nav-links">
       <a href="index.html" class="nav-link">Dashboard</a>
-      <a href="notes.html" class="nav-link active">Лента НОТ</a>
+      <a href="notes.html" class="nav-link active">Лента NOTы</a>
       <a href="profile.html" class="nav-link">Сохранённые</a>
       <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
     </div>
@@ -32,7 +32,7 @@
 
   <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="page-title">Лента НОТ</h1>
+      <h1 class="page-title">Лента NOTы</h1>
       <p class="page-subtitle" id="notes-count">Загрузка...</p>
     </div>
   </div>
@@ -54,7 +54,7 @@
     <!-- Динамически из Supabase -->
   </div>
 
-  <!-- Сетка НОТ -->
+  <!-- Сетка NOTы -->
   <div class="grid-3" id="notes-grid">
     <!-- JS -->
   </div>
@@ -108,7 +108,7 @@
     if (activeStage) notes = notes.filter(n => n.trend_stage === activeStage);
     if (activeCat) notes = notes.filter(n => n.category_id === activeCat);
 
-    document.getElementById('notes-count').textContent = `${notes.length} ${plural(notes.length, 'НОТА', 'НОТЫ', 'НОТ')}`;
+    document.getElementById('notes-count').textContent = `${notes.length} ${plural(notes.length, 'NOTA', 'NOTы', 'NOTы')}`;
     renderGrid(notes);
   }
 
@@ -139,7 +139,7 @@
   function renderGrid(notes) {
     const grid = document.getElementById('notes-grid');
     if (!notes.length) {
-      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">НОТ не найдено</div><p class="empty-state-text">Попробуйте изменить фильтры</p></div></div>`;
+      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">NOTы не найдено</div><p class="empty-state-text">Попробуйте изменить фильтры</p></div></div>`;
       return;
     }
     grid.innerHTML = notes.map(n => {
@@ -189,7 +189,7 @@
       ).join('');
     }
 
-    // НОТЫ
+    // NOTы
     const { data } = await getNotes();
     allNotes = data || [];
     render();

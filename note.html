@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>НОТА — Карточка</title>
+  <title>NOTA — Карточка</title>
   <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -12,11 +12,11 @@
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <div class="nav-logo-icon">Н</div>
-      НОТА
+      NOTA
     </a>
     <div class="nav-links">
       <a href="index.html" class="nav-link">Dashboard</a>
-      <a href="notes.html" class="nav-link">Лента НОТ</a>
+      <a href="notes.html" class="nav-link">Лента NOTы</a>
       <a href="profile.html" class="nav-link">Сохранённые</a>
       <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
     </div>
@@ -32,7 +32,7 @@
 
   <!-- Хлебные крошки -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;font-size:14px;color:var(--text-muted);">
-    <a href="notes.html" style="color:var(--accent);">← Лента НОТ</a>
+    <a href="notes.html" style="color:var(--accent);">← Лента NOTы</a>
     <span>/</span>
     <span id="breadcrumb-title">...</span>
   </div>
@@ -51,7 +51,7 @@
         <p class="note-hero-desc" id="hero-desc">...</p>
       </div>
 
-      <!-- Блоки 20 НОТы -->
+      <!-- Блоки 20 NOTы -->
       <div id="note-blocks">
         <!-- JS -->
       </div>
@@ -64,7 +64,7 @@
       <!-- Скоринг -->
       <div class="card sidebar-card sidebar-score-big">
         <div class="sidebar-score-number" id="score-number">—</div>
-        <div class="sidebar-score-label">Скоринг НОТЫ</div>
+        <div class="sidebar-score-label">Скоринг NOTA</div>
         <div style="margin-top:16px;">
           <div id="score-bar-full" style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:12px;">
             <div id="score-bar-fill" style="height:100%;border-radius:3px;width:0;transition:width 0.8s ease;"></div>
@@ -111,7 +111,7 @@
 
   <!-- Загрузка -->
   <div id="loading-state" style="text-align:center;padding:80px 24px;color:var(--text-muted);">
-    Загрузка НОТЫ...
+    Загрузка NOTA...
   </div>
 
 </main>
@@ -139,7 +139,7 @@
     return 'var(--red)';
   }
   function scoreVerdict(s) {
-    if (s >= 80) return '🟢 Сильная НОТА — изучить запуск';
+    if (s >= 80) return '🟢 Сильная NOTA — изучить запуск';
     if (s >= 60) return '🟡 Перспективно — нужен доп. анализ';
     if (s >= 40) return '🟠 Наблюдать';
     return '🔴 Пропустить';
@@ -277,7 +277,7 @@
     currentNote = note;
     const report = note.note_reports?.[0] || {};
 
-    document.title = `НОТА — ${note.title}`;
+    document.title = `NOTA — ${note.title}`;
     document.getElementById('breadcrumb-title').textContent = note.title;
 
     // Герой

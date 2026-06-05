@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>НОТА — Dashboard</title>
+  <title>NOTA — Dashboard</title>
   <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -13,11 +13,11 @@
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <div class="nav-logo-icon">Н</div>
-      НОТА
+      NOTA
     </a>
     <div class="nav-links">
       <a href="index.html" class="nav-link active">Dashboard</a>
-      <a href="notes.html" class="nav-link">Лента НОТ</a>
+      <a href="notes.html" class="nav-link">Лента NOTы</a>
       <a href="profile.html" class="nav-link">Сохранённые</a>
       <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
     </div>
@@ -35,14 +35,14 @@
   <!-- Заголовок -->
   <div class="page-header">
     <h1 class="page-title">Dashboard</h1>
-    <p class="page-subtitle">Актуальные FMCG-тренды и новые НОТЫ</p>
+    <p class="page-subtitle">Актуальные FMCG-тренды и новые NOTы</p>
   </div>
 
   <!-- Статистика -->
   <div class="section">
     <div class="grid-3" id="stats-grid">
       <div class="card stat-card">
-        <div class="stat-label">Всего НОТ</div>
+        <div class="stat-label">Всего NOTы</div>
         <div class="stat-value" id="stat-total">—</div>
         <div class="stat-delta" id="stat-new">загрузка...</div>
       </div>
@@ -59,11 +59,11 @@
     </div>
   </div>
 
-  <!-- Новые НОТЫ -->
+  <!-- Новые NOTы -->
   <div class="section">
     <div class="section-header">
-      <h2 class="section-title">Новые НОТЫ</h2>
-      <a href="notes.html" class="btn btn-secondary text-sm">Все НОТЫ →</a>
+      <h2 class="section-title">Новые NOTы</h2>
+      <a href="notes.html" class="btn btn-secondary text-sm">Все NOTы →</a>
     </div>
     <div class="grid-3" id="new-notes-grid">
       <!-- JS -->
@@ -116,7 +116,7 @@
       document.getElementById('stat-last-run').textContent = `обновлено ${d.toLocaleDateString('ru')}`;
     }
 
-    // Новые НОТЫ (последние 3)
+    // Новые NOTы (последние 3)
     renderNoteCards(notes.slice(0, 3), 'new-notes-grid');
 
     // Топ по скорингу (5 штук)
@@ -154,7 +154,7 @@
   function renderNoteCards(notes, containerId) {
     const grid = document.getElementById(containerId);
     if (!notes.length) {
-      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Пока нет НОТ</div><p class="empty-state-text">После первого анализа они появятся здесь</p></div></div>`;
+      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Пока нет NOTы</div><p class="empty-state-text">После первого анализа они появятся здесь</p></div></div>`;
       return;
     }
     grid.innerHTML = notes.map(n => {

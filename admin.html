@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>НОТА — Админка</title>
+  <title>NOTA — Админка</title>
   <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -12,11 +12,11 @@
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <div class="nav-logo-icon">Н</div>
-      НОТА
+      NOTA
     </a>
     <div class="nav-links">
       <a href="index.html" class="nav-link">Dashboard</a>
-      <a href="notes.html" class="nav-link">Лента НОТ</a>
+      <a href="notes.html" class="nav-link">Лента NOTы</a>
       <a href="admin.html" class="nav-link active">Админка</a>
     </div>
     <div class="nav-user">
@@ -37,7 +37,7 @@
   <div class="filters" style="margin-bottom:32px;">
     <button class="filter-btn active" onclick="showTab('users',this)">👥 Пользователи</button>
     <button class="filter-btn" onclick="showTab('categories',this)">📂 Категории</button>
-    <button class="filter-btn" onclick="showTab('notes',this)">📋 НОТЫ</button>
+    <button class="filter-btn" onclick="showTab('notes',this)">📋 NOTы</button>
   </div>
 
   <!-- Пользователи -->
@@ -124,10 +124,10 @@
     </div>
   </div>
 
-  <!-- НОТЫ -->
+  <!-- NOTы -->
   <div id="tab-notes" style="display:none;">
     <div class="section-header" style="margin-bottom:16px;">
-      <h2 class="section-title">Управление НОТами</h2>
+      <h2 class="section-title">Управление NOTами</h2>
     </div>
     <div id="admin-notes-list">
       <!-- JS -->
@@ -235,7 +235,7 @@
       </div>`).join('') || '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);">Нет категорий</div>';
   }
 
-  // ---- НОТЫ (управление) ----
+  // ---- NOTы (управление) ----
   async function loadAdminNotes() {
     const { data } = await supabase.from('notes').select('*,categories(name)').order('created_at',{ascending:false});
     const el = document.getElementById('admin-notes-list');
@@ -251,7 +251,7 @@
           ${n.status==='draft' ? `<button class="btn btn-primary text-sm" onclick="publishNote('${n.id}')">Опубликовать</button>` : `<button class="btn btn-secondary text-sm" onclick="unpublishNote('${n.id}')">В черновик</button>`}
           <a href="note.html?id=${n.id}" class="btn btn-secondary text-sm">Открыть</a>
         </div>
-      </div>`).join('') || '<div style="text-align:center;padding:32px;color:var(--text-muted);">Нет НОТ</div>';
+      </div>`).join('') || '<div style="text-align:center;padding:32px;color:var(--text-muted);">Нет NOTы</div>';
   }
 
   window.publishNote = async function(id) {
