@@ -75,15 +75,18 @@
   </div>
 </div>
 
-<script src="js/supabase-client.js"></script>
-<script>
+<script type="module">
+  import { supabase } from './js/supabase-client.js';
+
   let currentEmail = '';
 
   async function sendOtp() {
     const email = document.getElementById('input-email').value.trim();
     if (!email) return showError('Введите email');
 
-    // Проверяем, есть ли email в белом списке
+    showError('Проверяем доступ...');
+
+    // Проверяем белый список
     const { data: user } = await supabase
       .from('users')
       .select('id, is_active')
@@ -95,7 +98,7 @@
       return;
     }
 
-    // Отправляем OTP через Supabase Auth
+    // Отправляем Magic Link на почту
     const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) return showError(error.message);
 
@@ -140,6 +143,11 @@
   function hideError() {
     document.getElementById('auth-error').style.display = 'none';
   }
+
+  // Вешаем функции на кнопки
+  window.sendOtp = sendOtp;
+  window.verifyOtp = verifyOtp;
+  window.backToEmail = backToEmail;
 </script>
 </body>
 </html>
