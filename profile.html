@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTA — Сохранённые</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">Н</div>
+      NOTA
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="notes.html" class="nav-link">Лента NOTы</a>
+      <a href="profile.html" class="nav-link active">Сохранённые</a>
+      <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-user-name" id="nav-name">...</span>
+      <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <div class="page-header">
+    <h1 class="page-title">Сохранённые NOTы</h1>
+    <p class="page-subtitle" id="saved-count">Загрузка...</p>
+  </div>
+
+  <div class="grid-3" id="saved-grid">
+    <!-- JS -->
+  </div>
+
+</main>
+
+<script type="module">
+  import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
+
+  window.signOut = _signOut;
+
+  function scoreClass(s) {
+    if (s >= 80) return 'high';
+    if (s >= 60) return 'mid';
+    return 'low';
+  }
+
+  function stageBadge(stage) {
+    const map = { emerging:['badge-emerging','Зарождение'], growing:['badge-growing','Рост'], hype:['badge-hype','Хайп'], saturation:['badge-draft','Насыщение'] };
+    const [cls, label] = map[stage] || ['badge-draft', stage || ''];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function recBadge(rec) {
+    const map = { launch:['badge-launch','Запускать'], watch:['badge-watch','Наблюдать'], skip:['badge-skip','Пропустить'] };
+    const [cls, label] = map[rec] || ['badge-draft', rec || '—'];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  async function init() {
+    await requireAuth();
+    const user = await getCurrentUser();
+    if (!user) return;
+
+    document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+    document.getElementById('nav-name').textContent = user.name || user.email;
+    if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+
+    const { data: saved } = await supabase
+      .from('saved_notes')
+      .select('note_id, saved_at, notes(*, categories(name))')
+      .eq('user_id', user.id)
+      .order('saved_at', { ascending: false });
+
+    const notes = (saved || []).map(s => s.notes).filter(Boolean);
+    document.getElementById('saved-count').textContent = `${notes.length} сохранённых NOTы`;
+
+    const grid = document.getElementById('saved-grid');
+    if (!notes.length) {
+      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state">
+        <div class="empty-state-icon">☆</div>
+        <div class="empty-state-title">Нет сохранённых NOTы</div>
+        <p class="empty-state-text">Открывай NOTы и нажимай «Сохранить» — они появятся здесь</p>
+        <a href="notes.html" class="btn btn-primary" style="margin-top:16px;">Перейти в ленту</a>
+      </div></div>`;
+      return;
+    }
+
+    grid.innerHTML = notes.map(n => {
+      const sc = scoreClass(n.score);
+      return `
+      <a href="note.html?id=${n.id}" class="card nota-card card-link">
+        <div class="nota-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="nota-category">${n.categories?.name || ''}</div>
+            <div class="nota-title">${n.title}</div>
+          </div>
+          <div class="score score--${sc}" style="flex-shrink:0;flex-direction:column;align-items:flex-end;gap:4px;">
+            <span class="score-value" style="font-size:20px;font-weight:700;">${n.score}</span>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${n.score}%"></div></div>
+          </div>
+        </div>
+        <div class="nota-card-body">
+          <p class="nota-description">${n.description || ''}</p>
+        </div>
+        <div class="nota-card-footer">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${stageBadge(n.trend_stage)}
+            ${recBadge(n.recommendation)}
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  init();
+</script>
+</body>
+</html>

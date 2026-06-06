@@ -1,170 +1,199 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOTA — Dashboard</title>
-  <link rel="stylesheet" href="css/main.css" />
-</head>
-<body>
-
-<!-- Навигация -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
-      <div class="nav-logo-icon">Н</div>
-      NOTA
-    </a>
-    <div class="nav-links">
-      <a href="index.html" class="nav-link active">Dashboard</a>
-      <a href="notes.html" class="nav-link">Лента NOTы</a>
-      <a href="profile.html" class="nav-link">Сохранённые</a>
-      <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
-    </div>
-    <div class="nav-user">
-      <div class="nav-avatar" id="nav-avatar">?</div>
-      <span class="nav-user-name" id="nav-name">...</span>
-      <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
-    </div>
-  </div>
-</nav>
-
-<!-- Контент -->
-<main class="page">
-
-  <!-- Заголовок -->
-  <div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="page-subtitle">Актуальные FMCG-тренды и новые NOTы</p>
-  </div>
-
-  <!-- Статистика -->
-  <div class="section">
-    <div class="grid-3" id="stats-grid">
-      <div class="card stat-card">
-        <div class="stat-label">Всего NOTы</div>
-        <div class="stat-value" id="stat-total">—</div>
-        <div class="stat-delta" id="stat-new">загрузка...</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOTA — Dashboard</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <!-- Навигация -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">
+          <div class="nav-logo-icon">Н</div>
+          NOTA
+        </a>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link active">Dashboard</a>
+          <a href="notes.html" class="nav-link">Лента NOTы</a>
+          <a href="profile.html" class="nav-link">Сохранённые</a>
+          <a
+            href="admin.html"
+            class="nav-link"
+            id="admin-link"
+            style="display: none"
+            >Админка</a
+          >
+        </div>
+        <div class="nav-user">
+          <div class="nav-avatar" id="nav-avatar">?</div>
+          <span class="nav-user-name" id="nav-name">...</span>
+          <button class="btn btn-ghost text-sm" onclick="signOut()">
+            Выйти
+          </button>
+        </div>
       </div>
-      <div class="card stat-card">
-        <div class="stat-label">Рекомендованы к запуску</div>
-        <div class="stat-value" id="stat-launch" style="color:var(--green)">—</div>
-        <div class="stat-delta">Скор 80+</div>
+    </nav>
+
+    <!-- Контент -->
+    <main class="page">
+      <!-- Заголовок -->
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Актуальные FMCG-тренды и новые NOTы</p>
       </div>
-      <div class="card stat-card">
-        <div class="stat-label">Активных категорий</div>
-        <div class="stat-value" id="stat-cats">—</div>
-        <div class="stat-delta" id="stat-last-run">последний анализ...</div>
+
+      <!-- Статистика -->
+      <div class="section">
+        <div class="grid-3" id="stats-grid">
+          <div class="card stat-card">
+            <div class="stat-label">Всего NOTы</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-delta" id="stat-new">загрузка...</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Рекомендованы к запуску</div>
+            <div
+              class="stat-value"
+              id="stat-launch"
+              style="color: var(--green)"
+            >
+              —
+            </div>
+            <div class="stat-delta">Скор 80+</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Активных категорий</div>
+            <div class="stat-value" id="stat-cats">—</div>
+            <div class="stat-delta" id="stat-last-run">последний анализ...</div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Новые NOTы -->
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">Новые NOTы</h2>
-      <a href="notes.html" class="btn btn-secondary text-sm">Все NOTы →</a>
-    </div>
-    <div class="grid-3" id="new-notes-grid">
-      <!-- JS -->
-    </div>
-  </div>
+      <!-- Новые NOTы -->
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">Новые NOTы</h2>
+          <a href="notes.html" class="btn btn-secondary text-sm">Все NOTы →</a>
+        </div>
+        <div class="grid-3" id="new-notes-grid">
+          <!-- JS -->
+        </div>
+      </div>
 
-  <!-- Топ по скорингу -->
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">Топ по скорингу</h2>
-    </div>
-    <div id="top-notes-list">
-      <!-- JS -->
-    </div>
-  </div>
+      <!-- Топ по скорингу -->
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">Топ по скорингу</h2>
+        </div>
+        <div id="top-notes-list">
+          <!-- JS -->
+        </div>
+      </div>
+    </main>
 
-</main>
+    <script type="module">
+      import {
+        requireAuth,
+        getCurrentUser,
+        getNotes,
+        signOut as _signOut,
+        supabase,
+      } from "./js/supabase-client.js";
 
-<script type="module">
-  import { requireAuth, getCurrentUser, getNotes, signOut as _signOut, supabase } from './js/supabase-client.js';
+      window.signOut = _signOut;
 
-  window.signOut = _signOut;
+      async function init() {
+        await requireAuth();
+        const user = await getCurrentUser();
+        if (!user) return;
 
-  async function init() {
-    await requireAuth();
-    const user = await getCurrentUser();
-    if (!user) return;
+        // Навигация
+        document.getElementById("nav-avatar").textContent =
+          user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+        document.getElementById("nav-name").textContent =
+          user.name || user.email;
+        if (user.role === "admin")
+          document.getElementById("admin-link").style.display = "block";
 
-    // Навигация
-    document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
-    document.getElementById('nav-name').textContent = user.name || user.email;
-    if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+        // Статистика
+        const { data: allNotes } = await getNotes();
+        const notes = allNotes || [];
+        document.getElementById("stat-total").textContent = notes.length;
+        document.getElementById("stat-launch").textContent = notes.filter(
+          (n) => n.recommendation === "launch",
+        ).length;
 
-    // Статистика
-    const { data: allNotes } = await getNotes();
-    const notes = allNotes || [];
-    document.getElementById('stat-total').textContent = notes.length;
-    document.getElementById('stat-launch').textContent = notes.filter(n => n.recommendation === 'launch').length;
+        const { data: cats } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("is_active", true);
+        document.getElementById("stat-cats").textContent = cats?.length || 0;
 
-    const { data: cats } = await supabase.from('categories').select('id').eq('is_active', true);
-    document.getElementById('stat-cats').textContent = cats?.length || 0;
+        const fresh = notes.slice(0, 1)[0];
+        if (fresh) {
+          const d = new Date(fresh.created_at);
+          document.getElementById("stat-new").textContent = `+${
+            notes.filter((n) => {
+              const nd = new Date(n.created_at);
+              return Date.now() - nd < 7 * 24 * 3600 * 1000;
+            }).length
+          } за неделю`;
+          document.getElementById("stat-last-run").textContent =
+            `обновлено ${d.toLocaleDateString("ru")}`;
+        }
 
-    const fresh = notes.slice(0, 1)[0];
-    if (fresh) {
-      const d = new Date(fresh.created_at);
-      document.getElementById('stat-new').textContent = `+${notes.filter(n => {
-        const nd = new Date(n.created_at);
-        return (Date.now() - nd) < 7*24*3600*1000;
-      }).length} за неделю`;
-      document.getElementById('stat-last-run').textContent = `обновлено ${d.toLocaleDateString('ru')}`;
-    }
+        // Новые NOTы (последние 3)
+        renderNoteCards(notes.slice(0, 3), "new-notes-grid");
 
-    // Новые NOTы (последние 3)
-    renderNoteCards(notes.slice(0, 3), 'new-notes-grid');
+        // Топ по скорингу (5 штук)
+        const top = [...notes].sort((a, b) => b.score - a.score).slice(0, 5);
+        renderTopList(top);
+      }
 
-    // Топ по скорингу (5 штук)
-    const top = [...notes].sort((a,b) => b.score - a.score).slice(0, 5);
-    renderTopList(top);
-  }
+      function scoreClass(s) {
+        if (s >= 80) return "high";
+        if (s >= 60) return "mid";
+        return "low";
+      }
 
-  function scoreClass(s) {
-    if (s >= 80) return 'high';
-    if (s >= 60) return 'mid';
-    return 'low';
-  }
+      function stageBadge(stage) {
+        const map = {
+          emerging: ["badge-emerging", "Зарождение"],
+          growing: ["badge-growing", "Рост"],
+          hype: ["badge-hype", "Хайп"],
+          saturation: ["badge-draft", "Насыщение"],
+        };
+        const [cls, label] = map[stage] || ["badge-draft", stage || ""];
+        return `<span class="badge ${cls}">${label}</span>`;
+      }
 
-  function stageBadge(stage) {
-    const map = {
-      emerging: ['badge-emerging','Зарождение'],
-      growing:  ['badge-growing','Рост'],
-      hype:     ['badge-hype','Хайп'],
-      saturation: ['badge-draft','Насыщение'],
-    };
-    const [cls, label] = map[stage] || ['badge-draft', stage || ''];
-    return `<span class="badge ${cls}">${label}</span>`;
-  }
+      function recBadge(rec) {
+        const map = {
+          launch: ["badge-launch", "Запускать"],
+          watch: ["badge-watch", "Наблюдать"],
+          skip: ["badge-skip", "Пропустить"],
+        };
+        const [cls, label] = map[rec] || ["badge-draft", rec || "—"];
+        return `<span class="badge ${cls}">${label}</span>`;
+      }
 
-  function recBadge(rec) {
-    const map = {
-      launch: ['badge-launch','Запускать'],
-      watch:  ['badge-watch','Наблюдать'],
-      skip:   ['badge-skip','Пропустить'],
-    };
-    const [cls, label] = map[rec] || ['badge-draft', rec || '—'];
-    return `<span class="badge ${cls}">${label}</span>`;
-  }
-
-  function renderNoteCards(notes, containerId) {
-    const grid = document.getElementById(containerId);
-    if (!notes.length) {
-      grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Пока нет NOTы</div><p class="empty-state-text">После первого анализа они появятся здесь</p></div></div>`;
-      return;
-    }
-    grid.innerHTML = notes.map(n => {
-      const sc = scoreClass(n.score);
-      const pct = n.score || 0;
-      return `
+      function renderNoteCards(notes, containerId) {
+        const grid = document.getElementById(containerId);
+        if (!notes.length) {
+          grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Пока нет NOTы</div><p class="empty-state-text">После первого анализа они появятся здесь</p></div></div>`;
+          return;
+        }
+        grid.innerHTML = notes
+          .map((n) => {
+            const sc = scoreClass(n.score);
+            const pct = n.score || 0;
+            return `
       <a href="note.html?id=${n.id}" class="card nota-card card-link">
         <div class="nota-card-header">
           <div>
-            <div class="nota-category">${n.categories?.name || ''}</div>
+            <div class="nota-category">${n.categories?.name || ""}</div>
             <div class="nota-title">${n.title}</div>
           </div>
           <div class="score score--${sc}">
@@ -172,29 +201,32 @@
           </div>
         </div>
         <div class="nota-card-body">
-          <p class="nota-description">${n.description || ''}</p>
+          <p class="nota-description">${n.description || ""}</p>
         </div>
         <div class="nota-card-footer">
           ${stageBadge(n.trend_stage)}
           ${recBadge(n.recommendation)}
         </div>
       </a>`;
-    }).join('');
-  }
+          })
+          .join("");
+      }
 
-  function renderTopList(notes) {
-    const el = document.getElementById('top-notes-list');
-    if (!notes.length) {
-      el.innerHTML = '<div class="card"><div class="empty-state"><div class="empty-state-icon">🏆</div><div class="empty-state-title">Пока нет данных</div></div></div>';
-      return;
-    }
-    el.innerHTML = notes.map((n, i) => {
-      const sc = scoreClass(n.score);
-      return `
+      function renderTopList(notes) {
+        const el = document.getElementById("top-notes-list");
+        if (!notes.length) {
+          el.innerHTML =
+            '<div class="card"><div class="empty-state"><div class="empty-state-icon">🏆</div><div class="empty-state-title">Пока нет данных</div></div></div>';
+          return;
+        }
+        el.innerHTML = notes
+          .map((n, i) => {
+            const sc = scoreClass(n.score);
+            return `
       <a href="note.html?id=${n.id}" class="card card-link" style="display:flex;align-items:center;gap:20px;padding:18px 24px;margin-bottom:10px;">
-        <span style="font-size:22px;font-weight:800;color:var(--border);min-width:28px;">${i+1}</span>
+        <span style="font-size:22px;font-weight:800;color:var(--border);min-width:28px;">${i + 1}</span>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">${n.categories?.name || ''}</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">${n.categories?.name || ""}</div>
           <div style="font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.title}</div>
         </div>
         ${recBadge(n.recommendation)}
@@ -203,10 +235,11 @@
           <span class="score-value" style="min-width:32px;text-align:right;">${n.score}</span>
         </div>
       </a>`;
-    }).join('');
-  }
+          })
+          .join("");
+      }
 
-  init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

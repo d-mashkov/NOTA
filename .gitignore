@@ -2,3 +2,11 @@
 *.env
 .env.local
 node_modules/
+.agents/
+.claude/
+.superpowers/
+skills-lock.json
+data/telegram/*.json
+__pycache__/
+*.pyc
+.pytest_cache/
