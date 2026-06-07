@@ -46,7 +46,7 @@ export async function getNotes(filters = {}) {
   let query = supabase
     .from('notes')
     .select(`*, categories(name), note_reports(ai_output, ai_recommendation)`)
-    .eq('status', 'published')
+    .in('status', ['published', 'pending'])
     .order('created_at', { ascending: false });
 
   if (filters.category) query = query.eq('category_id', filters.category);

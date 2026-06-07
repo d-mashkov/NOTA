@@ -143,6 +143,25 @@
       return;
     }
     grid.innerHTML = notes.map(n => {
+      if (n.status === 'pending') {
+        return `
+      <div class="card nota-card" style="border:1px dashed var(--border);opacity:0.85;">
+        <div class="nota-card-header">
+          <div style="flex:1;">
+            <div class="nota-category">${n.categories?.name || 'Новый запрос'}</div>
+            <div class="nota-title">${n.title}</div>
+          </div>
+          <div style="width:44px;height:44px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin 1s linear infinite;flex-shrink:0;"></div>
+        </div>
+        <div class="nota-card-body">
+          <p class="nota-description" style="color:var(--text-muted);">⏳ Анализируем нишу — результат будет готов совсем скоро</p>
+        </div>
+        <div class="nota-card-footer">
+          <div style="display:flex;gap:6px;"><span class="badge badge-draft">В анализе</span></div>
+          <span class="text-sm text-muted">${new Date(n.created_at).toLocaleDateString('ru', {day:'numeric',month:'short'})}</span>
+        </div>
+      </div>`;
+      }
       const sc = scoreClass(n.score);
       const date = new Date(n.created_at).toLocaleDateString('ru', {day:'numeric',month:'short'});
       return `

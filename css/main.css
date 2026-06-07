@@ -625,3 +625,5 @@ img { max-width: 100%; }
 .text-secondary { color: var(--text-secondary); }
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
+
+@keyframes spin { to { transform: rotate(360deg); } }

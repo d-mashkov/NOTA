@@ -221,6 +221,24 @@
         }
         grid.innerHTML = notes
           .map((n) => {
+            if (n.status === "pending") {
+              return `
+      <div class="card nota-card" style="border:1px dashed var(--border);opacity:0.85;">
+        <div class="nota-card-header">
+          <div style="flex:1;">
+            <div class="nota-category">${n.categories?.name || "Новый запрос"}</div>
+            <div class="nota-title">${n.title}</div>
+          </div>
+          <div style="width:44px;height:44px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin 1s linear infinite;flex-shrink:0;"></div>
+        </div>
+        <div class="nota-card-body">
+          <p class="nota-description" style="color:var(--text-muted);">⏳ Анализируем нишу — результат будет готов совсем скоро</p>
+        </div>
+        <div class="nota-card-footer">
+          <span class="badge badge-draft">В анализе</span>
+        </div>
+      </div>`;
+            }
             const sc = scoreClass(n.score);
             const pct = n.score || 0;
             return `
@@ -279,29 +297,42 @@
         if (!name) return;
 
         const btn = document.querySelector("#request-block button");
-        const status = document.getElementById("req-status");
+        const statusEl = document.getElementById("req-status");
         btn.disabled = true;
         btn.textContent = "Отправляем...";
 
-        const { error } = await supabase.from("categories").insert({
+        // 1. Создаём категорию
+        const { data: cat } = await supabase.from("categories").insert({
           name,
           name_en: name_en || null,
           seed_queries: [name.toLowerCase()],
           is_active: true,
-        });
+        }).select().single();
 
-        status.style.display = "block";
-        if (error) {
-          status.style.color = "var(--red)";
-          status.textContent = "Ошибка: " + error.message;
-        } else {
-          status.style.color = "#4ade80";
-          status.textContent = `✓ «${name}» добавлена в очередь на анализ. Результат появится после следующего запуска пайплайна.`;
-          document.getElementById("req-name").value = "";
-          document.getElementById("req-name-en").value = "";
+        // 2. Создаём placeholder-ноту со статусом pending
+        if (cat) {
+          await supabase.from("notes").insert({
+            category_id: cat.id,
+            title: name,
+            description: "Анализируем нишу — результат будет готов совсем скоро.",
+            score: null,
+            status: "pending",
+            trend_stage: null,
+            recommendation: null,
+          });
         }
+
+        statusEl.style.display = "block";
+        statusEl.style.color = "#4ade80";
+        statusEl.textContent = `✓ «${name}» отправлена в анализ — карточка уже в ленте`;
+        document.getElementById("req-name").value = "";
+        document.getElementById("req-name-en").value = "";
         btn.disabled = false;
         btn.textContent = "Отправить в анализ →";
+
+        // 3. Перезагрузим ленту
+        const { data: allNotes } = await getNotes();
+        renderNoteCards((allNotes || []).slice(0, 3), "new-notes-grid");
       };
 
       init();
