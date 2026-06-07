@@ -7,12 +7,27 @@ def build_prompt(
     exa_en_data: str,
     exa_ru_data: str,
     telegram_data: str,
+    youtube_data: str = "",
+    tiktok_data: str = "",
+    linkedin_data: str = "",
 ) -> str:
     today = date.today().strftime("%Y-%m-%d")
 
     telegram_section = ""
     if telegram_data:
-        telegram_section = f"\n\n### Данные из Telegram-каналов (FMCG-аналитика РФ):\n{telegram_data}"
+        telegram_section = f"\n\n### Telegram-каналы (FMCG-аналитика РФ):\n{telegram_data}"
+
+    youtube_section = ""
+    if youtube_data:
+        youtube_section = f"\n\n### YouTube (видео-тренды, просмотры):\n{youtube_data}"
+
+    tiktok_section = ""
+    if tiktok_data:
+        tiktok_section = f"\n\n### TikTok (вирусный контент):\n{tiktok_data}"
+
+    linkedin_section = ""
+    if linkedin_data:
+        linkedin_section = f"\n\n### LinkedIn (B2B и профессиональные обсуждения):\n{linkedin_data}"
 
     return f"""Ты — аналитик FMCG-рынка России. На основе данных о трендах создай структурированный отчёт по продуктовой нише (NOTA).
 
@@ -21,11 +36,11 @@ def build_prompt(
 Категория: {category_name} ({category_name_en})
 Дата анализа: {today}
 
-### Данные Exa.ai (глобальные тренды EN):
+### Exa.ai — глобальные тренды (EN):
 {exa_en_data}
 
-### Данные Exa.ai (тренды РФ):
-{exa_ru_data}{telegram_section}
+### Exa.ai — тренды РФ:
+{exa_ru_data}{telegram_section}{youtube_section}{tiktok_section}{linkedin_section}
 
 На основе этих данных создай NOTA в JSON-формате:
 
