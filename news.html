@@ -6,6 +6,106 @@
   <title>NOTA — Новости и тренды</title>
   <link rel="stylesheet" href="css/main.css" />
   <style>
+    /* Инсайты Авоськи */
+    .avoska-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .avoska-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avoska-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .avoska-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+    }
+    .avoska-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .avoska-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .avoska-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .avoska-card-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--border);
+      line-height: 1;
+    }
+    .avoska-card-cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      width: fit-content;
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+    }
+    .avoska-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    .avoska-card-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .avoska-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .avoska-importance-high { color: var(--green); font-size: 11px; font-weight: 600; }
+    .avoska-importance-mid  { color: var(--yellow); font-size: 11px; font-weight: 600; }
+    .avoska-source { font-size: 11px; color: var(--text-muted); }
+    .avoska-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 48px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Сигналы */
     .signal-card {
       display: flex;
       flex-direction: column;
@@ -58,38 +158,26 @@
       justify-content: space-between;
       margin-top: auto;
     }
-    .signal-date {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .signal-link {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 500;
-    }
+    .signal-date { font-size: 12px; color: var(--text-muted); }
+    .signal-link { font-size: 13px; color: var(--accent); font-weight: 500; }
     .news-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 20px;
     }
-    .update-bar {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 20px;
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      font-size: 13px;
-      color: var(--text-muted);
+      gap: 8px;
     }
-    .update-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      display: inline-block;
-      margin-right: 8px;
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0 32px;
     }
   </style>
 </head>
@@ -121,19 +209,34 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Новости и тренды</h1>
-      <p class="page-subtitle">Свежие сигналы из LinkedIn и Reddit — что ищет потребитель и куда движется рынок</p>
+      <p class="page-subtitle">Инсайты из FMCG-каналов и свежие сигналы рынка</p>
     </div>
   </div>
 
-  <div class="update-bar">
-    <div>
-      <span class="update-dot"></span>
-      <span id="update-label">Обновляется каждую неделю</span>
+  <!-- ── Авоська: Инсайты недели ── -->
+  <div class="avoska-header">
+    <div class="avoska-title">
+      🛒 Инсайты Авоськи
+      <span style="font-size:13px;font-weight:400;color:var(--text-muted);">топ-5 с цифрами из FMCG Telegram-каналов</span>
     </div>
-    <span id="signal-count" style="font-weight:600;color:var(--text-primary);">—</span>
+    <div class="avoska-updated">
+      <span class="avoska-dot"></span>
+      <span id="avoska-updated-label">Загрузка...</span>
+    </div>
   </div>
 
-  <!-- Фильтры по источнику -->
+  <div class="avoska-grid" id="avoska-grid">
+    <div class="avoska-empty">Загрузка инсайтов...</div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Сигналы из соцсетей ── -->
+  <div class="section-title">
+    📡 Сигналы из соцсетей
+  </div>
+
+  <!-- Фильтры -->
   <div class="filters" style="margin-bottom:28px;">
     <button class="filter-btn active" data-src="all" onclick="filterBy('all',this)">Все</button>
     <button class="filter-btn" data-src="linkedin" onclick="filterBy('linkedin',this)">💼 LinkedIn</button>
@@ -153,9 +256,81 @@
 
   let allSignals = [];
 
-  const SOURCE_ICONS = { linkedin: '💼', reddit: '🟠', tiktok: '🎵' };
+  const SOURCE_ICONS  = { linkedin: '💼', reddit: '🟠', tiktok: '🎵' };
   const SOURCE_LABELS = { linkedin: 'LinkedIn', reddit: 'Reddit', tiktok: 'TikTok' };
 
+  const CAT_ICONS = {
+    тренд: '📈', рынок: '🏪', продукт: '📦',
+    ритейл: '🛍', потребитель: '👥', регулирование: '⚖️'
+  };
+
+  // ──────────────────────────────────────────────
+  // Авоська
+  // ──────────────────────────────────────────────
+  function renderAvoskaGrid(insights) {
+    const grid = document.getElementById('avoska-grid');
+    if (!insights.length) {
+      grid.innerHTML = `<div class="avoska-empty">
+        <div style="font-size:32px;margin-bottom:12px;">🛒</div>
+        Авоська ещё не загрузила инсайты.<br>
+        <span style="font-size:13px;">Первый анализ появится после запуска пайплайна.</span>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = insights.map((ins, i) => {
+      const r = ins.raw_data || {};
+      const cat = r.category || '';
+      const catIcon = CAT_ICONS[cat] || '💡';
+      const impClass = r.importance === 'высокая' ? 'avoska-importance-high' : 'avoska-importance-mid';
+      const impText  = r.importance === 'высокая' ? '🔥 Высокая важность' : '⭐ Средняя важность';
+      const date = ins.date
+        ? new Date(ins.date).toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '';
+      const stat = r.stat || '';
+
+      return `
+      <div class="avoska-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+          <span class="avoska-card-num">${String(i+1).padStart(2,'0')}</span>
+          <span class="avoska-card-cat">${catIcon} ${cat}</span>
+        </div>
+        <div class="avoska-card-title">${r.title || ins.keyword || 'Без заголовка'}</div>
+        ${stat ? `<div style="font-size:13px;font-weight:700;color:var(--accent);padding:6px 10px;background:rgba(0,229,255,0.06);border-radius:8px;margin:2px 0;">${stat}</div>` : ''}
+        <div class="avoska-card-text">${r.summary || ''}</div>
+        <div class="avoska-card-footer">
+          <span class="${impClass}">${impText}</span>
+          <span class="avoska-source">${r.source_channel || ''}</span>
+        </div>
+        ${date ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📅 ${date}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function loadAvoskaInsights() {
+    const { data, error } = await supabase
+      .from('trend_signals')
+      .select('*')
+      .eq('source', 'telegram')
+      .order('date', { ascending: false })
+      .limit(10);
+
+    const insights = data || [];
+    const label = document.getElementById('avoska-updated-label');
+
+    if (insights.length) {
+      const lastDate = new Date(insights[0].date || insights[0].created_at);
+      label.textContent = `Обновлено: ${lastDate.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    } else {
+      label.textContent = 'Обновляется еженедельно';
+    }
+
+    renderAvoskaGrid(insights);
+  }
+
+  // ──────────────────────────────────────────────
+  // Сигналы из соцсетей
+  // ──────────────────────────────────────────────
   window.filterBy = function(src, btn) {
     document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -176,13 +351,13 @@
     }
 
     grid.innerHTML = signals.map((s, i) => {
-      const raw = s.raw_data || {};
+      const raw   = s.raw_data || {};
       const title = raw.title || s.keyword || 'Без заголовка';
-      const text = raw.text || '';
-      const url = raw.url || '#';
-      const src = s.source || 'unknown';
-      const date = new Date(s.date || s.created_at).toLocaleDateString('ru', { day: 'numeric', month: 'long' });
-      const icon = SOURCE_ICONS[src] || '🌐';
+      const text  = raw.text || '';
+      const url   = raw.url || '#';
+      const src   = s.source || 'unknown';
+      const date  = new Date(s.date || s.created_at).toLocaleDateString('ru', { day: 'numeric', month: 'long' });
+      const icon  = SOURCE_ICONS[src] || '🌐';
       const label = SOURCE_LABELS[src] || src;
 
       return `
@@ -210,26 +385,28 @@
     document.getElementById('nav-name').textContent = user.name || user.email;
     if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
 
-    const { data, error } = await supabase
-      .from('trend_signals')
-      .select('*')
-      .in('source', ['linkedin', 'reddit', 'tiktok'])
-      .order('date', { ascending: false })
-      .order('value', { ascending: false })
-      .limit(10);
+    // Загружаем параллельно
+    await Promise.all([
+      loadAvoskaInsights(),
+      (async () => {
+        // Фильтр: только последние 3 месяца
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const cutoffDate = threeMonthsAgo.toISOString().split('T')[0];
 
-    allSignals = data || [];
+        const { data } = await supabase
+          .from('trend_signals')
+          .select('*')
+          .in('source', ['linkedin', 'reddit', 'tiktok'])
+          .gte('date', cutoffDate)
+          .order('date', { ascending: false })
+          .order('value', { ascending: false })
+          .limit(20);
 
-    const count = allSignals.length;
-    document.getElementById('signal-count').textContent = `${count} сигналов`;
-
-    if (allSignals.length) {
-      const lastDate = new Date(allSignals[0].date || allSignals[0].created_at);
-      document.getElementById('update-label').textContent =
-        `Последнее обновление: ${lastDate.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-    }
-
-    renderGrid(allSignals);
+        allSignals = data || [];
+        renderGrid(allSignals);
+      })()
+    ]);
   }
 
   init();
