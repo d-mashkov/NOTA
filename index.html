@@ -44,6 +44,38 @@
         <p class="page-subtitle">Актуальные FMCG-тренды и новые NOTы</p>
       </div>
 
+      <!-- Запрос на анализ (только для admin) -->
+      <div id="request-block" style="display:none;" class="section">
+        <div class="card" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;padding:32px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+            <div style="flex:1;min-width:260px;">
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;margin-bottom:8px;">🔬 Новый запрос на анализ</div>
+              <div style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Какую нишу проверить?</div>
+              <div style="font-size:14px;color:#94a3b8;">Введи название — NOTA проанализирует тренд и добавит карточку</div>
+            </div>
+          </div>
+          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+            <input
+              type="text"
+              id="req-name"
+              placeholder="Например: Кокосовое масло, Детское питание без сахара..."
+              style="flex:1;min-width:240px;padding:12px 16px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#f1f5f9;font-size:15px;outline:none;"
+              onkeydown="if(event.key==='Enter') submitRequest()"
+            />
+            <input
+              type="text"
+              id="req-name-en"
+              placeholder="English name (опционально)"
+              style="width:220px;padding:12px 16px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#f1f5f9;font-size:15px;outline:none;"
+            />
+            <button onclick="submitRequest()" style="padding:12px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">
+              Отправить в анализ →
+            </button>
+          </div>
+          <div id="req-status" style="margin-top:12px;font-size:14px;display:none;"></div>
+        </div>
+      </div>
+
       <!-- Статистика -->
       <div class="section">
         <div class="grid-3" id="stats-grid">
@@ -114,8 +146,10 @@
           user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
         document.getElementById("nav-name").textContent =
           user.name || user.email;
-        if (user.role === "admin")
+        if (user.role === "admin") {
           document.getElementById("admin-link").style.display = "block";
+          document.getElementById("request-block").style.display = "block";
+        }
 
         // Статистика
         const { data: allNotes } = await getNotes();
@@ -238,6 +272,37 @@
           })
           .join("");
       }
+
+      window.submitRequest = async function() {
+        const name = document.getElementById("req-name").value.trim();
+        const name_en = document.getElementById("req-name-en").value.trim();
+        if (!name) return;
+
+        const btn = document.querySelector("#request-block button");
+        const status = document.getElementById("req-status");
+        btn.disabled = true;
+        btn.textContent = "Отправляем...";
+
+        const { error } = await supabase.from("categories").insert({
+          name,
+          name_en: name_en || null,
+          seed_queries: [name.toLowerCase()],
+          is_active: true,
+        });
+
+        status.style.display = "block";
+        if (error) {
+          status.style.color = "var(--red)";
+          status.textContent = "Ошибка: " + error.message;
+        } else {
+          status.style.color = "#4ade80";
+          status.textContent = `✓ «${name}» добавлена в очередь на анализ. Результат появится после следующего запуска пайплайна.`;
+          document.getElementById("req-name").value = "";
+          document.getElementById("req-name-en").value = "";
+        }
+        btn.disabled = false;
+        btn.textContent = "Отправить в анализ →";
+      };
 
       init();
     </script>
