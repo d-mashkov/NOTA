@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTA — Новости и тренды</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .signal-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 24px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .signal-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .signal-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .signal-source.linkedin { background: #dbeafe; color: #1d4ed8; }
+    .signal-source.reddit   { background: #ffedd5; color: #c2410c; }
+    .signal-source.tiktok   { background: #fce7f3; color: #9d174d; }
+    .signal-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-primary);
+    }
+    .signal-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .signal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+    .signal-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .signal-link {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .update-bar {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .update-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">Н</div>
+      NOTA
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="notes.html" class="nav-link">Лента NOTы</a>
+      <a href="news.html" class="nav-link active">Новости</a>
+      <a href="profile.html" class="nav-link">Сохранённые</a>
+      <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-user-name" id="nav-name">...</span>
+      <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Новости и тренды</h1>
+      <p class="page-subtitle">Свежие сигналы из LinkedIn и Reddit — что ищет потребитель и куда движется рынок</p>
+    </div>
+  </div>
+
+  <div class="update-bar">
+    <div>
+      <span class="update-dot"></span>
+      <span id="update-label">Обновляется каждую неделю</span>
+    </div>
+    <span id="signal-count" style="font-weight:600;color:var(--text-primary);">—</span>
+  </div>
+
+  <!-- Фильтры по источнику -->
+  <div class="filters" style="margin-bottom:28px;">
+    <button class="filter-btn active" data-src="all" onclick="filterBy('all',this)">Все</button>
+    <button class="filter-btn" data-src="linkedin" onclick="filterBy('linkedin',this)">💼 LinkedIn</button>
+    <button class="filter-btn" data-src="reddit" onclick="filterBy('reddit',this)">🟠 Reddit</button>
+  </div>
+
+  <div class="news-grid" id="news-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted);">Загрузка...</div>
+  </div>
+
+</main>
+
+<script type="module">
+  import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
+
+  window.signOut = _signOut;
+
+  let allSignals = [];
+
+  const SOURCE_ICONS = { linkedin: '💼', reddit: '🟠', tiktok: '🎵' };
+  const SOURCE_LABELS = { linkedin: 'LinkedIn', reddit: 'Reddit', tiktok: 'TikTok' };
+
+  window.filterBy = function(src, btn) {
+    document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = src === 'all' ? allSignals : allSignals.filter(s => s.source === src);
+    renderGrid(filtered);
+  };
+
+  function renderGrid(signals) {
+    const grid = document.getElementById('news-grid');
+
+    if (!signals.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;" class="card"><div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-title">Нет сигналов</div>
+        <p class="empty-state-text">Первый сбор данных произойдёт при следующем запуске пайплайна</p>
+      </div></div>`;
+      return;
+    }
+
+    grid.innerHTML = signals.map((s, i) => {
+      const raw = s.raw_data || {};
+      const title = raw.title || s.keyword || 'Без заголовка';
+      const text = raw.text || '';
+      const url = raw.url || '#';
+      const src = s.source || 'unknown';
+      const date = new Date(s.date || s.created_at).toLocaleDateString('ru', { day: 'numeric', month: 'long' });
+      const icon = SOURCE_ICONS[src] || '🌐';
+      const label = SOURCE_LABELS[src] || src;
+
+      return `
+      <a href="${url}" target="_blank" rel="noopener" class="signal-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span class="signal-source ${src}">${icon} ${label}</span>
+          <span style="font-size:22px;font-weight:800;color:var(--border);">${String(i+1).padStart(2,'0')}</span>
+        </div>
+        <div class="signal-title">${title}</div>
+        <div class="signal-text">${text}</div>
+        <div class="signal-footer">
+          <span class="signal-date">📅 ${date}</span>
+          <span class="signal-link">Читать →</span>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  async function init() {
+    await requireAuth();
+    const user = await getCurrentUser();
+    if (!user) return;
+
+    document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+    document.getElementById('nav-name').textContent = user.name || user.email;
+    if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+
+    const { data, error } = await supabase
+      .from('trend_signals')
+      .select('*')
+      .in('source', ['linkedin', 'reddit', 'tiktok'])
+      .order('date', { ascending: false })
+      .order('value', { ascending: false })
+      .limit(10);
+
+    allSignals = data || [];
+
+    const count = allSignals.length;
+    document.getElementById('signal-count').textContent = `${count} сигналов`;
+
+    if (allSignals.length) {
+      const lastDate = new Date(allSignals[0].date || allSignals[0].created_at);
+      document.getElementById('update-label').textContent =
+        `Последнее обновление: ${lastDate.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    }
+
+    renderGrid(allSignals);
+  }
+
+  init();
+</script>
+</body>
+</html>
