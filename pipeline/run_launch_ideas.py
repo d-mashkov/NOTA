@@ -126,7 +126,7 @@ def generate_idea(seed: dict):
     try:
         resp = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=2000,
+            max_tokens=4000,
             messages=[{"role": "user", "content": synthesis_prompt}]
         )
         raw = resp.content[0].text.strip()
@@ -134,7 +134,19 @@ def generate_idea(seed: dict):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
                 raw = raw[4:]
-        data = json.loads(raw)
+        # Если JSON обрезан — пробуем починить добавив закрывающие скобки
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            # Пробуем найти последний валидный объект
+            for end in range(len(raw), 0, -1):
+                try:
+                    data = json.loads(raw[:end] + '}}' if raw[:end].count('{') > raw[:end].count('}') else raw[:end] + '}')
+                    break
+                except Exception:
+                    continue
+            else:
+                raise ValueError("JSON не восстановить")
     except Exception as e:
         print(f"[Ideas] Ошибка синтеза: {e}")
         data = {
