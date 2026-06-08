@@ -173,10 +173,10 @@ def _reddit_via_praw(query: str) -> str:
     if not results:
         return ""
 
-    lines = [f"**Reddit (r/CPGIndustry, r/food и др.) — свежие обсуждения:**"]
+    lines = [f"Reddit (r/CPGIndustry, r/food и др.) — свежие обсуждения:"]
     for r in sorted(results, key=lambda x: x["score"], reverse=True)[:5]:
         lines.append(
-            f"• [{r['score']}★] **r/{r['subreddit']}** — {r['title']}\n"
+            f"• [{r['score']}★] r/{r['subreddit']} — {r['title']}\n"
             f"  {r['selftext'][:150]}\n"
             f"  🔗 {r['url']}"
         )
@@ -208,41 +208,51 @@ def search_social_trends(query: str) -> str:
     print(f"[Артём] Поиск: {query}")
     parts = []
 
-    # TikTok
-    tiktok = _exa_search(f"site:tiktok.com {query} trending viral", num=5)
+    # TikTok — только заголовки, текст страниц TikTok мусорный (навигация, UI)
+    tiktok = _exa_search(f"site:tiktok.com {query} trending viral", num=5, start_date="2025-01-01")
     if tiktok:
-        parts.append("📱 **TikTok тренды:**")
+        parts.append("📱 TikTok тренды:")
         for r in tiktok[:4]:
-            parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
+            title = (r.title or '').replace('| TikTok', '').replace('- TikTok', '').strip()
+            if title and len(title) > 5:
+                parts.append(f"• {title}")
 
     # LinkedIn — только свежее (с 2025)
     linkedin = _exa_search(f"site:linkedin.com {query} FMCG consumer trend 2025 2026", num=5, start_date="2025-01-01")
     if linkedin:
-        parts.append("\n💼 **LinkedIn / Индустрия:**")
+        parts.append("\n💼 LinkedIn / Индустрия:")
         for r in linkedin[:4]:
-            parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
+            title = r.title or ''
+            text = (r.text or '')[:200].strip()
+            # Фильтр мусора — LinkedIn тоже иногда отдаёт навигацию
+            junk_markers = ['Sign in', 'Join now', 'Log in', 'Cookie', 'Privacy Policy']
+            if any(j in text for j in junk_markers):
+                text = ''
+            parts.append(f"• {title}" + (f"\n  {text}" if text else ''))
 
     # 2First (alan2f) — отраслевые инсайты FMCG
-    twofirst = _exa_search(f"site:linkedin.com/in/alan2f {query} 2025", num=3, start_date="2025-01-01")
-    if not twofirst:
-        twofirst = _exa_search(f"2first fmcg {query} 2025 russia", num=3, start_date="2025-01-01")
+    twofirst = _exa_search(f"2first fmcg {query} 2025 market", num=3, start_date="2025-01-01")
     if twofirst:
-        parts.append("\n🔥 **2First:**")
+        parts.append("\n🔥 2First:")
         for r in twofirst[:2]:
-            parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
+            title = r.title or ''
+            text = (r.text or '')[:200].strip()
+            parts.append(f"• {title}" + (f"\n  {text}" if text else ''))
 
     # YouTube
     youtube = _exa_search(f"site:youtube.com {query} trend review новинки 2025", num=4)
     if youtube:
-        parts.append("\n🎥 **YouTube:**")
+        parts.append("\n🎥 YouTube:")
         for r in youtube[:3]:
-            parts.append(f"• {r.title or r.url}")
+            title = (r.title or '').replace('- YouTube', '').strip()
+            if title:
+                parts.append(f"• {title}")
 
     # X/Twitter через Grok
     print("[Артём] X/Twitter через Grok...")
     grok_result = _grok_search(query)
     if grok_result:
-        parts.append(f"\n🐦 **X/Twitter (Grok live):**\n{grok_result}")
+        parts.append(f"\n🐦 X/Twitter (live):\n{grok_result}")
 
     # Reddit — сначала PRAW, потом Grok как fallback
     print("[Артём] Reddit...")
@@ -250,7 +260,7 @@ def search_social_trends(query: str) -> str:
     if not reddit_result:
         reddit_result = _reddit_via_grok(query)
     if reddit_result:
-        parts.append(f"\n🟠 **Reddit:**\n{reddit_result}")
+        parts.append(f"\n🟠 Reddit:\n{reddit_result}")
 
     if not parts:
         return "Артём: данных по запросу не найдено."
