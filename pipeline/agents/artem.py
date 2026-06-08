@@ -48,17 +48,23 @@ def _get_reddit():
 # ──────────────────────────────────────────────
 # Exa поиск
 # ──────────────────────────────────────────────
-def _exa_search(query: str, num: int = 5) -> list:
+def _exa_search(query: str, num: int = 5, start_date: str = "2024-06-01") -> list:
     try:
         result = _get_exa().search_and_contents(
             query,
             num_results=num,
             text={"max_characters": 600},
+            start_published_date=start_date,
         )
         return result.results or []
     except Exception as e:
-        print(f"[Артём] Exa error: {e}")
-        return []
+        # Fallback without date filter
+        try:
+            result = _get_exa().search_and_contents(query, num_results=num, text={"max_characters": 600})
+            return result.results or []
+        except Exception:
+            print(f"[Артём] Exa error: {e}")
+            return []
 
 
 # ──────────────────────────────────────────────
@@ -209,11 +215,20 @@ def search_social_trends(query: str) -> str:
         for r in tiktok[:4]:
             parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
 
-    # LinkedIn
-    linkedin = _exa_search(f"site:linkedin.com {query} FMCG consumer trend 2025 2026", num=5)
+    # LinkedIn — только свежее (с 2025)
+    linkedin = _exa_search(f"site:linkedin.com {query} FMCG consumer trend 2025 2026", num=5, start_date="2025-01-01")
     if linkedin:
         parts.append("\n💼 **LinkedIn / Индустрия:**")
         for r in linkedin[:4]:
+            parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
+
+    # 2First (alan2f) — отраслевые инсайты FMCG
+    twofirst = _exa_search(f"site:linkedin.com/in/alan2f {query} 2025", num=3, start_date="2025-01-01")
+    if not twofirst:
+        twofirst = _exa_search(f"2first fmcg {query} 2025 russia", num=3, start_date="2025-01-01")
+    if twofirst:
+        parts.append("\n🔥 **2First:**")
+        for r in twofirst[:2]:
             parts.append(f"• {r.title or r.url}\n  {(r.text or '')[:200]}")
 
     # YouTube

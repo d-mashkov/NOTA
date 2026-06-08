@@ -73,29 +73,29 @@
 
       /* Agent verdicts */
       .idea-agents {
-        padding: 16px 24px 20px;
+        padding: 12px 24px 20px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
       }
       .agent-row {
         display: flex;
         align-items: flex-start;
         gap: 10px;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.45;
       }
       .agent-dot {
         flex-shrink: 0;
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
-        margin-top: 5px;
+        margin-top: 4px;
       }
       .agent-name {
         font-weight: 600;
         white-space: nowrap;
-        min-width: 62px;
+        min-width: 58px;
         color: var(--text);
       }
       .agent-text { color: var(--text-muted); }
@@ -106,6 +106,27 @@
       .dot-blue   { background: #3b82f6; }
       .dot-cart   { background: #10b981; }
       .dot-purple { background: #8b5cf6; }
+
+      /* Detail button */
+      .idea-footer {
+        padding: 0 24px 20px;
+      }
+      .idea-detail-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+      .idea-detail-btn:hover { opacity: 0.88; }
 
       /* Search bar compact */
       .search-bar {
@@ -305,6 +326,11 @@
                   <div class="agent-text">${escHtml(a.text)}</div>
                 </div>
               `).join('')}
+            </div>
+            <div class="idea-footer">
+              <a href="idea-detail.html?id=${idea.id}" class="idea-detail-btn">
+                Ознакомиться →
+              </a>
             </div>
           </div>`;
         }).join('');

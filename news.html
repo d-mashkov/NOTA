@@ -231,6 +231,25 @@
 
   <hr class="section-divider">
 
+  <hr class="section-divider">
+
+  <!-- ── Никотин ── -->
+  <div class="avoska-header">
+    <div class="avoska-title">
+      🚬 Никотин
+      <span style="font-size:13px;font-weight:400;color:var(--text-muted);">Ник-паучи · POD-системы · Жевательный табак · ОЭСДН</span>
+    </div>
+    <div class="avoska-updated">
+      <span class="avoska-dot" style="background:#f59e0b;"></span>
+      <span id="nicotine-updated-label">Актуально</span>
+    </div>
+  </div>
+  <div id="nicotine-grid" style="margin-bottom:48px;">
+    <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">Загрузка...</div>
+  </div>
+
+  <hr class="section-divider">
+
   <!-- ── Сигналы из соцсетей ── -->
   <div class="section-title">
     📡 Сигналы из соцсетей
@@ -241,6 +260,7 @@
     <button class="filter-btn active" data-src="all" onclick="filterBy('all',this)">Все</button>
     <button class="filter-btn" data-src="linkedin" onclick="filterBy('linkedin',this)">💼 LinkedIn</button>
     <button class="filter-btn" data-src="reddit" onclick="filterBy('reddit',this)">🟠 Reddit</button>
+    <button class="filter-btn" data-src="2first" onclick="filterBy('2first',this)">🔥 2First</button>
   </div>
 
   <div class="news-grid" id="news-grid">
@@ -256,8 +276,8 @@
 
   let allSignals = [];
 
-  const SOURCE_ICONS  = { linkedin: '💼', reddit: '🟠', tiktok: '🎵' };
-  const SOURCE_LABELS = { linkedin: 'LinkedIn', reddit: 'Reddit', tiktok: 'TikTok' };
+  const SOURCE_ICONS  = { linkedin: '💼', reddit: '🟠', tiktok: '🎵', '2first': '🔥' };
+  const SOURCE_LABELS = { linkedin: 'LinkedIn', reddit: 'Reddit', tiktok: 'TikTok', '2first': '2First' };
 
   const CAT_ICONS = {
     тренд: '📈', рынок: '🏪', продукт: '📦',
@@ -305,6 +325,80 @@
         ${date ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📅 ${date}</div>` : ''}
       </div>`;
     }).join('');
+  }
+
+  // ──────────────────────────────────────────────
+  // Никотин-новости
+  // ──────────────────────────────────────────────
+  const NICOTINE_SUBCATS = ['ник-паучи', 'pod-системы', 'жевательный табак', 'оэсдн', 'никотин'];
+
+  async function loadNicotineNews() {
+    // Ищем сигналы по ключевым словам никотина
+    const cutoff = '2025-01-01';
+    const { data } = await supabase
+      .from('trend_signals')
+      .select('*')
+      .gte('date', cutoff)
+      .or('keyword.ilike.%никотин%,keyword.ilike.%паучи%,keyword.ilike.%pod%,keyword.ilike.%vape%,keyword.ilike.%сигарет%,keyword.ilike.%табак%,keyword.ilike.%снюс%,keyword.ilike.%snus%,keyword.ilike.%nicotine%')
+      .order('date', { ascending: false })
+      .limit(12);
+
+    const grid = document.getElementById('nicotine-grid');
+    const items = data || [];
+
+    if (!items.length) {
+      grid.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:10px;">🚬</div>
+          <div style="font-weight:600;margin-bottom:6px;">Нет данных по никотину</div>
+          <div style="color:var(--text-muted);font-size:13px;">
+            Раздел появится после запуска пайплайна с никотиновыми категориями.<br>
+            Включает: ник-паучи, POD-системы, жевательный табак, ОЭСДН.
+          </div>
+        </div>`;
+      return;
+    }
+
+    const SUBCAT_LABELS = {
+      'паучи': '🧸 Ник-паучи', 'snus': '🧸 Снюс', 'снюс': '🧸 Снюс',
+      'pod': '💨 POD-системы', 'vape': '💨 Вейп',
+      'табак': '🍂 Жев. табак', 'tobacco': '🍂 Жев. табак',
+      'оэсдн': '🟠 ОЭСДН', 'disposable': '🟠 ОЭСДН',
+      'nicotine': '🚬 Никотин', 'никотин': '🚬 Никотин',
+    };
+
+    function getSubcat(keyword) {
+      const kw = (keyword || '').toLowerCase();
+      for (const [k, v] of Object.entries(SUBCAT_LABELS)) {
+        if (kw.includes(k)) return v;
+      }
+      return '🚬 Никотин';
+    }
+
+    grid.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;">
+        ${items.map((s, i) => {
+          const raw = s.raw_data || {};
+          const title = raw.title || s.keyword || 'Без заголовка';
+          const text = raw.text || raw.summary || '';
+          const url = raw.url || '#';
+          const subcat = getSubcat(s.keyword);
+          const date = new Date(s.date || s.created_at).toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
+          return `
+          <a href="${url}" target="_blank" rel="noopener" class="avoska-card" style="text-decoration:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="avoska-card-cat" style="background:rgba(245,158,11,0.1);color:#f59e0b;">${subcat}</span>
+              <span style="font-size:11px;color:var(--text-muted);">${date}</span>
+            </div>
+            <div class="avoska-card-title">${title}</div>
+            ${text ? `<div class="avoska-card-text">${text.slice(0,160)}${text.length > 160 ? '...' : ''}</div>` : ''}
+            <div style="font-size:11px;color:var(--accent);font-weight:600;margin-top:4px;">Читать →</div>
+          </a>`;
+        }).join('')}
+      </div>`;
+
+    document.getElementById('nicotine-updated-label').textContent =
+      `Обновлено: ${new Date(items[0].date || items[0].created_at).toLocaleDateString('ru', { day: 'numeric', month: 'long' })}`;
   }
 
   async function loadAvoskaInsights() {
@@ -388,20 +482,19 @@
     // Загружаем параллельно
     await Promise.all([
       loadAvoskaInsights(),
+      loadNicotineNews(),
       (async () => {
-        // Фильтр: только последние 3 месяца
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        const cutoffDate = threeMonthsAgo.toISOString().split('T')[0];
+        // Фильтр: только с 2025 года
+        const cutoffDate = '2025-01-01';
 
         const { data } = await supabase
           .from('trend_signals')
           .select('*')
-          .in('source', ['linkedin', 'reddit', 'tiktok'])
+          .in('source', ['linkedin', 'reddit', 'tiktok', '2first'])
           .gte('date', cutoffDate)
           .order('date', { ascending: false })
           .order('value', { ascending: false })
-          .limit(20);
+          .limit(30);
 
         allSignals = data || [];
         renderGrid(allSignals);

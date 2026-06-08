@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTA — Идея запуска</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .detail-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .detail-hero-info { flex: 1; }
+    .detail-category {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .detail-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .detail-summary {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 680px;
+    }
+    .detail-score {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 26px;
+      font-weight: 900;
+      border: 4px solid;
+    }
+    .detail-score.high { color: var(--green); border-color: var(--green); background: rgba(34,197,94,0.07); }
+    .detail-score.mid  { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.07); }
+    .detail-score.low  { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.07); }
+    .detail-score-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+
+    /* 2-col grid */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    .detail-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .detail-section.full { grid-column: 1 / -1; }
+    .detail-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Metrics row */
+    .metrics-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .metric-box {
+      flex: 1;
+      min-width: 140px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-value { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.3; }
+
+    /* Agents tabs */
+    .agent-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .agent-tab {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-muted);
+    }
+    .agent-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .agent-panel { display: none; }
+    .agent-panel.active { display: block; }
+    .agent-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    /* Lists */
+    .detail-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .detail-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .detail-list li::before {
+      content: attr(data-icon);
+      flex-shrink: 0;
+      font-size: 14px;
+      margin-top: 1px;
+    }
+
+    /* Sources */
+    .source-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+    }
+    .source-item:hover { border-color: var(--accent); }
+    .source-icon { font-size: 16px; flex-shrink: 0; }
+    .source-body { flex: 1; min-width: 0; }
+    .source-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .source-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .source-link {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .source-link:hover { text-decoration: underline; }
+
+    /* Packaging cards */
+    .pack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .pack-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .pack-card-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    /* Risk pill */
+    .risk-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(239,68,68,0.08);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 600;
+      margin: 3px;
+    }
+
+    /* Key players */
+    .player-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 3px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <!-- Навигация -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">Н</div>
+        NOTA
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Идеи запуска</a>
+        <a href="notes.html" class="nav-link">Лента NOTы</a>
+        <a href="news.html" class="nav-link">Новости</a>
+        <a href="profile.html" class="nav-link">Сохранённые</a>
+        <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
+      </div>
+      <div class="nav-user">
+        <div class="nav-avatar" id="nav-avatar">?</div>
+        <span class="nav-user-name" id="nav-name">...</span>
+        <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <a href="index.html" class="back-btn">← Назад к идеям</a>
+
+    <!-- Hero -->
+    <div class="detail-hero" id="detail-hero">
+      <div class="detail-hero-info">
+        <div class="detail-category" id="d-category">—</div>
+        <div class="detail-title" id="d-title">Загружаем...</div>
+        <div class="detail-summary" id="d-summary"></div>
+      </div>
+      <div class="detail-score" id="d-score">—</div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="detail-section full" id="metrics-section" style="margin-bottom:20px;">
+      <div class="detail-section-title">📊 Рыночные метрики</div>
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Объём рынка РФ</div>
+          <div class="metric-value" id="m-size">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Темп роста</div>
+          <div class="metric-value" id="m-growth">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Рекомендуемая цена</div>
+          <div class="metric-value" id="m-price">—</div>
+        </div>
+        <div class="metric-box" id="m-players-box">
+          <div class="metric-label">Ключевые игроки</div>
+          <div id="m-players">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+
+      <!-- Агенты -->
+      <div class="detail-section full">
+        <div class="detail-section-title">🤖 Данные агентов</div>
+        <div class="agent-tabs" id="agent-tabs">
+          <button class="agent-tab active" onclick="switchAgent('artem',this)">🔴 Артём</button>
+          <button class="agent-tab" onclick="switchAgent('petya',this)">🟡 Петя</button>
+          <button class="agent-tab" onclick="switchAgent('vova',this)">🔵 Вова</button>
+          <button class="agent-tab" onclick="switchAgent('avoska',this)">🛒 Авоська</button>
+          <button class="agent-tab" onclick="switchAgent('polya',this)">🟣 Поля</button>
+        </div>
+        <div id="agent-artem" class="agent-panel active"><div class="agent-text" id="t-artem">—</div></div>
+        <div id="agent-petya" class="agent-panel"><div class="agent-text" id="t-petya">—</div></div>
+        <div id="agent-vova" class="agent-panel"><div class="agent-text" id="t-vova">—</div></div>
+        <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska">—</div></div>
+        <div id="agent-polya" class="agent-panel"><div class="agent-text" id="t-polya">—</div></div>
+      </div>
+
+      <!-- Упаковка -->
+      <div class="detail-section">
+        <div class="detail-section-title">📦 Идеи упаковки</div>
+        <div class="pack-grid" id="pack-grid">
+          <div style="color:var(--text-muted);font-size:13px;">Загружается...</div>
+        </div>
+      </div>
+
+      <!-- Шаги запуска -->
+      <div class="detail-section">
+        <div class="detail-section-title">🚀 Шаги запуска</div>
+        <ul class="detail-list" id="launch-steps"></ul>
+      </div>
+
+      <!-- Риски -->
+      <div class="detail-section">
+        <div class="detail-section-title">⚠️ Риски</div>
+        <div id="risks-container"></div>
+      </div>
+
+      <!-- Источники -->
+      <div class="detail-section">
+        <div class="detail-section-title">🔗 Источники и ссылки</div>
+        <div id="sources-container">
+          <div style="color:var(--text-muted);font-size:13px;">Загружается...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      requireAuth, getCurrentUser,
+      signOut as _signOut, supabase
+    } from './js/supabase-client.js';
+
+    window.signOut = _signOut;
+
+    window.switchAgent = function(name, btn) {
+      document.querySelectorAll('.agent-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('agent-' + name).classList.add('active');
+    };
+
+    function sc(score) {
+      if (score >= 80) return 'high';
+      if (score >= 60) return 'mid';
+      return 'low';
+    }
+
+    function esc(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function init() {
+      await requireAuth();
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+      document.getElementById('nav-name').textContent = user.name || user.email;
+      if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      if (!id) { location.href = 'index.html'; return; }
+
+      const { data: idea } = await supabase
+        .from('launch_ideas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!idea) { location.href = 'index.html'; return; }
+
+      // Hero
+      document.getElementById('d-category').textContent = idea.category || '';
+      document.getElementById('d-title').textContent = idea.title || '';
+      document.getElementById('d-summary').textContent = idea.summary || '';
+      const scoreEl = document.getElementById('d-score');
+      scoreEl.innerHTML = `<span>${idea.score || '—'}</span><span class="detail-score-label">SCORE</span>`;
+      scoreEl.className = 'detail-score ' + sc(idea.score || 0);
+
+      // Agent full texts
+      function agentText(field) {
+        // Try to get full text from detail_json first, fallback to field
+        return field || '—';
+      }
+
+      // Parse detail_json if available
+      let detail = {};
+      try { detail = JSON.parse(idea.detail_json || '{}'); } catch {}
+
+      // Fill agent tabs — prefer full text, fallback to stored field
+      document.getElementById('t-artem').textContent = detail.artem_full || idea.artem || '—';
+      document.getElementById('t-petya').textContent = detail.petya_full || idea.petya || '—';
+      document.getElementById('t-vova').textContent = detail.vova_full || idea.vova || '—';
+      document.getElementById('t-avoska').textContent = detail.avoska_full || idea.avoska || '—';
+      document.getElementById('t-polya').textContent = detail.polya_full || idea.polya || '—';
+
+      // Metrics
+      document.getElementById('m-size').textContent = detail.market_size || '—';
+      document.getElementById('m-growth').textContent = detail.growth_rate || '—';
+      document.getElementById('m-price').textContent = detail.entry_price || '—';
+
+      const players = detail.key_players || [];
+      document.getElementById('m-players').innerHTML = players.length
+        ? players.map(p => `<span class="player-badge">${esc(p)}</span>`).join('')
+        : '—';
+
+      // Packaging
+      const packs = detail.packaging_ideas || [];
+      document.getElementById('pack-grid').innerHTML = packs.length
+        ? packs.map((p, i) => `
+          <div class="pack-card">
+            <div class="pack-card-num">0${i+1}</div>
+            ${esc(p)}
+          </div>`).join('')
+        : '<div style="color:var(--text-muted);font-size:13px;">Данные появятся при следующей генерации</div>';
+
+      // Launch steps
+      const steps = detail.launch_steps || [];
+      document.getElementById('launch-steps').innerHTML = steps.length
+        ? steps.map((s, i) => `<li data-icon="${i+1}.">${esc(s)}</li>`).join('')
+        : '<li data-icon="—">Данные появятся при следующей генерации</li>';
+
+      // Risks
+      const risks = detail.risks || [];
+      document.getElementById('risks-container').innerHTML = risks.length
+        ? risks.map(r => `<span class="risk-pill">⚠ ${esc(r)}</span>`).join('')
+        : '<div style="color:var(--text-muted);font-size:13px;">—</div>';
+
+      // Sources
+      const sources = detail.sources || [];
+      document.getElementById('sources-container').innerHTML = sources.length
+        ? sources.map(s => `
+          <div class="source-item">
+            <span class="source-icon">🔗</span>
+            <div class="source-body">
+              <div class="source-title">${esc(s.title || '')}</div>
+              ${s.note ? `<div class="source-note">${esc(s.note)}</div>` : ''}
+            </div>
+            ${s.url && s.url !== 'https://...' ? `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="source-link">Открыть →</a>` : ''}
+          </div>`).join('')
+        : `<div style="color:var(--text-muted);font-size:13px;">
+            Ссылки на источники будут добавлены при следующей генерации идей.<br>
+            <span style="font-size:12px;">Nielsen, Euromonitor, Statista, отраслевые отчёты.</span>
+           </div>`;
+    }
+
+    init();
+  </script>
+</body>
+</html>
