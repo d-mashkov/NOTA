@@ -226,17 +226,6 @@ def search_social_trends(query: str) -> str:
             if title and len(title) > 5:
                 parts.append(f"• {title}")
 
-    # 2First — только заголовки
-    twofirst = _exa_search(f"2first fmcg {query} 2025 market", num=3, start_date="2025-01-01")
-    if twofirst:
-        parts.append("\n🔥 2First:")
-        for r in twofirst[:2]:
-            title = (r.title or '').strip()
-            # Убираем мусор сайтов-агрегаторов
-            junk = ['Affiliate links', 'Cookie', 'Privacy', 'Sign in', 'Subscribe']
-            if title and not any(j in (r.text or '') for j in junk):
-                parts.append(f"• {title}")
-
     # YouTube
     youtube = _exa_search(f"site:youtube.com {query} trend review новинки 2025", num=4)
     if youtube:
