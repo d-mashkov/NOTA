@@ -395,40 +395,95 @@
       return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    /** Конвертирует plain-text с markdown-разметкой в читаемый HTML */
+    /** Конвертирует plain-text с markdown в читаемый HTML */
     function renderAgentText(raw) {
       if (!raw) return '<em style="color:var(--text-muted)">—</em>';
+
+      // 1. Убираем мусор LinkedIn/TikTok/сайтов
+      const JUNK = [
+        'Agree & Join', 'By clicking Continue', 'Sign in', 'Join now',
+        'Cookie Policy', 'Privacy Policy', 'Affiliate links',
+        'use essential and non-essential cookies',
+        'Dear Users', 'Government of India', 'Learn more',
+        'Get app', 'Log in', 'Coupon Center', 'Watch now',
+      ];
+
+      // 2. Рендерим markdown ссылки [[n]](url) и [text](url)
+      function renderLinks(text) {
+        // [[n]](url) → кликабельная сноска
+        text = text.replace(/\[\[(\d+)\]\]\((https?:\/\/[^\)]+)\)/g,
+          (_, n, url) => `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);font-size:11px;vertical-align:super;">[${n}]</a>`);
+        // [text](url)
+        text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
+          (_, t, url) => `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);">${esc(t)}</a>`);
+        // Голые URL — сделать ссылками
+        text = text.replace(/((?:^|\s)(https?:\/\/[^\s\)]+))/g,
+          (_, prefix, url) => `${prefix.startsWith('h') ? '' : prefix[0]}<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px;">${url.replace(/^https?:\/\//, '').slice(0,50)}</a>`);
+        return text;
+      }
+
+      function inlineFormat(text) {
+        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        return renderLinks(text);
+      }
+
       const lines = raw.split('\n');
       let html = '';
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) { html += '<br>'; continue; }
+      let prevLine = '';
+      let emptyCount = 0;
 
-        // Заголовки: ## Title, **Title:** или Title:
-        if (/^#{1,3}\s/.test(trimmed)) {
-          const text = trimmed.replace(/^#+\s*/, '').replace(/\*\*/g, '');
-          html += `<div class="agent-section-title">${esc(text)}</div>`;
+      for (let i = 0; i < lines.length; i++) {
+        const trimmed = lines[i].trim();
+
+        // Пропускаем мусор
+        if (JUNK.some(j => trimmed.includes(j))) continue;
+
+        // Пропускаем дубликаты соседних строк
+        if (trimmed && trimmed === prevLine) continue;
+
+        if (!trimmed) {
+          emptyCount++;
+          if (emptyCount <= 1) html += '<div style="height:8px"></div>';
           continue;
         }
-        if (/^\*\*[^*]+:\*\*$/.test(trimmed) || /^[📱💼🔥🎥🐦🟠📎][^*\n]+:$/.test(trimmed)) {
-          const text = trimmed.replace(/\*\*/g, '');
-          html += `<div class="agent-section-title">${esc(text)}</div>`;
+        emptyCount = 0;
+        prevLine = trimmed;
+
+        // Заголовки: ## или **Текст:** или эмодзи + текст + :
+        if (/^#{1,3}\s/.test(trimmed)) {
+          const t = trimmed.replace(/^#+\s*/, '').replace(/\*\*/g, '');
+          html += `<div class="agent-section-title">${esc(t)}</div>`;
+          continue;
+        }
+        if (/^\*\*[^*]+:\*\*$/.test(trimmed) || /^[\p{Emoji}][^\n]+:$/u.test(trimmed)) {
+          const t = trimmed.replace(/\*\*/g, '');
+          html += `<div class="agent-section-title">${inlineFormat(esc(t))}</div>`;
+          continue;
+        }
+        // Сноски — источники: 📎 Источники: или — https://
+        if (trimmed.startsWith('📎') || trimmed.startsWith('Источники')) {
+          html += `<div class="agent-section-title">📎 Источники</div>`;
+          continue;
+        }
+        if (/^—\s*https?:\/\//.test(trimmed)) {
+          const url = trimmed.replace(/^—\s*/, '');
+          const label = url.replace(/^https?:\/\//, '').split('/')[0];
+          html += `<div class="agent-bullet"><a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--accent);word-break:break-all;">${esc(label)}</a></div>`;
           continue;
         }
 
         // Буллиты: • или -
         if (/^[•\-]\s/.test(trimmed)) {
           let text = trimmed.replace(/^[•\-]\s*/, '');
-          text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-          html += `<div class="agent-bullet">${text}</div>`;
+          html += `<div class="agent-bullet">${inlineFormat(text)}</div>`;
           continue;
         }
 
         // Обычный текст
-        let text = trimmed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html += `<p>${text}</p>`;
+        html += `<p>${inlineFormat(trimmed)}</p>`;
       }
-      return html;
+      return html || '<em style="color:var(--text-muted)">Нет данных</em>';
     }
 
     async function init() {

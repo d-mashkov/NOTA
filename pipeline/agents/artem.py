@@ -217,27 +217,25 @@ def search_social_trends(query: str) -> str:
             if title and len(title) > 5:
                 parts.append(f"• {title}")
 
-    # LinkedIn — только свежее (с 2025)
+    # LinkedIn — только заголовки (страницы всегда за auth-стеной, текст мусорный)
     linkedin = _exa_search(f"site:linkedin.com {query} FMCG consumer trend 2025 2026", num=5, start_date="2025-01-01")
     if linkedin:
         parts.append("\n💼 LinkedIn / Индустрия:")
         for r in linkedin[:4]:
-            title = r.title or ''
-            text = (r.text or '')[:200].strip()
-            # Фильтр мусора — LinkedIn тоже иногда отдаёт навигацию
-            junk_markers = ['Sign in', 'Join now', 'Log in', 'Cookie', 'Privacy Policy']
-            if any(j in text for j in junk_markers):
-                text = ''
-            parts.append(f"• {title}" + (f"\n  {text}" if text else ''))
+            title = (r.title or '').replace('| LinkedIn', '').replace('- LinkedIn', '').strip()
+            if title and len(title) > 5:
+                parts.append(f"• {title}")
 
-    # 2First (alan2f) — отраслевые инсайты FMCG
+    # 2First — только заголовки
     twofirst = _exa_search(f"2first fmcg {query} 2025 market", num=3, start_date="2025-01-01")
     if twofirst:
         parts.append("\n🔥 2First:")
         for r in twofirst[:2]:
-            title = r.title or ''
-            text = (r.text or '')[:200].strip()
-            parts.append(f"• {title}" + (f"\n  {text}" if text else ''))
+            title = (r.title or '').strip()
+            # Убираем мусор сайтов-агрегаторов
+            junk = ['Affiliate links', 'Cookie', 'Privacy', 'Sign in', 'Subscribe']
+            if title and not any(j in (r.text or '') for j in junk):
+                parts.append(f"• {title}")
 
     # YouTube
     youtube = _exa_search(f"site:youtube.com {query} trend review новинки 2025", num=4)
