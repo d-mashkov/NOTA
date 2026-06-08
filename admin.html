@@ -212,7 +212,27 @@
   };
 
   // ---- Telegram-бот аналитика ----
+  // Автообновление каждые 60 секунд
+  let _botRefreshTimer = null;
+  function startBotAutoRefresh() {
+    if (_botRefreshTimer) clearInterval(_botRefreshTimer);
+    _botRefreshTimer = setInterval(() => {
+      const active = document.getElementById('tab-bot');
+      if (active && active.style.display !== 'none') loadBotData();
+    }, 60_000);
+  }
+
   window.loadBotData = async function() {
+    // Показываем время последнего обновления
+    document.getElementById('bot-last-updated')?.remove();
+    const header = document.querySelector('#tab-bot .section-header');
+    if (header) {
+      const ts = document.createElement('span');
+      ts.id = 'bot-last-updated';
+      ts.style = 'font-size:12px;color:var(--text-muted);margin-left:8px;';
+      ts.textContent = `Обновлено: ${new Date().toLocaleTimeString('ru')}`;
+      header.appendChild(ts);
+    }
     // Пользователи
     const { data: botUsers } = await supabase
       .from('telegram_users')
@@ -409,6 +429,7 @@
     document.getElementById('nav-avatar').textContent = currentUser.name?.[0]?.toUpperCase() || currentUser.email[0].toUpperCase();
     document.getElementById('nav-name').textContent = currentUser.name || currentUser.email;
     loadBotData();
+    startBotAutoRefresh();
   }
 
   init();
