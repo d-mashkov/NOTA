@@ -5,6 +5,7 @@ NOTA Telegram Bot — точка входа.
 
 import os
 import sys
+import asyncio
 import logging
 from dotenv import load_dotenv
 
@@ -92,7 +93,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
     try:
-        response = ask_chukcha(chat_id, user_text)
+        # Запускаем синхронный вызов в thread pool — не блокирует event loop
+        response = await asyncio.to_thread(ask_chukcha, chat_id, user_text)
 
         # Очищаем символы которые ломают Telegram Markdown
         import re
