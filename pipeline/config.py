@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
-EXA_API_KEY = os.environ["EXA_API_KEY"]
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+EXA_API_KEY = os.environ.get("EXA_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # YouTube Data API v3 (console.cloud.google.com)
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
