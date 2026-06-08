@@ -20,6 +20,7 @@ load_dotenv()
 
 from pipeline.agents.chukcha import ask_chukcha
 from pipeline.agents import memory
+from pipeline.supabase_client import supabase
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -48,7 +49,28 @@ WELCOME = """👋 Привет! Я **NOTA Intelligence Bot**.
 /clear — очистить историю диалога"""
 
 
+def _track_user(update: Update):
+    """Сохраняет/обновляет пользователя в Supabase telegram_users."""
+    try:
+        user = update.effective_user
+        if not user:
+            return
+        supabase.table("telegram_users").upsert({
+            "chat_id": user.id,
+            "username": user.username or "",
+            "first_name": user.first_name or "",
+            "last_name": user.last_name or "",
+            "last_seen": "now()",
+        }, on_conflict="chat_id").execute()
+
+        # Увеличиваем счётчик сообщений
+        supabase.rpc("increment_message_count", {"user_chat_id": user.id}).execute()
+    except Exception as e:
+        logger.warning(f"Не удалось сохранить пользователя: {e}")
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    _track_user(update)
     await update.message.reply_text(WELCOME, parse_mode=ParseMode.MARKDOWN)
 
 
@@ -59,6 +81,7 @@ async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    _track_user(update)
     chat_id = update.effective_chat.id
     user_text = update.message.text.strip()
 
