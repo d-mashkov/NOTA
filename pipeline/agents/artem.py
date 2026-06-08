@@ -120,13 +120,14 @@ def _grok_request(prompt: str, tools: list = None) -> str:
 def _grok_search(query: str) -> str:
     """X/Twitter тренды через Grok live search."""
     return _grok_request(
-        f"Найди свежие обсуждения в X/Twitter по теме: {query}\n\n"
-        "Покажи на русском языке:\n"
-        "• Что сейчас вирусится / хайпует в X\n"
-        "• Тональность обсуждений (позитив/негатив/нейтрал)\n"
-        "• Ключевые инфлюенсеры или бренды если есть\n"
-        "• Вывод: есть ли реальный тренд в X-сообществе\n\n"
-        "Максимум 300 слов.",
+        f"Найди свежие посты и обсуждения в X/Twitter по теме: {query}\n\n"
+        "Ответ строго на русском языке. Используй простые абзацы без таблиц и без жирных меток.\n\n"
+        "Напиши:\n"
+        "1. Что сейчас обсуждают и хайпуют (конкретные посты/авторы если есть)\n"
+        "2. Тональность: позитивная, негативная или нейтральная — и почему\n"
+        "3. Кто из инфлюенсеров или брендов мелькает\n"
+        "4. Вывод одним предложением — есть реальный тренд или нет\n\n"
+        "Максимум 200 слов. Только текст, никаких таблиц.",
         tools=[{"type": "x_search"}, {"type": "web_search"}],
     )
 
@@ -186,14 +187,15 @@ def _reddit_via_praw(query: str) -> str:
 def _reddit_via_grok(query: str) -> str:
     """Ищет Reddit-дискуссии через Grok web_search (работает без credentials)."""
     return _grok_request(
-        f"Search Reddit for recent discussions about: {query} in context of FMCG, food industry, consumer trends.\n\n"
-        "Find posts from subreddits like r/CPGIndustry, r/food, r/nutrition, r/HealthyFood, r/Entrepreneur.\n"
-        "Show in Russian:\n"
-        "• Top 3-5 most upvoted/discussed posts (subreddit, title, key point)\n"
-        "• Main sentiment and concerns\n"
-        "• Any viral products or brands mentioned\n"
-        "• Conclusion: what does Reddit think about this trend?\n\n"
-        "Max 250 words.",
+        f"Найди свежие обсуждения на Reddit по теме: {query} в контексте FMCG, продукты питания, потребительские тренды.\n\n"
+        "Смотри сабреддиты: r/CPGIndustry, r/food, r/nutrition, r/HealthyFood, r/Entrepreneur.\n\n"
+        "Ответ строго на русском. Простой текст без таблиц.\n\n"
+        "Напиши:\n"
+        "1. Топ-3 самых обсуждаемых поста (сабреддит, суть, ключевой вывод)\n"
+        "2. Общий тон и настроение\n"
+        "3. Какие продукты или бренды упоминаются\n"
+        "4. Вывод одним предложением\n\n"
+        "Максимум 200 слов.",
         tools=[{"type": "web_search"}],
     )
 
