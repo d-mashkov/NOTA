@@ -34,10 +34,10 @@ WELCOME = """👋 Привет! Я **NOTA Intelligence Bot**.
 Нахожу FMCG-тренды и продуктовые ниши для России. Со мной работает команда агентов:
 
 🔴 **Артём** — тренд-разведчик (TikTok, LinkedIn, YouTube, X/Twitter)
-🔵 **Вова** — рыночный аналитик (WB, Ozon, Amazon) _—скоро—_
+🔵 **Вова** — рыночный аналитик (WB, Ozon · продажи, выручка, конкуренты)
 🟡 **Петя** — SEO-аналитик (Яндекс, Google Trends)
 🛒 **Авоська** — FMCG гений (инсайты из профессиональных каналов)
-🟣 **Поля** — маркетолог (упаковка идей под РФ) _—скоро—_
+🟣 **Поля** — маркетолог (позиционирование, GTM, launch brief для РФ)
 🟢 **Денис** — я, операционный директор, собираю всё в один ответ
 
 Просто напиши что ищешь, например:
@@ -71,13 +71,31 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         response = ask_chukcha(chat_id, user_text)
 
+        # Очищаем символы которые ломают Telegram Markdown
+        import re
+        # Убираем ## заголовки → просто текст жирным
+        response = re.sub(r'^#{1,6}\s*(.+)$', r'*\1*', response, flags=re.MULTILINE)
+        # Убираем горизонтальные линии
+        response = re.sub(r'^---+$', '', response, flags=re.MULTILINE)
+        response = re.sub(r'^\*\*\*+$', '', response, flags=re.MULTILINE)
+        # ** жирный → * жирный (Telegram использует одинарные звёздочки)
+        response = re.sub(r'\*\*(.+?)\*\*', r'*\1*', response)
+        # Убираем лишние пустые строки
+        response = re.sub(r'\n{3,}', '\n\n', response).strip()
+
         # Telegram ограничивает 4096 символов — режем если нужно
         if len(response) > 4000:
             chunks = [response[i:i+4000] for i in range(0, len(response), 4000)]
             for chunk in chunks:
-                await update.message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN)
+                try:
+                    await update.message.reply_text(chunk, parse_mode=ParseMode.MARKDOWN)
+                except Exception:
+                    await update.message.reply_text(chunk)
         else:
-            await update.message.reply_text(response, parse_mode=ParseMode.MARKDOWN)
+            try:
+                await update.message.reply_text(response, parse_mode=ParseMode.MARKDOWN)
+            except Exception:
+                await update.message.reply_text(response)
 
     except Exception as e:
         logger.error(f"Ошибка при обработке сообщения: {e}", exc_info=True)

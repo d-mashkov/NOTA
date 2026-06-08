@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTA — Что это и зачем</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #EDEEF2;
+      --surface: #FFFFFF;
+      --border: #E2E4EC;
+      --text-primary: #111827;
+      --text-secondary: #6B7280;
+      --text-muted: #9CA3AF;
+      --accent: #3B74F5;
+      --accent-light: #EEF2FF;
+      --green: #10B981;
+      --green-light: #ECFDF5;
+      --yellow: #F59E0B;
+      --yellow-light: #FFFBEB;
+      --red: #EF4444;
+      --purple: #8B5CF6;
+      --purple-light: #F5F3FF;
+      --shadow: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    /* ── LAYOUT ── */
+    .canvas {
+      width: 1920px;
+      height: 1080px;
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      grid-template-rows: 1fr;
+      gap: 0;
+      position: relative;
+    }
+
+    /* ── LEFT PANEL — тёмная брендовая колонка ── */
+    .left {
+      background: #111827;
+      padding: 64px 52px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .left::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: -120px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(59,116,245,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .left::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: var(--accent);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 22px; color: white;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+    .logo-text {
+      font-size: 28px; font-weight: 800;
+      color: white; letter-spacing: -0.5px;
+    }
+    .logo-sub {
+      font-size: 12px; font-weight: 500;
+      color: #64748b; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-top: 1px;
+    }
+
+    .headline-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 0;
+    }
+    .headline-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,116,245,0.15);
+      border: 1px solid rgba(59,116,245,0.3);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 12px; font-weight: 600;
+      color: #93b4fc;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      width: fit-content;
+      margin-bottom: 24px;
+    }
+    .headline-tag::before { content: '●'; font-size: 8px; color: #3B74F5; }
+    .headline-main {
+      font-size: 42px; font-weight: 800;
+      color: white; line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .headline-main span {
+      background: linear-gradient(135deg, #3B74F5 0%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .headline-desc {
+      font-size: 15px; font-weight: 400;
+      color: #94a3b8; line-height: 1.6;
+    }
+
+    .left-stats {
+      display: flex;
+      gap: 28px;
+    }
+    .left-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .left-stat-val {
+      font-size: 26px; font-weight: 800;
+      color: white; letter-spacing: -0.5px;
+    }
+    .left-stat-lbl {
+      font-size: 11px; font-weight: 500;
+      color: #64748b; text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .stat-divider {
+      width: 1px; background: #1e293b; align-self: stretch;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right {
+      background: var(--bg);
+      padding: 48px 56px 48px 52px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 32px;
+      overflow: hidden;
+    }
+
+    /* Секция — заголовок */
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── КАК РАБОТАЕТ — горизонтальная лента ── */
+    .how-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: box-shadow 0.2s;
+    }
+    .step-card::after {
+      content: attr(data-arrow);
+      position: absolute;
+      right: -18px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px; color: var(--text-muted);
+      z-index: 1;
+    }
+    .step-card:last-child::after { display: none; }
+
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .step-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .step-desc {
+      font-size: 11px; color: var(--text-secondary); line-height: 1.5;
+    }
+    .step-agent {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    /* ── АГЕНТЫ + ПОЛЬЗА — нижняя сетка ── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Агенты */
+    .agents-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .agent-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .agent-dot {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .agent-info { display: flex; flex-direction: column; gap: 2px; }
+    .agent-name {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .agent-role {
+      font-size: 10px; color: var(--text-secondary); line-height: 1.4;
+    }
+
+    /* Польза */
+    .benefits-block {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .benefit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .benefit-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .benefit-text { display: flex; flex-direction: column; gap: 3px; }
+    .benefit-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .benefit-desc {
+      font-size: 11px; color: var(--text-secondary); line-height: 1.5;
+    }
+
+    /* ── CTA строка ── */
+    .cta-bar {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+      border-radius: 16px;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .cta-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .cta-icon {
+      width: 40px; height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .cta-text-title {
+      font-size: 15px; font-weight: 700; color: white;
+    }
+    .cta-text-sub {
+      font-size: 12px; color: #64748b; margin-top: 2px;
+    }
+    .cta-chips {
+      display: flex;
+      gap: 8px;
+    }
+    .cta-chip {
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 12px; font-weight: 600;
+    }
+    .chip-blue { background: rgba(59,116,245,0.2); color: #93b4fc; border: 1px solid rgba(59,116,245,0.3); }
+    .chip-green { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+    .chip-white { background: rgba(255,255,255,0.08); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- ══════════════ LEFT ══════════════ -->
+  <div class="left">
+    <div class="logo-block">
+      <div class="logo-icon">Н</div>
+      <div>
+        <div class="logo-text">NOTA</div>
+        <div class="logo-sub">Intelligence Platform</div>
+      </div>
+    </div>
+
+    <div class="headline-block">
+      <div class="headline-tag">FMCG · Россия · AI</div>
+      <div class="headline-main">
+        Находим<br/>
+        <span>продуктовые ниши</span><br/>
+        раньше других
+      </div>
+      <div class="headline-desc">
+        Закрытый разведывательный сервис<br/>
+        для FMCG-предпринимателей.<br/>
+        Пока конкуренты гадают — NOTA знает.
+      </div>
+    </div>
+
+    <div class="left-stats">
+      <div class="left-stat">
+        <div class="left-stat-val">5</div>
+        <div class="left-stat-lbl">AI-агентов</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="left-stat">
+        <div class="left-stat-val">6+</div>
+        <div class="left-stat-lbl">источников</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="left-stat">
+        <div class="left-stat-val">24/7</div>
+        <div class="left-stat-lbl">мониторинг</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ RIGHT ══════════════ -->
+  <div class="right">
+
+    <!-- КАК РАБОТАЕТ -->
+    <div>
+      <div class="section-label">Как работает NOTA</div>
+      <div class="how-row">
+
+        <div class="step-card" data-arrow="→">
+          <div class="step-num" style="background:#EEF2FF;color:#3B74F5;">1</div>
+          <div class="step-title">Ты задаёшь вопрос</div>
+          <div class="step-desc">В Telegram-боте или на сайте — любым словами</div>
+          <div class="step-agent">💬 Telegram Bot</div>
+        </div>
+
+        <div class="step-card" data-arrow="→">
+          <div class="step-num" style="background:#F5F3FF;color:#8B5CF6;">2</div>
+          <div class="step-title">Денис распределяет задачи</div>
+          <div class="step-desc">Оркестратор решает каких агентов поднять</div>
+          <div class="step-agent">🟢 Денис · Claude AI</div>
+        </div>
+
+        <div class="step-card" data-arrow="→">
+          <div class="step-num" style="background:#FEF3C7;color:#D97706;">3</div>
+          <div class="step-title">Агенты собирают данные</div>
+          <div class="step-desc">TikTok, X/Twitter, WB, Ozon, Яндекс, FMCG-каналы</div>
+          <div class="step-agent">🔴🔵🟡🛒 Команда</div>
+        </div>
+
+        <div class="step-card" data-arrow="→">
+          <div class="step-num" style="background:#ECFDF5;color:#10B981;">4</div>
+          <div class="step-title">Поля упаковывает</div>
+          <div class="step-desc">Позиционирование, GTM-план, launch brief под РФ</div>
+          <div class="step-agent">🟣 Поля · маркетолог</div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num" style="background:#EEF2FF;color:#3B74F5;">5</div>
+          <div class="step-title">Готовый ответ</div>
+          <div class="step-desc">Факты, цифры, рекомендации — только то что нужно</div>
+          <div class="step-agent">📊 NOTA Score</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- АГЕНТЫ + ПОЛЬЗА -->
+    <div class="bottom-grid">
+
+      <!-- Агенты -->
+      <div class="agents-block">
+        <div class="section-label">Команда агентов</div>
+        <div class="agents-grid">
+          <div class="agent-chip">
+            <div class="agent-dot" style="background:#FEE2E2;">🔴</div>
+            <div class="agent-info">
+              <div class="agent-name">Артём</div>
+              <div class="agent-role">TikTok, X/Twitter, LinkedIn, YouTube, Reddit</div>
+            </div>
+          </div>
+          <div class="agent-chip">
+            <div class="agent-dot" style="background:#DBEAFE;">🔵</div>
+            <div class="agent-info">
+              <div class="agent-name">Вова</div>
+              <div class="agent-role">WB и Ozon — продажи, выручка, топ-SKU</div>
+            </div>
+          </div>
+          <div class="agent-chip">
+            <div class="agent-dot" style="background:#FEF9C3;">🟡</div>
+            <div class="agent-info">
+              <div class="agent-name">Петя</div>
+              <div class="agent-role">Яндекс Wordstat, Google Trends, SEO</div>
+            </div>
+          </div>
+          <div class="agent-chip">
+            <div class="agent-dot" style="background:#DCFCE7;">🛒</div>
+            <div class="agent-info">
+              <div class="agent-name">Авоська</div>
+              <div class="agent-role">Профессиональные FMCG Telegram-каналы</div>
+            </div>
+          </div>
+          <div class="agent-chip" style="grid-column: 1 / -1;">
+            <div class="agent-dot" style="background:#F5F3FF;">🟣</div>
+            <div class="agent-info">
+              <div class="agent-name">Поля — маркетолог</div>
+              <div class="agent-role">Позиционирование · ICP · GTM для РФ · Launch brief · Конкурентный анализ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Польза -->
+      <div class="benefits-block">
+        <div class="section-label">Чем NOTA полезна тебе</div>
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background:#EEF2FF;">⚡</div>
+          <div class="benefit-text">
+            <div class="benefit-title">Экономия 20–40 часов в неделю</div>
+            <div class="benefit-desc">Вместо ручного мониторинга — один запрос и полный анализ за минуты</div>
+          </div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background:#ECFDF5;">🎯</div>
+          <div class="benefit-text">
+            <div class="benefit-title">Входишь в нишу раньше конкурентов</div>
+            <div class="benefit-desc">NOTA ловит тренды на взлёте — до того как рынок перегрелся</div>
+          </div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background:#FEF3C7;">📦</div>
+          <div class="benefit-text">
+            <div class="benefit-title">Готовый launch brief за 1 запрос</div>
+            <div class="benefit-desc">Тренд + рынок + маркетинг — всё в одном структурированном ответе</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA BAR -->
+    <div class="cta-bar">
+      <div class="cta-left">
+        <div class="cta-icon">🤖</div>
+        <div>
+          <div class="cta-text-title">Попробуй прямо сейчас — бесплатно</div>
+          <div class="cta-text-sub">@nota_intelligence_bot · Telegram</div>
+        </div>
+      </div>
+      <div class="cta-chips">
+        <div class="cta-chip chip-blue">TikTok тренды</div>
+        <div class="cta-chip chip-green">Продажи WB/Ozon</div>
+        <div class="cta-chip chip-white">GTM стратегия</div>
+        <div class="cta-chip chip-white">FMCG инсайты</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
