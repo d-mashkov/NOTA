@@ -3,8 +3,179 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NOTA — Dashboard</title>
+    <title>NOTA — Идеи для запуска</title>
     <link rel="stylesheet" href="css/main.css" />
+    <style>
+      /* ── Launch ideas grid ── */
+      .ideas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+        gap: 24px;
+      }
+
+      .idea-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.15s;
+      }
+      .idea-card:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+        transform: translateY(-2px);
+      }
+
+      .idea-card-top {
+        padding: 24px 24px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .idea-card-info { flex: 1; min-width: 0; }
+      .idea-category {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+      .idea-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.3;
+        margin-bottom: 10px;
+      }
+      .idea-summary {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.55;
+      }
+
+      /* Score circle */
+      .idea-score {
+        flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        font-weight: 800;
+        border: 3px solid;
+      }
+      .idea-score.high { color: var(--green); border-color: var(--green); background: rgba(34,197,94,0.07); }
+      .idea-score.mid  { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.07); }
+      .idea-score.low  { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.07); }
+
+      /* Agent verdicts */
+      .idea-agents {
+        padding: 16px 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .agent-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .agent-dot {
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 5px;
+      }
+      .agent-name {
+        font-weight: 600;
+        white-space: nowrap;
+        min-width: 62px;
+        color: var(--text);
+      }
+      .agent-text { color: var(--text-muted); }
+
+      /* Colors */
+      .dot-red    { background: #ef4444; }
+      .dot-yellow { background: #f59e0b; }
+      .dot-blue   { background: #3b82f6; }
+      .dot-cart   { background: #10b981; }
+      .dot-purple { background: #8b5cf6; }
+
+      /* Search bar compact */
+      .search-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 14px;
+        max-width: 640px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      }
+      .search-bar input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .search-bar input::placeholder { color: var(--text-muted); }
+      .search-bar button {
+        padding: 7px 18px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .search-bar button:hover { opacity: 0.88; }
+
+      /* Skeleton loader */
+      .skeleton-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        height: 320px;
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.45; }
+      }
+      .skel-line {
+        background: var(--border);
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+
+      .refresh-btn {
+        padding: 7px 16px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-muted);
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+      /* Spinner inside refresh btn */
+      .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
     <!-- Навигация -->
@@ -15,113 +186,64 @@
           NOTA
         </a>
         <div class="nav-links">
-          <a href="index.html" class="nav-link active">Dashboard</a>
+          <a href="index.html" class="nav-link active">Идеи запуска</a>
           <a href="notes.html" class="nav-link">Лента NOTы</a>
-      <a href="news.html" class="nav-link">Новости</a>
+          <a href="news.html" class="nav-link">Новости</a>
           <a href="profile.html" class="nav-link">Сохранённые</a>
-          <a
-            href="admin.html"
-            class="nav-link"
-            id="admin-link"
-            style="display: none"
-            >Админка</a
-          >
+          <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
         </div>
         <div class="nav-user">
           <div class="nav-avatar" id="nav-avatar">?</div>
           <span class="nav-user-name" id="nav-name">...</span>
-          <button class="btn btn-ghost text-sm" onclick="signOut()">
-            Выйти
-          </button>
+          <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
         </div>
       </div>
     </nav>
 
-    <!-- Контент -->
     <main class="page">
-      <!-- Заголовок -->
-      <div class="page-header">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Актуальные FMCG-тренды и новые NOTы</p>
-      </div>
-
-      <!-- Запрос на анализ (только для admin) -->
-      <div id="request-block" style="display:none;" class="section">
-        <div class="card" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;padding:32px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-            <div style="flex:1;min-width:260px;">
-              <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;margin-bottom:8px;">🔬 Новый запрос на анализ</div>
-              <div style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Какую нишу проверить?</div>
-              <div style="font-size:14px;color:#94a3b8;">Введи название — NOTA проанализирует тренд и добавит карточку</div>
-            </div>
+      <!-- Header -->
+      <div class="page-header" style="margin-bottom: 20px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <h1 class="page-title">Идеи для запуска</h1>
+            <p class="page-subtitle">Агенты NOTA проработали ниши — каждый со своей стороны</p>
           </div>
-          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
-            <input
-              type="text"
-              id="req-name"
-              placeholder="Например: Кокосовое масло, Детское питание без сахара..."
-              style="flex:1;min-width:240px;padding:12px 16px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#f1f5f9;font-size:15px;outline:none;"
-              onkeydown="if(event.key==='Enter') submitRequest()"
-            />
-            <input
-              type="text"
-              id="req-name-en"
-              placeholder="English name (опционально)"
-              style="width:220px;padding:12px 16px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#f1f5f9;font-size:15px;outline:none;"
-            />
-            <button onclick="submitRequest()" style="padding:12px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">
-              Отправить в анализ →
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            <button class="refresh-btn" id="refresh-btn" onclick="loadIdeas()" style="display:none">
+              ↻ Обновить
             </button>
           </div>
-          <div id="req-status" style="margin-top:12px;font-size:14px;display:none;"></div>
+        </div>
+
+        <!-- Compact search (admin only) -->
+        <div id="search-bar" style="display:none;margin-top:18px;">
+          <div class="search-bar">
+            <span style="font-size:16px;">🔍</span>
+            <input type="text" id="req-name" placeholder="Введи нишу для анализа..." onkeydown="if(event.key==='Enter') submitRequest()" />
+            <input type="text" id="req-name-en" placeholder="English (опц.)" style="width:160px;border-left:1px solid var(--border);padding-left:10px;margin-left:4px;" />
+            <button onclick="submitRequest()">Анализировать</button>
+          </div>
+          <div id="req-status" style="margin-top:8px;font-size:13px;display:none;"></div>
         </div>
       </div>
 
-      <!-- Статистика -->
-      <div class="section">
-        <div class="grid-3" id="stats-grid">
-          <div class="card stat-card">
-            <div class="stat-label">Всего NOTы</div>
-            <div class="stat-value" id="stat-total">—</div>
-            <div class="stat-delta" id="stat-new">загрузка...</div>
+      <!-- Ideas section -->
+      <div class="section" style="margin-top:0;">
+        <div id="ideas-container">
+          <!-- Skeleton -->
+          <div class="ideas-grid" id="ideas-skeleton">
+            ${Array(4).fill(0).map(() => `
+            <div class="skeleton-card">
+              <div class="skel-line" style="width:30%;height:12px;"></div>
+              <div class="skel-line" style="width:70%;height:20px;"></div>
+              <div class="skel-line" style="width:90%;height:13px;margin-top:8px;"></div>
+              <div class="skel-line" style="width:75%;height:13px;"></div>
+              <div style="margin-top:20px;">
+                ${Array(5).fill(0).map(() => `<div class="skel-line" style="width:85%;height:11px;"></div>`).join('')}
+              </div>
+            </div>`).join('')}
           </div>
-          <div class="card stat-card">
-            <div class="stat-label">Рекомендованы к запуску</div>
-            <div
-              class="stat-value"
-              id="stat-launch"
-              style="color: var(--green)"
-            >
-              —
-            </div>
-            <div class="stat-delta">Скор 80+</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-label">Активных категорий</div>
-            <div class="stat-value" id="stat-cats">—</div>
-            <div class="stat-delta" id="stat-last-run">последний анализ...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Новые NOTы -->
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title">Новые NOTы</h2>
-          <a href="notes.html" class="btn btn-secondary text-sm">Все NOTы →</a>
-        </div>
-        <div class="grid-3" id="new-notes-grid">
-          <!-- JS -->
-        </div>
-      </div>
-
-      <!-- Топ по скорингу -->
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title">Топ по скорингу</h2>
-        </div>
-        <div id="top-notes-list">
-          <!-- JS -->
+          <div class="ideas-grid" id="ideas-grid" style="display:none;"></div>
         </div>
       </div>
     </main>
@@ -137,203 +259,125 @@
 
       window.signOut = _signOut;
 
-      async function init() {
-        await requireAuth();
-        const user = await getCurrentUser();
-        if (!user) return;
-
-        // Навигация
-        document.getElementById("nav-avatar").textContent =
-          user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
-        document.getElementById("nav-name").textContent =
-          user.name || user.email;
-        if (user.role === "admin") {
-          document.getElementById("admin-link").style.display = "block";
-          document.getElementById("request-block").style.display = "block";
-        }
-
-        // Статистика
-        const { data: allNotes } = await getNotes();
-        const notes = allNotes || [];
-        document.getElementById("stat-total").textContent = notes.length;
-        document.getElementById("stat-launch").textContent = notes.filter(
-          (n) => n.recommendation === "launch",
-        ).length;
-
-        const { data: cats } = await supabase
-          .from("categories")
-          .select("id")
-          .eq("is_active", true);
-        document.getElementById("stat-cats").textContent = cats?.length || 0;
-
-        const fresh = notes.slice(0, 1)[0];
-        if (fresh) {
-          const d = new Date(fresh.created_at);
-          document.getElementById("stat-new").textContent = `+${
-            notes.filter((n) => {
-              const nd = new Date(n.created_at);
-              return Date.now() - nd < 7 * 24 * 3600 * 1000;
-            }).length
-          } за неделю`;
-          document.getElementById("stat-last-run").textContent =
-            `обновлено ${d.toLocaleDateString("ru")}`;
-        }
-
-        // Новые NOTы (последние 3)
-        renderNoteCards(notes.slice(0, 3), "new-notes-grid");
-
-        // Топ по скорингу (5 штук)
-        const top = [...notes].sort((a, b) => b.score - a.score).slice(0, 5);
-        renderTopList(top);
-      }
-
       function scoreClass(s) {
         if (s >= 80) return "high";
         if (s >= 60) return "mid";
         return "low";
       }
 
-      function stageBadge(stage) {
-        const map = {
-          emerging: ["badge-emerging", "Зарождение"],
-          growing: ["badge-growing", "Рост"],
-          hype: ["badge-hype", "Хайп"],
-          saturation: ["badge-draft", "Насыщение"],
-        };
-        const [cls, label] = map[stage] || ["badge-draft", stage || ""];
-        return `<span class="badge ${cls}">${label}</span>`;
-      }
-
-      function recBadge(rec) {
-        const map = {
-          launch: ["badge-launch", "Запускать"],
-          watch: ["badge-watch", "Наблюдать"],
-          skip: ["badge-skip", "Пропустить"],
-        };
-        const [cls, label] = map[rec] || ["badge-draft", rec || "—"];
-        return `<span class="badge ${cls}">${label}</span>`;
-      }
-
-      function renderNoteCards(notes, containerId) {
-        const grid = document.getElementById(containerId);
-        if (!notes.length) {
-          grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Пока нет NOTы</div><p class="empty-state-text">После первого анализа они появятся здесь</p></div></div>`;
+      function renderIdeas(ideas) {
+        const grid = document.getElementById("ideas-grid");
+        if (!ideas || !ideas.length) {
+          grid.innerHTML = `
+            <div class="card" style="grid-column:1/-1;padding:48px;text-align:center;">
+              <div style="font-size:40px;margin-bottom:12px;">🤖</div>
+              <div style="font-size:17px;font-weight:600;margin-bottom:6px;">Идеи генерируются...</div>
+              <div style="color:var(--text-muted);font-size:14px;">Агенты анализируют ниши — обычно это занимает пару минут</div>
+            </div>`;
           return;
         }
-        grid.innerHTML = notes
-          .map((n) => {
-            if (n.status === "pending") {
-              return `
-      <div class="card nota-card" style="border:1px dashed var(--border);opacity:0.85;">
-        <div class="nota-card-header">
-          <div style="flex:1;">
-            <div class="nota-category">${n.categories?.name || "Новый запрос"}</div>
-            <div class="nota-title">${n.title}</div>
-          </div>
-          <div style="width:44px;height:44px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin 1s linear infinite;flex-shrink:0;"></div>
-        </div>
-        <div class="nota-card-body">
-          <p class="nota-description" style="color:var(--text-muted);">⏳ Анализируем нишу — результат будет готов совсем скоро</p>
-        </div>
-        <div class="nota-card-footer">
-          <span class="badge badge-draft">В анализе</span>
-        </div>
-      </div>`;
-            }
-            const sc = scoreClass(n.score);
-            const pct = n.score || 0;
-            return `
-      <a href="note.html?id=${n.id}" class="card nota-card card-link">
-        <div class="nota-card-header">
-          <div>
-            <div class="nota-category">${n.categories?.name || ""}</div>
-            <div class="nota-title">${n.title}</div>
-          </div>
-          <div class="score score--${sc}">
-            <span class="score-value">${pct}</span>
-          </div>
-        </div>
-        <div class="nota-card-body">
-          <p class="nota-description">${n.description || ""}</p>
-        </div>
-        <div class="nota-card-footer">
-          ${stageBadge(n.trend_stage)}
-          ${recBadge(n.recommendation)}
-        </div>
-      </a>`;
-          })
-          .join("");
+
+        grid.innerHTML = ideas.map(idea => {
+          const sc = scoreClass(idea.score || 0);
+          const agents = [
+            { dot: 'dot-red',    name: 'Артём',   text: extractVerdict(idea.artem) },
+            { dot: 'dot-yellow', name: 'Петя',    text: extractVerdict(idea.petya) },
+            { dot: 'dot-blue',   name: 'Вова',    text: extractVerdict(idea.vova) },
+            { dot: 'dot-cart',   name: 'Авоська', text: extractVerdict(idea.avoska) },
+            { dot: 'dot-purple', name: 'Поля',    text: extractVerdict(idea.polya) },
+          ];
+
+          return `
+          <div class="idea-card">
+            <div class="idea-card-top">
+              <div class="idea-card-info">
+                <div class="idea-category">${escHtml(idea.category || 'FMCG')}</div>
+                <div class="idea-title">${escHtml(idea.title)}</div>
+                <div class="idea-summary">${escHtml(idea.summary || '')}</div>
+              </div>
+              <div class="idea-score ${sc}">${idea.score || '—'}</div>
+            </div>
+            <div class="idea-agents">
+              ${agents.map(a => `
+                <div class="agent-row">
+                  <div class="agent-dot ${a.dot}"></div>
+                  <div class="agent-name">${a.name}</div>
+                  <div class="agent-text">${escHtml(a.text)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        }).join('');
       }
 
-      function renderTopList(notes) {
-        const el = document.getElementById("top-notes-list");
-        if (!notes.length) {
-          el.innerHTML =
-            '<div class="card"><div class="empty-state"><div class="empty-state-icon">🏆</div><div class="empty-state-title">Пока нет данных</div></div></div>';
-          return;
+      function extractVerdict(agentData) {
+        if (!agentData) return '—';
+        // Format: "🔴 Verdict sentence\n\nFull data..."
+        // Extract just the first line (verdict)
+        const firstLine = agentData.split('\n')[0];
+        // Strip emoji prefix (e.g. "🔴 ")
+        return firstLine.replace(/^[\u{1F300}-\u{1FFFF}\u{2700}-\u{27BF}\u{FE00}-\u{FEFF}🛒🟣🟡🔵🔴\s]+/u, '').trim() || agentData.slice(0, 100);
+      }
+
+      function escHtml(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      window.loadIdeas = async function() {
+        const btn = document.getElementById("refresh-btn");
+        btn.innerHTML = '<span class="spin">↻</span> Обновляем...';
+        btn.disabled = true;
+
+        const { data } = await supabase
+          .from("launch_ideas")
+          .select("*")
+          .eq("status", "active")
+          .order("score", { ascending: false });
+
+        document.getElementById("ideas-skeleton").style.display = "none";
+        document.getElementById("ideas-grid").style.display = "grid";
+        renderIdeas(data || []);
+
+        btn.innerHTML = '↻ Обновить';
+        btn.disabled = false;
+      }
+
+      async function init() {
+        await requireAuth();
+        const user = await getCurrentUser();
+        if (!user) return;
+
+        document.getElementById("nav-avatar").textContent =
+          user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+        document.getElementById("nav-name").textContent = user.name || user.email;
+
+        if (user.role === "admin") {
+          document.getElementById("admin-link").style.display = "block";
+          document.getElementById("search-bar").style.display = "block";
+          document.getElementById("refresh-btn").style.display = "block";
         }
-        el.innerHTML = notes
-          .map((n, i) => {
-            const sc = scoreClass(n.score);
-            return `
-      <a href="note.html?id=${n.id}" class="card card-link" style="display:flex;align-items:center;gap:20px;padding:18px 24px;margin-bottom:10px;">
-        <span style="font-size:22px;font-weight:800;color:var(--border);min-width:28px;">${i + 1}</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">${n.categories?.name || ""}</div>
-          <div style="font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.title}</div>
-        </div>
-        ${recBadge(n.recommendation)}
-        <div class="score score--${sc}" style="flex-shrink:0;">
-          <div class="score-bar"><div class="score-bar-fill" style="width:${n.score}%"></div></div>
-          <span class="score-value" style="min-width:32px;text-align:right;">${n.score}</span>
-        </div>
-      </a>`;
-          })
-          .join("");
+
+        // Load ideas
+        const { data } = await supabase
+          .from("launch_ideas")
+          .select("*")
+          .eq("status", "active")
+          .order("score", { ascending: false });
+
+        document.getElementById("ideas-skeleton").style.display = "none";
+        document.getElementById("ideas-grid").style.display = "grid";
+        renderIdeas(data || []);
       }
 
       window.submitRequest = async function() {
         const name = document.getElementById("req-name").value.trim();
-        const name_en = document.getElementById("req-name-en").value.trim();
         if (!name) return;
-
-        const btn = document.querySelector("#request-block button");
         const statusEl = document.getElementById("req-status");
-        btn.disabled = true;
-        btn.textContent = "Отправляем...";
-
-        // 1. Создаём категорию
-        const { data: cat } = await supabase.from("categories").insert({
-          name,
-          name_en: name_en || null,
-          seed_queries: [name.toLowerCase()],
-          is_active: true,
-        }).select().single();
-
-        // 2. Создаём placeholder-ноту со статусом pending
-        if (cat) {
-          await supabase.from("notes").insert({
-            category_id: cat.id,
-            title: name,
-            description: "Анализируем нишу — результат будет готов совсем скоро.",
-            score: null,
-            status: "pending",
-            trend_stage: null,
-            recommendation: null,
-          });
-        }
-
         statusEl.style.display = "block";
-        statusEl.style.color = "#4ade80";
-        statusEl.textContent = `✓ «${name}» отправлена в анализ — карточка уже в ленте`;
+        statusEl.style.color = "#f59e0b";
+        statusEl.textContent = "⏳ Добавляем нишу — агенты начнут анализ при следующем запуске...";
         document.getElementById("req-name").value = "";
         document.getElementById("req-name-en").value = "";
-        btn.disabled = false;
-        btn.textContent = "Отправить в анализ →";
-
-        // 3. Перезагрузим ленту
-        const { data: allNotes } = await getNotes();
-        renderNoteCards((allNotes || []).slice(0, 3), "new-notes-grid");
       };
 
       init();
