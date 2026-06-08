@@ -93,8 +93,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
     try:
+        # Сохраняем запрос пользователя в Supabase
+        try:
+            supabase.table("chat_messages").insert({
+                "chat_id": chat_id,
+                "role": "user",
+                "message": user_text,
+            }).execute()
+        except Exception as e:
+            logger.warning(f"Не удалось сохранить сообщение: {e}")
+
         # Запускаем синхронный вызов в thread pool — не блокирует event loop
         response = await asyncio.to_thread(ask_chukcha, chat_id, user_text)
+
+        # Сохраняем ответ бота
+        try:
+            supabase.table("chat_messages").insert({
+                "chat_id": chat_id,
+                "role": "assistant",
+                "message": response[:4000],
+            }).execute()
+        except Exception as e:
+            logger.warning(f"Не удалось сохранить ответ: {e}")
 
         # Очищаем символы которые ломают Telegram Markdown
         import re
