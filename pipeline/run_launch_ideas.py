@@ -157,13 +157,47 @@ def generate_idea(seed: dict):
   "sources": [
     {{"title": "название источника/статьи", "url": "https://...", "note": "что оттуда взяли"}},
     {{"title": "название источника/статьи", "url": "https://...", "note": "что оттуда взяли"}}
-  ]
+  ],
+  "roadmap": [
+    {{
+      "phase": "Фаза 1 — Подготовка",
+      "months": "1–2 мес",
+      "milestones": ["задача 1", "задача 2", "задача 3"]
+    }},
+    {{
+      "phase": "Фаза 2 — Запуск",
+      "months": "3–4 мес",
+      "milestones": ["задача 1", "задача 2", "задача 3"]
+    }},
+    {{
+      "phase": "Фаза 3 — Рост",
+      "months": "5–8 мес",
+      "milestones": ["задача 1", "задача 2", "задача 3"]
+    }},
+    {{
+      "phase": "Фаза 4 — Масштаб",
+      "months": "9–12 мес",
+      "milestones": ["задача 1", "задача 2", "задача 3"]
+    }}
+  ],
+  "value_chain": {{
+    "retail_price": "рекомендуемая розничная цена (напр. 890 ₽)",
+    "items": [
+      {{"label": "Сырьё / материалы", "pct": 25, "note": "краткий комментарий"}},
+      {{"label": "Производство", "pct": 15, "note": "краткий комментарий"}},
+      {{"label": "Упаковка", "pct": 8, "note": "краткий комментарий"}},
+      {{"label": "Логистика", "pct": 7, "note": "краткий комментарий"}},
+      {{"label": "Комиссия МП / дистриб.", "pct": 15, "note": "краткий комментарий"}},
+      {{"label": "Маркетинг", "pct": 10, "note": "краткий комментарий"}},
+      {{"label": "Валовая маржа", "pct": 20, "note": "остаток до EBITDA без ФОТа"}}
+    ]
+  }}
 }}"""
 
     try:
         resp = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=4000,
+            max_tokens=6000,
             messages=[{"role": "user", "content": synthesis_prompt}]
         )
         raw = resp.content[0].text.strip()
@@ -203,6 +237,8 @@ def generate_idea(seed: dict):
             "launch_steps": [],
             "risks": [],
             "sources": [],
+            "roadmap": [],
+            "value_chain": {},
         }
 
     # detail_json — всё что нужно для страницы детали
@@ -215,6 +251,8 @@ def generate_idea(seed: dict):
         "launch_steps":    data.get("launch_steps", []),
         "risks":           data.get("risks", []),
         "sources":         data.get("sources", []),
+        "roadmap":         data.get("roadmap", []),
+        "value_chain":     data.get("value_chain", {}),
         "group":           group,
         # Субскоры рубрики — видны пользователю
         "sub_scores": sub_scores,
