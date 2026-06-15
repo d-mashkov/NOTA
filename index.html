@@ -336,6 +336,25 @@
       flex-shrink: 0;
     }
 
+    /* ── Авторская метка на карточке ── */
+    .author-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.28);
+      border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+      color: var(--green);
+      box-shadow: 0 0 10px rgba(16,185,129,0.15);
+      pointer-events: none;
+    }
+    .author-badge-stars {
+      letter-spacing: -1px;
+      font-size: 10px;
+    }
+
     /* ── Пустое состояние ── */
     .ideas-empty {
       grid-column: 1/-1;
@@ -455,8 +474,15 @@
         const cls = sc(idea.score || 0);
         const detail = (() => { try { return JSON.parse(idea.detail_json||'{}'); } catch { return {}; } })();
         const group = detail.group || idea.category || '';
+        const reviewed = idea.author_reviewed;
+        const rating = idea.author_rating;
+        const stars = rating ? '★'.repeat(rating) + '☆'.repeat(5 - rating) : '';
+        const badge = reviewed
+          ? `<div class="author-badge">✓ Прочитано${stars ? `<span class="author-badge-stars">${stars}</span>` : ''}</div>`
+          : '';
         return `
         <a href="idea-detail.html?id=${idea.id}" class="idea-card">
+          ${badge}
           <div class="idea-card-body">
             <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
             <div class="idea-card-title">${esc(idea.title)}</div>

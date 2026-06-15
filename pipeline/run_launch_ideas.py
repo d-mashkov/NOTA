@@ -285,23 +285,50 @@ def generate_idea(seed: dict):
     }
 
 
-def run(limit: int = 5):
-    """Генерирует N идей и сохраняет в Supabase."""
+TARGET_TOTAL = 20  # сколько идей хотим держать в базе
+
+
+def run(limit: int = None):
+    """
+    Накопительная генерация: не удаляет старые идеи.
+    Добавляет новые до TARGET_TOTAL (или limit, если задан явно).
+    Пропускает seed'ы, уже существующие в базе по title.
+    """
     import random
 
-    supabase.table("launch_ideas").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
-    print(f"[Ideas] Старые идеи удалены")
+    # Считаем и получаем уже существующие идеи
+    existing = supabase.table("launch_ideas").select("title").eq("status", "active").execute()
+    existing_titles = {row["title"].strip().lower() for row in (existing.data or [])}
+    current_count = len(existing_titles)
 
-    seeds = random.sample(IDEA_SEEDS, min(limit, len(IDEA_SEEDS)))
+    # Сколько нужно добавить
+    target = TARGET_TOTAL if limit is None else limit
+    to_generate = max(0, target - current_count)
+    print(f"[Ideas] В базе: {current_count} идей. Нужно добавить: {to_generate}")
 
+    if to_generate == 0:
+        print(f"[Ideas] База уже заполнена ({current_count}/{target}). Ничего не делаем.")
+        return
+
+    # Фильтруем seeds — только те, которых ещё нет
+    available = [s for s in IDEA_SEEDS if s["title"].strip().lower() not in existing_titles]
+    if not available:
+        print(f"[Ideas] Все seed'ы уже использованы. Перезапускаем с полным списком.")
+        available = IDEA_SEEDS[:]
+
+    seeds = random.sample(available, min(to_generate, len(available)))
+    print(f"[Ideas] Будет сгенерировано: {len(seeds)} идей")
+
+    generated = 0
     for seed in seeds:
         idea = generate_idea(seed)
         if idea:
             supabase.table("launch_ideas").insert(idea).execute()
             print(f"[Ideas] ✅ Сохранена: {idea['title']} (score: {idea['score']})")
+            generated += 1
 
-    print(f"\n[Ideas] Готово — сгенерировано {len(seeds)} идей")
+    print(f"\n[Ideas] Готово — добавлено {generated} идей. Итого в базе: {current_count + generated}")
 
 
 if __name__ == "__main__":
-    run(limit=5)
+    run()  # добирает до TARGET_TOTAL (20)

@@ -346,6 +346,76 @@
     .sub-score-val.mid   { color: var(--yellow); }
     .sub-score-val.low   { color: var(--red); }
 
+    /* ── Авторская оценка ── */
+    .author-zone {
+      margin-top: 20px;
+      background: rgba(16,185,129,0.05);
+      backdrop-filter: blur(32px) saturate(170%);
+      -webkit-backdrop-filter: blur(32px) saturate(170%);
+      border: 1px solid rgba(16,185,129,0.18);
+      border-top-color: rgba(16,185,129,0.28);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(16,185,129,0.1);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: none; /* показывается только для admin */
+    }
+    .author-zone.visible { display: block; }
+    .author-zone-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--green); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .author-row {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+
+    /* Чекбокс «Ознакомился» */
+    .author-check-wrap {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      user-select: none;
+    }
+    .author-check-box {
+      width: 22px; height: 22px;
+      border-radius: 7px;
+      border: 2px solid rgba(16,185,129,0.35);
+      background: rgba(16,185,129,0.06);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .author-check-box.checked {
+      background: var(--green);
+      border-color: var(--green);
+      box-shadow: 0 0 16px rgba(16,185,129,0.45);
+    }
+    .author-check-label {
+      font-size: 14px; font-weight: 700; color: var(--text);
+    }
+
+    /* Звёзды рейтинга */
+    .author-stars {
+      display: flex; gap: 4px;
+    }
+    .author-star {
+      font-size: 24px; cursor: pointer;
+      color: rgba(255,255,255,0.15);
+      transition: color 0.12s, transform 0.12s;
+      line-height: 1;
+    }
+    .author-star.lit {
+      color: #F59E0B;
+      text-shadow: 0 0 12px rgba(245,158,11,0.6);
+    }
+    .author-star:hover { transform: scale(1.15); }
+
+    .author-save-status {
+      font-size: 11px; color: var(--green); font-weight: 600;
+      opacity: 0; transition: opacity 0.3s;
+      align-self: center;
+    }
+    .author-save-status.show { opacity: 1; }
+
     /* ── Страничные вкладки (Аналитика / Роудмэп / ВельюЧейн) ── */
     .page-tabs {
       display: flex;
@@ -674,6 +744,25 @@
       </div>
     </div>
 
+    <!-- ═══ АВТОРСКАЯ ОЦЕНКА (только admin) ═══ -->
+    <div class="author-zone" id="author-zone">
+      <div class="author-zone-title"><span>✍️</span> Авторская оценка</div>
+      <div class="author-row">
+        <div class="author-check-wrap" onclick="toggleReviewed()">
+          <div class="author-check-box" id="author-check-box"></div>
+          <span class="author-check-label">Ознакомился</span>
+        </div>
+        <div class="author-stars" id="author-stars">
+          <span class="author-star" data-val="1" onclick="setRating(1)">★</span>
+          <span class="author-star" data-val="2" onclick="setRating(2)">★</span>
+          <span class="author-star" data-val="3" onclick="setRating(3)">★</span>
+          <span class="author-star" data-val="4" onclick="setRating(4)">★</span>
+          <span class="author-star" data-val="5" onclick="setRating(5)">★</span>
+        </div>
+        <span class="author-save-status" id="author-save-status">✓ Сохранено</span>
+      </div>
+    </div>
+
   </main>
 
   <script type="module">
@@ -910,6 +999,62 @@
       });
     }
 
+    /* ── Авторская оценка ── */
+    let _ideaId = null;
+    let _authorReviewed = false;
+    let _authorRating = null;
+
+    function renderAuthorState() {
+      const box = document.getElementById('author-check-box');
+      box.textContent = _authorReviewed ? '✓' : '';
+      box.className = 'author-check-box' + (_authorReviewed ? ' checked' : '');
+      document.querySelectorAll('.author-star').forEach(s => {
+        const v = parseInt(s.dataset.val);
+        s.className = 'author-star' + (_authorRating && v <= _authorRating ? ' lit' : '');
+      });
+    }
+
+    async function saveAuthorFields() {
+      if (!_ideaId) return;
+      try {
+        await supabase.from('launch_ideas').update({
+          author_reviewed: _authorReviewed,
+          author_rating: _authorRating,
+        }).eq('id', _ideaId);
+        const st = document.getElementById('author-save-status');
+        st.classList.add('show');
+        setTimeout(() => st.classList.remove('show'), 2000);
+      } catch(e) {
+        console.warn('author save error:', e);
+      }
+    }
+
+    window.toggleReviewed = function() {
+      _authorReviewed = !_authorReviewed;
+      renderAuthorState();
+      saveAuthorFields();
+    };
+
+    window.setRating = function(val) {
+      _authorRating = _authorRating === val ? null : val;  // повторный клик снимает
+      _authorReviewed = true;  // если ставишь оценку — автоматически «ознакомился»
+      renderAuthorState();
+      saveAuthorFields();
+    };
+
+    // Ховер на звёзды
+    document.querySelectorAll('.author-star').forEach(s => {
+      s.addEventListener('mouseenter', () => {
+        const v = parseInt(s.dataset.val);
+        document.querySelectorAll('.author-star').forEach(s2 => {
+          s2.style.color = parseInt(s2.dataset.val) <= v ? '#F59E0B' : '';
+        });
+      });
+      s.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.author-star').forEach(s2 => { s2.style.color = ''; });
+      });
+    });
+
     async function init() {
       await requireAuth();
       const user = await getCurrentUser();
@@ -978,6 +1123,15 @@
       document.getElementById('risks-list').innerHTML = risks.length
         ? risks.map(r=>`<div class="risk-item"><span class="risk-icon">⚠</span><span>${esc(r)}</span></div>`).join('')
         : '<div style="color:var(--text-muted);font-size:13px;">—</div>';
+
+      // Author zone (только admin)
+      if (user.role === 'admin') {
+        _ideaId = id;
+        _authorReviewed = idea.author_reviewed || false;
+        _authorRating = idea.author_rating || null;
+        document.getElementById('author-zone').classList.add('visible');
+        renderAuthorState();
+      }
 
       // Roadmap
       renderRoadmap(detail.roadmap || []);
