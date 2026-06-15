@@ -1,454 +1,441 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NOTA — Идеи для запуска</title>
-    <link rel="stylesheet" href="css/main.css" />
-    <style>
-      /* ── Launch ideas grid ── */
-      .ideas-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
-        gap: 24px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOTA — Идеи для запуска</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 36px;
+    }
+    .hero-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .hero-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .hero-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
 
-      .idea-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
-        transition: box-shadow 0.2s, transform 0.15s;
-      }
-      .idea-card:hover {
-        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-        transform: translateY(-2px);
-      }
+    /* ── Идеи — компактная сетка ── */
+    .ideas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
 
-      .idea-card-top {
-        padding: 24px 24px 20px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-      }
-      .idea-card-info { flex: 1; min-width: 0; }
-      .idea-category {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--accent);
-        margin-bottom: 6px;
-      }
-      .idea-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--text);
-        line-height: 1.3;
-        margin-bottom: 10px;
-      }
-      .idea-summary {
-        font-size: 13px;
-        color: var(--text-muted);
-        line-height: 1.55;
-      }
+    /* ── Минималистичная карточка ── */
+    .idea-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.18s, background 0.18s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .idea-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(59,130,246,0.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .idea-card:hover {
+      border-color: var(--border-2);
+      background: var(--surface-2);
+      transform: translateY(-1px);
+    }
+    .idea-card:hover::before { opacity: 1; }
 
-      /* Score circle */
-      .idea-score {
-        flex-shrink: 0;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 17px;
-        font-weight: 800;
-        border: 3px solid;
-      }
-      .idea-score.high { color: var(--green); border-color: var(--green); background: rgba(34,197,94,0.07); }
-      .idea-score.mid  { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.07); }
-      .idea-score.low  { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.07); }
+    .idea-card-body { flex: 1; min-width: 0; }
+    .idea-card-cat {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .idea-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .idea-card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
 
-      /* Agent verdicts */
-      .idea-agents {
-        padding: 12px 24px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .agent-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 12px;
-        line-height: 1.45;
-      }
-      .agent-dot {
-        flex-shrink: 0;
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        margin-top: 4px;
-      }
-      .agent-name {
-        font-weight: 600;
-        white-space: nowrap;
-        min-width: 58px;
-        color: var(--text);
-      }
-      .agent-text { color: var(--text-muted); }
+    /* ── Скор ── */
+    .idea-score {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid;
+      position: relative;
+    }
+    .idea-score-num {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .idea-score-lbl {
+      font-size: 7px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.6;
+    }
+    .idea-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+    .idea-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
+    .idea-score.low  { color: var(--red);   border-color: var(--red);   background: var(--red-dim); }
 
-      /* Colors */
-      .dot-red    { background: #ef4444; }
-      .dot-yellow { background: #f59e0b; }
-      .dot-blue   { background: #3b82f6; }
-      .dot-cart   { background: #10b981; }
-      .dot-purple { background: #8b5cf6; }
+    /* ── Стрелка ── */
+    .idea-arrow {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: 16px;
+      transition: transform 0.15s, color 0.15s;
+    }
+    .idea-card:hover .idea-arrow { transform: translateX(3px); color: var(--accent); }
 
-      /* Detail button */
-      .idea-footer {
-        padding: 0 24px 20px;
-      }
-      .idea-detail-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 18px;
-        background: var(--accent);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        transition: opacity 0.15s;
-      }
-      .idea-detail-btn:hover { opacity: 0.88; }
+    /* ── Топ-бар ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .group-filter {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .group-filter:hover { border-color: var(--border-2); color: var(--text-secondary); }
+    .group-filter.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .refresh-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: none;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-      /* Search bar compact */
-      .search-bar {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 10px 14px;
-        max-width: 640px;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-      }
-      .search-bar input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 14px;
-        color: var(--text);
-      }
-      .search-bar input::placeholder { color: var(--text-muted); }
-      .search-bar button {
-        padding: 7px 18px;
-        background: var(--accent);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-      .search-bar button:hover { opacity: 0.88; }
+    /* ── Search (admin only) ── */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      max-width: 560px;
+      margin-bottom: 24px;
+    }
+    .search-bar input {
+      flex: 1; border: none; outline: none;
+      background: transparent; font-size: 13px; color: var(--text);
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .search-bar button {
+      padding: 6px 16px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .search-bar button:hover { opacity: 0.88; }
 
-      /* Skeleton loader */
-      .skeleton-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
-        height: 320px;
-        animation: pulse 1.6s ease-in-out infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.45; }
-      }
-      .skel-line {
-        background: var(--border);
-        border-radius: 6px;
-        margin-bottom: 12px;
-      }
+    /* ── Skeleton ── */
+    .skel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .skel-line {
+      background: var(--surface-3);
+      border-radius: 5px;
+      height: 12px;
+    }
+    .skel-circle {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--surface-3);
+      flex-shrink: 0;
+    }
 
-      .refresh-btn {
-        padding: 7px 16px;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        color: var(--text-muted);
-        border-radius: 8px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.15s;
-      }
-      .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-      /* Spinner inside refresh btn */
-      .spin { display: inline-block; animation: spin 0.8s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-  </head>
-  <body>
-    <!-- Навигация -->
-    <nav class="nav">
-      <div class="nav-inner">
-        <a href="index.html" class="nav-logo">
-          <div class="nav-logo-icon">Н</div>
-          NOTA
-        </a>
-        <div class="nav-links">
-          <a href="index.html" class="nav-link active">Идеи запуска</a>
-          <a href="notes.html" class="nav-link">Лента NOTы</a>
-          <a href="news.html" class="nav-link">Новости</a>
-          <a href="profile.html" class="nav-link">Сохранённые</a>
-          <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
-        </div>
-        <div class="nav-user">
-          <div class="nav-avatar" id="nav-avatar">?</div>
-          <span class="nav-user-name" id="nav-name">...</span>
-          <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
-        </div>
+    /* ── Пустое состояние ── */
+    .ideas-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+    .ideas-empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .ideas-empty-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">Н</div>
+        NOTA
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Идеи запуска</a>
+        <a href="notes.html" class="nav-link">Лента NOTы</a>
+        <a href="news.html" class="nav-link">Новости</a>
+        <a href="profile.html" class="nav-link">Сохранённые</a>
+        <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Админка</a>
       </div>
-    </nav>
-
-    <main class="page">
-      <!-- Header -->
-      <div class="page-header" style="margin-bottom: 20px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-          <div>
-            <h1 class="page-title">Идеи для запуска</h1>
-            <p class="page-subtitle">Агенты NOTA проработали ниши — каждый со своей стороны</p>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-            <button class="refresh-btn" id="refresh-btn" onclick="loadIdeas()" style="display:none">
-              ↻ Обновить
-            </button>
-          </div>
-        </div>
-
-        <!-- Compact search (admin only) -->
-        <div id="search-bar" style="display:none;margin-top:18px;">
-          <div class="search-bar">
-            <span style="font-size:16px;">🔍</span>
-            <input type="text" id="req-name" placeholder="Введи нишу для анализа..." onkeydown="if(event.key==='Enter') submitRequest()" />
-            <input type="text" id="req-name-en" placeholder="English (опц.)" style="width:160px;border-left:1px solid var(--border);padding-left:10px;margin-left:4px;" />
-            <button onclick="submitRequest()">Анализировать</button>
-          </div>
-          <div id="req-status" style="margin-top:8px;font-size:13px;display:none;"></div>
-        </div>
+      <div class="nav-user">
+        <div class="nav-avatar" id="nav-avatar">?</div>
+        <span class="nav-user-name" id="nav-name">...</span>
+        <button class="btn btn-ghost text-sm" onclick="signOut()">Выйти</button>
       </div>
+    </div>
+  </nav>
 
-      <!-- Ideas section -->
-      <div class="section" style="margin-top:0;">
-        <div id="ideas-container">
-          <!-- Skeleton -->
-          <div class="ideas-grid" id="ideas-skeleton">
-            <div class="skeleton-card">
-              <div class="skel-line" style="width:30%;height:12px;"></div>
-              <div class="skel-line" style="width:70%;height:20px;"></div>
-              <div class="skel-line" style="width:90%;height:13px;margin-top:8px;"></div>
-              <div class="skel-line" style="width:75%;height:13px;"></div>
-              <div style="margin-top:20px;">
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:80%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:70%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-              </div>
-            </div>
-            <div class="skeleton-card">
-              <div class="skel-line" style="width:25%;height:12px;"></div>
-              <div class="skel-line" style="width:65%;height:20px;"></div>
-              <div class="skel-line" style="width:85%;height:13px;margin-top:8px;"></div>
-              <div class="skel-line" style="width:70%;height:13px;"></div>
-              <div style="margin-top:20px;">
-                <div class="skel-line" style="width:80%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:75%;height:11px;"></div>
-                <div class="skel-line" style="width:80%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-              </div>
-            </div>
-            <div class="skeleton-card">
-              <div class="skel-line" style="width:35%;height:12px;"></div>
-              <div class="skel-line" style="width:60%;height:20px;"></div>
-              <div class="skel-line" style="width:90%;height:13px;margin-top:8px;"></div>
-              <div class="skel-line" style="width:80%;height:13px;"></div>
-              <div style="margin-top:20px;">
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:75%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:70%;height:11px;"></div>
-                <div class="skel-line" style="width:80%;height:11px;"></div>
-              </div>
-            </div>
-            <div class="skeleton-card">
-              <div class="skel-line" style="width:28%;height:12px;"></div>
-              <div class="skel-line" style="width:72%;height:20px;"></div>
-              <div class="skel-line" style="width:88%;height:13px;margin-top:8px;"></div>
-              <div class="skel-line" style="width:65%;height:13px;"></div>
-              <div style="margin-top:20px;">
-                <div class="skel-line" style="width:80%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:75%;height:11px;"></div>
-                <div class="skel-line" style="width:85%;height:11px;"></div>
-                <div class="skel-line" style="width:70%;height:11px;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="ideas-grid" id="ideas-grid" style="display:none;"></div>
-        </div>
+  <main class="page">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-label">NOTA Intelligence</div>
+      <h1 class="hero-title">Идеи для запуска</h1>
+      <p class="hero-sub">5 агентов проработали ниши — каждый со своей стороны. Нажми на идею, чтобы погрузиться.</p>
+    </div>
+
+    <!-- Search (admin) -->
+    <div id="search-bar" style="display:none">
+      <div class="search-bar">
+        <span style="font-size:15px;color:var(--text-muted)">🔍</span>
+        <input type="text" id="req-name" placeholder="Введи нишу для анализа..." onkeydown="if(event.key==='Enter') submitRequest()" />
+        <button onclick="submitRequest()">Анализировать</button>
       </div>
-    </main>
+      <div id="req-status" style="display:none;font-size:12px;color:var(--yellow);margin-bottom:12px;"></div>
+    </div>
 
-    <script type="module">
-      import {
-        requireAuth,
-        getCurrentUser,
-        getNotes,
-        signOut as _signOut,
-        supabase,
-      } from "./js/supabase-client.js";
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left" id="group-filters">
+        <button class="group-filter active" data-group="all" onclick="filterGroup('all',this)">Все</button>
+      </div>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadIdeas()">↻ Обновить</button>
+    </div>
 
-      window.signOut = _signOut;
+    <!-- Grid -->
+    <div class="ideas-grid" id="ideas-grid">
+      <!-- Skeleton -->
+      <div class="skel-card">
+        <div style="flex:1"><div class="skel-line" style="width:30%;margin-bottom:8px;"></div><div class="skel-line" style="width:75%;"></div></div>
+        <div class="skel-circle"></div>
+      </div>
+      <div class="skel-card">
+        <div style="flex:1"><div class="skel-line" style="width:25%;margin-bottom:8px;"></div><div class="skel-line" style="width:68%;"></div></div>
+        <div class="skel-circle"></div>
+      </div>
+      <div class="skel-card">
+        <div style="flex:1"><div class="skel-line" style="width:35%;margin-bottom:8px;"></div><div class="skel-line" style="width:80%;"></div></div>
+        <div class="skel-circle"></div>
+      </div>
+      <div class="skel-card">
+        <div style="flex:1"><div class="skel-line" style="width:28%;margin-bottom:8px;"></div><div class="skel-line" style="width:72%;"></div></div>
+        <div class="skel-circle"></div>
+      </div>
+      <div class="skel-card">
+        <div style="flex:1"><div class="skel-line" style="width:32%;margin-bottom:8px;"></div><div class="skel-line" style="width:65%;"></div></div>
+        <div class="skel-circle"></div>
+      </div>
+    </div>
 
-      function scoreClass(s) {
-        if (s >= 80) return "high";
-        if (s >= 60) return "mid";
-        return "low";
-      }
+  </main>
 
-      function renderIdeas(ideas) {
-        const grid = document.getElementById("ideas-grid");
-        if (!ideas || !ideas.length) {
-          grid.innerHTML = `
-            <div class="card" style="grid-column:1/-1;padding:48px;text-align:center;">
-              <div style="font-size:40px;margin-bottom:12px;">🤖</div>
-              <div style="font-size:17px;font-weight:600;margin-bottom:6px;">Идеи генерируются...</div>
-              <div style="color:var(--text-muted);font-size:14px;">Агенты анализируют ниши — обычно это занимает пару минут</div>
-            </div>`;
-          return;
-        }
+  <script type="module">
+    import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
+    window.signOut = _signOut;
 
-        grid.innerHTML = ideas.map(idea => {
-          const sc = scoreClass(idea.score || 0);
-          const agents = [
-            { dot: 'dot-red',    name: 'Артём',   text: extractVerdict(idea.artem) },
-            { dot: 'dot-yellow', name: 'Петя',    text: extractVerdict(idea.petya) },
-            { dot: 'dot-blue',   name: 'Вова',    text: extractVerdict(idea.vova) },
-            { dot: 'dot-cart',   name: 'Авоська', text: extractVerdict(idea.avoska) },
-            { dot: 'dot-purple', name: 'Поля',    text: extractVerdict(idea.polya) },
-          ];
+    let allIdeas = [];
 
-          return `
-          <div class="idea-card">
-            <div class="idea-card-top">
-              <div class="idea-card-info">
-                <div class="idea-category">${escHtml(idea.category || 'FMCG')}</div>
-                <div class="idea-title">${escHtml(idea.title)}</div>
-                <div class="idea-summary">${escHtml(idea.summary || '')}</div>
-              </div>
-              <div class="idea-score ${sc}">${idea.score || '—'}</div>
-            </div>
-            <div class="idea-agents">
-              ${agents.map(a => `
-                <div class="agent-row">
-                  <div class="agent-dot ${a.dot}"></div>
-                  <div class="agent-name">${a.name}</div>
-                  <div class="agent-text">${escHtml(a.text)}</div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="idea-footer">
-              <a href="idea-detail.html?id=${idea.id}" class="idea-detail-btn">
-                Ознакомиться →
-              </a>
-            </div>
+    function sc(score) {
+      return score >= 80 ? 'high' : score >= 60 ? 'mid' : 'low';
+    }
+    function esc(s) {
+      return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderIdeas(ideas) {
+      const grid = document.getElementById('ideas-grid');
+      if (!ideas.length) {
+        grid.innerHTML = `
+          <div class="ideas-empty">
+            <div class="ideas-empty-icon">🤖</div>
+            <div class="ideas-empty-title">Идеи генерируются...</div>
+            <p style="font-size:13px;margin-top:6px;">Агенты анализируют ниши — обычно 10–15 минут</p>
           </div>`;
-        }).join('');
+        return;
       }
 
-      function extractVerdict(agentData) {
-        if (!agentData) return '—';
-        // Format: "🔴 Verdict sentence\n\nFull data..."
-        // Extract just the first line (verdict)
-        const firstLine = agentData.split('\n')[0];
-        // Strip emoji prefix (e.g. "🔴 ")
-        return firstLine.replace(/^[\u{1F300}-\u{1FFFF}\u{2700}-\u{27BF}\u{FE00}-\u{FEFF}🛒🟣🟡🔵🔴\s]+/u, '').trim() || agentData.slice(0, 100);
+      grid.innerHTML = ideas.map(idea => {
+        const cls = sc(idea.score || 0);
+        const detail = (() => { try { return JSON.parse(idea.detail_json||'{}'); } catch { return {}; } })();
+        const group = detail.group || idea.category || '';
+        return `
+        <a href="idea-detail.html?id=${idea.id}" class="idea-card">
+          <div class="idea-card-body">
+            <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
+            <div class="idea-card-title">${esc(idea.title)}</div>
+            <div class="idea-card-meta">${esc(group)} · нажми для аналитики</div>
+          </div>
+          <div class="idea-score ${cls}" data-score="${idea.score||0}">
+            <span class="idea-score-num">${idea.score||'—'}</span>
+            <span class="idea-score-lbl">балл</span>
+          </div>
+          <span class="idea-arrow">›</span>
+        </a>`;
+      }).join('');
+    }
+
+    function buildGroupFilters(ideas) {
+      const groups = [...new Set(ideas.map(i => {
+        try { return JSON.parse(i.detail_json||'{}').group; } catch { return null; }
+      }).filter(Boolean))];
+      if (!groups.length) return;
+
+      const bar = document.getElementById('group-filters');
+      groups.forEach(g => {
+        const btn = document.createElement('button');
+        btn.className = 'group-filter';
+        btn.dataset.group = g;
+        btn.textContent = g;
+        btn.onclick = () => filterGroup(g, btn);
+        bar.appendChild(btn);
+      });
+    }
+
+    window.filterGroup = function(group, btn) {
+      document.querySelectorAll('.group-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = group === 'all' ? allIdeas : allIdeas.filter(i => {
+        try { return JSON.parse(i.detail_json||'{}').group === group; } catch { return false; }
+      });
+      renderIdeas(filtered);
+    };
+
+    window.loadIdeas = async function() {
+      const btn = document.getElementById('refresh-btn');
+      btn.textContent = '↻ ...';
+      btn.disabled = true;
+
+      const { data } = await supabase
+        .from('launch_ideas').select('*')
+        .eq('status','active')
+        .order('score', { ascending: false });
+
+      allIdeas = data || [];
+      renderIdeas(allIdeas);
+      buildGroupFilters(allIdeas);
+      btn.textContent = '↻ Обновить';
+      btn.disabled = false;
+    };
+
+    window.submitRequest = async function() {
+      const name = document.getElementById('req-name').value.trim();
+      if (!name) return;
+      const st = document.getElementById('req-status');
+      st.style.display = 'block';
+      st.textContent = `⏳ «${name}» добавлена в очередь — появится при следующем запуске агентов`;
+      document.getElementById('req-name').value = '';
+    };
+
+    async function init() {
+      await requireAuth();
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
+      document.getElementById('nav-name').textContent = user.name || user.email;
+      if (user.role === 'admin') {
+        document.getElementById('admin-link').style.display = 'block';
+        document.getElementById('search-bar').style.display = 'block';
+        document.getElementById('refresh-btn').style.display = 'block';
       }
 
-      function escHtml(str) {
-        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }
+      const { data } = await supabase
+        .from('launch_ideas').select('*')
+        .eq('status','active')
+        .order('score', { ascending: false });
 
-      window.loadIdeas = async function() {
-        const btn = document.getElementById("refresh-btn");
-        btn.innerHTML = '<span class="spin">↻</span> Обновляем...';
-        btn.disabled = true;
+      allIdeas = data || [];
+      renderIdeas(allIdeas);
+      buildGroupFilters(allIdeas);
+    }
 
-        const { data } = await supabase
-          .from("launch_ideas")
-          .select("*")
-          .eq("status", "active")
-          .order("score", { ascending: false });
-
-        document.getElementById("ideas-skeleton").style.display = "none";
-        document.getElementById("ideas-grid").style.display = "grid";
-        renderIdeas(data || []);
-
-        btn.innerHTML = '↻ Обновить';
-        btn.disabled = false;
-      }
-
-      async function init() {
-        await requireAuth();
-        const user = await getCurrentUser();
-        if (!user) return;
-
-        document.getElementById("nav-avatar").textContent =
-          user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
-        document.getElementById("nav-name").textContent = user.name || user.email;
-
-        if (user.role === "admin") {
-          document.getElementById("admin-link").style.display = "block";
-          document.getElementById("search-bar").style.display = "block";
-          document.getElementById("refresh-btn").style.display = "block";
-        }
-
-        // Load ideas
-        const { data } = await supabase
-          .from("launch_ideas")
-          .select("*")
-          .eq("status", "active")
-          .order("score", { ascending: false });
-
-        document.getElementById("ideas-skeleton").style.display = "none";
-        document.getElementById("ideas-grid").style.display = "grid";
-        renderIdeas(data || []);
-      }
-
-      window.submitRequest = async function() {
-        const name = document.getElementById("req-name").value.trim();
-        if (!name) return;
-        const statusEl = document.getElementById("req-status");
-        statusEl.style.display = "block";
-        statusEl.style.color = "#f59e0b";
-        statusEl.textContent = "⏳ Добавляем нишу — агенты начнут анализ при следующем запуске...";
-        document.getElementById("req-name").value = "";
-        document.getElementById("req-name-en").value = "";
-      };
-
-      init();
-    </script>
-  </body>
+    init();
+  </script>
+</body>
 </html>

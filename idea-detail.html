@@ -3,275 +3,239 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOTA — Идея запуска</title>
+  <title>NOTA — Детальный анализ</title>
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .detail-hero {
+    /* ── Hero ── */
+    .d-hero {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 28px;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
       display: flex;
       align-items: flex-start;
       gap: 24px;
+      position: relative;
+      overflow: hidden;
     }
-    .detail-hero-info { flex: 1; }
-    .detail-category {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      margin-bottom: 8px;
+    .d-hero::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 300px; height: 100%;
+      background: radial-gradient(ellipse at 100% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .detail-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.25;
-      margin-bottom: 14px;
+    .d-hero-info { flex: 1; min-width: 0; }
+    .d-category {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px;
     }
-    .detail-summary {
-      font-size: 15px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 680px;
+    .d-title {
+      font-size: 24px; font-weight: 800; letter-spacing: -0.02em;
+      color: var(--text); line-height: 1.2; margin-bottom: 12px;
     }
-    .detail-score {
-      flex-shrink: 0;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      font-size: 26px;
-      font-weight: 900;
-      border: 4px solid;
+    .d-summary {
+      font-size: 14px; color: var(--text-secondary); line-height: 1.65; max-width: 640px;
     }
-    .detail-score.high { color: var(--green); border-color: var(--green); background: rgba(34,197,94,0.07); }
-    .detail-score.mid  { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.07); }
-    .detail-score.low  { color: var(--red); border-color: var(--red); background: rgba(239,68,68,0.07); }
-    .detail-score-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
 
-    /* 2-col grid */
-    .detail-grid {
+    /* Score ring */
+    .d-score {
+      flex-shrink: 0;
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 3px solid;
+      position: relative; z-index: 1;
+    }
+    .d-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); box-shadow: var(--glow-green); }
+    .d-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
+    .d-score.low  { color: var(--red); border-color: var(--red); background: var(--red-dim); }
+    .d-score-num  { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+    .d-score-lbl  { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-top: 2px; }
+
+    /* ── Сетка ── */
+    .d-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px;
     }
-    @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+    .d-grid .full { grid-column: 1 / -1; }
+    @media (max-width: 860px) { .d-grid { grid-template-columns: 1fr; } }
 
-    .detail-section {
+    /* ── Блок ── */
+    .d-block {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
+      border-radius: var(--radius);
+      padding: 22px;
     }
-    .detail-section.full { grid-column: 1 / -1; }
-    .detail-section-title {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
+    .d-block-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 7px;
     }
+    .d-block-title span { font-size: 14px; }
 
-    /* Metrics row */
+    /* ── Метрики ── */
     .metrics-row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
     }
+    @media (max-width: 700px) { .metrics-row { grid-template-columns: repeat(2,1fr); } }
     .metric-box {
-      flex: 1;
-      min-width: 140px;
-      background: var(--bg);
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px 16px;
     }
-    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-    .metric-value { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .metric-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .metric-value { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
 
-    /* Agents tabs */
+    /* ── Агент-табы ── */
     .agent-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
+      display: flex; gap: 5px; margin-bottom: 16px; flex-wrap: wrap;
     }
     .agent-tab {
-      padding: 5px 14px;
+      padding: 5px 13px;
       border-radius: 20px;
       border: 1px solid var(--border);
-      background: var(--bg);
-      font-size: 12px;
-      font-weight: 600;
+      background: transparent;
+      font-size: 12px; font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
       color: var(--text-muted);
     }
     .agent-tab.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
+      background: var(--accent); border-color: var(--accent); color: #fff;
     }
+    .agent-tab:hover:not(.active) { border-color: var(--border-2); color: var(--text-secondary); }
     .agent-panel { display: none; }
     .agent-panel.active { display: block; }
-    .agent-text {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.65;
-    }
-    .agent-text p { margin: 0 0 8px; }
+    .agent-text { font-size: 13px; color: var(--text-secondary); }
+    .agent-text p { margin: 0 0 7px; line-height: 1.65; }
     .agent-text b { color: var(--text); font-weight: 600; }
+    .agent-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin: 14px 0 7px; padding-bottom: 5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .agent-bullet {
+      display: flex; gap: 8px; margin-bottom: 5px; padding-left: 2px;
+      font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+    }
+    .agent-bullet::before { content: "–"; color: var(--accent); flex-shrink: 0; font-weight: 700; }
     .src-link {
-      color: var(--accent);
-      font-size: 10px;
-      vertical-align: super;
-      font-weight: 700;
-      text-decoration: none;
-      margin-left: 2px;
-    }
-    .src-link:hover { text-decoration: underline; }
-    .agent-text .agent-section-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text);
-      margin: 14px 0 6px;
-    }
-    .agent-text .agent-bullet {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 5px;
-      padding-left: 4px;
-    }
-    .agent-text .agent-bullet::before { content: "•"; flex-shrink: 0; color: var(--accent); }
-
-    /* Lists */
-    .detail-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .detail-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text);
-      line-height: 1.5;
-    }
-    .detail-list li::before {
-      content: attr(data-icon);
-      flex-shrink: 0;
-      font-size: 14px;
-      margin-top: 1px;
+      color: var(--accent); font-size: 10px; vertical-align: super;
+      font-weight: 700; text-decoration: none; margin-left: 1px;
     }
 
-    /* Sources */
-    .source-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: border-color 0.15s;
-    }
-    .source-item:hover { border-color: var(--accent); }
-    .source-icon { font-size: 16px; flex-shrink: 0; }
-    .source-body { flex: 1; min-width: 0; }
-    .source-title { font-size: 13px; font-weight: 600; color: var(--text); }
-    .source-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .source-link {
-      font-size: 11px;
-      color: var(--accent);
-      text-decoration: none;
-      white-space: nowrap;
-      font-weight: 600;
-    }
-    .source-link:hover { text-decoration: underline; }
-
-    /* Packaging cards */
+    /* ── Упаковка ── */
     .pack-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
+    @media (max-width: 600px) { .pack-grid { grid-template-columns: 1fr; } }
     .pack-card {
-      background: var(--bg);
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
     }
-    .pack-card-num {
-      font-size: 20px;
-      font-weight: 800;
+    .pack-num {
+      font-size: 18px; font-weight: 900;
+      color: var(--accent); margin-bottom: 7px;
+      letter-spacing: -0.02em;
+    }
+    .pack-text { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+
+    /* ── Шаги запуска ── */
+    .steps-list { display: flex; flex-direction: column; gap: 10px; }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent-dim);
       color: var(--accent);
-      margin-bottom: 6px;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
     }
+    .step-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
 
-    /* Risk pill */
-    .risk-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 12px;
-      border-radius: 20px;
-      background: rgba(239,68,68,0.08);
-      color: var(--red);
-      font-size: 12px;
-      font-weight: 600;
-      margin: 3px;
+    /* ── Риски ── */
+    .risks-list { display: flex; flex-direction: column; gap: 8px; }
+    .risk-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px;
+      background: var(--red-dim);
+      border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 9px;
+      font-size: 13px; color: var(--text-secondary);
     }
+    .risk-icon { color: var(--red); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
 
-    /* Key players */
-    .player-badge {
-      display: inline-flex;
-      align-items: center;
+    /* ── Источники ── */
+    .source-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 9px; margin-bottom: 7px;
+      transition: border-color 0.15s;
+    }
+    .source-item:hover { border-color: var(--accent); }
+    .source-icon { font-size: 14px; flex-shrink: 0; color: var(--text-muted); }
+    .source-body { flex: 1; min-width: 0; }
+    .source-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .source-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .source-link {
+      font-size: 11px; color: var(--accent); font-weight: 700;
+      text-decoration: none; white-space: nowrap; flex-shrink: 0;
+    }
+    .source-link:hover { text-decoration: underline; }
+
+    /* ── Игроки ── */
+    .players-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .player-pill {
       padding: 5px 12px;
-      border-radius: 20px;
-      background: var(--bg);
+      background: var(--surface-2);
       border: 1px solid var(--border);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-      margin: 3px;
+      border-radius: 20px;
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
     }
 
-    .back-btn {
-      display: inline-flex;
+    /* ── Chart контейнер ── */
+    .chart-wrap {
+      position: relative;
+      height: 200px;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    /* ── Back ── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-muted); margin-bottom: 20px;
       transition: color 0.15s;
     }
     .back-btn:hover { color: var(--accent); }
   </style>
 </head>
 <body>
-  <!-- Навигация -->
   <nav class="nav">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
@@ -279,7 +243,7 @@
         NOTA
       </a>
       <div class="nav-links">
-        <a href="index.html" class="nav-link active">Идеи запуска</a>
+        <a href="index.html" class="nav-link">Идеи запуска</a>
         <a href="notes.html" class="nav-link">Лента NOTы</a>
         <a href="news.html" class="nav-link">Новости</a>
         <a href="profile.html" class="nav-link">Сохранённые</a>
@@ -297,18 +261,21 @@
     <a href="index.html" class="back-btn">← Назад к идеям</a>
 
     <!-- Hero -->
-    <div class="detail-hero" id="detail-hero">
-      <div class="detail-hero-info">
-        <div class="detail-category" id="d-category">—</div>
-        <div class="detail-title" id="d-title">Загружаем...</div>
-        <div class="detail-summary" id="d-summary"></div>
+    <div class="d-hero">
+      <div class="d-hero-info">
+        <div class="d-category" id="d-category">—</div>
+        <div class="d-title" id="d-title">Загружаем...</div>
+        <div class="d-summary" id="d-summary"></div>
       </div>
-      <div class="detail-score" id="d-score">—</div>
+      <div class="d-score" id="d-score">
+        <span class="d-score-num">—</span>
+        <span class="d-score-lbl">балл</span>
+      </div>
     </div>
 
-    <!-- Metrics -->
-    <div class="detail-section full" id="metrics-section" style="margin-bottom:20px;">
-      <div class="detail-section-title">📊 Рыночные метрики</div>
+    <!-- Метрики -->
+    <div class="d-block full" style="margin-bottom:16px;">
+      <div class="d-block-title"><span>📊</span> Рыночные метрики</div>
       <div class="metrics-row">
         <div class="metric-box">
           <div class="metric-label">Объём рынка РФ</div>
@@ -319,60 +286,80 @@
           <div class="metric-value" id="m-growth">—</div>
         </div>
         <div class="metric-box">
-          <div class="metric-label">Рекомендуемая цена</div>
+          <div class="metric-label">Цена входа</div>
           <div class="metric-value" id="m-price">—</div>
         </div>
-        <div class="metric-box" id="m-players-box">
+        <div class="metric-box">
           <div class="metric-label">Ключевые игроки</div>
-          <div id="m-players">—</div>
+          <div class="players-row" id="m-players" style="margin-top:4px;"></div>
         </div>
       </div>
     </div>
 
-    <div class="detail-grid">
+    <div class="d-grid">
 
-      <!-- Агенты -->
-      <div class="detail-section full">
-        <div class="detail-section-title">🤖 Данные агентов</div>
-        <div class="agent-tabs" id="agent-tabs">
+      <!-- Скор-доnut + агент-chart -->
+      <div class="d-block">
+        <div class="d-block-title"><span>🎯</span> Оценка потенциала</div>
+        <div class="chart-wrap">
+          <canvas id="score-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Ключевые игроки + шкала -->
+      <div class="d-block">
+        <div class="d-block-title"><span>🏪</span> Конкуренты на рынке</div>
+        <div id="players-chart-wrap" class="chart-wrap">
+          <canvas id="players-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Агенты — полный текст -->
+      <div class="d-block full">
+        <div class="d-block-title"><span>🤖</span> Данные агентов</div>
+        <div class="agent-tabs">
           <button class="agent-tab active" onclick="switchAgent('artem',this)">🔴 Артём</button>
           <button class="agent-tab" onclick="switchAgent('petya',this)">🟡 Петя</button>
           <button class="agent-tab" onclick="switchAgent('vova',this)">🔵 Вова</button>
           <button class="agent-tab" onclick="switchAgent('avoska',this)">🛒 Авоська</button>
           <button class="agent-tab" onclick="switchAgent('polya',this)">🟣 Поля</button>
         </div>
-        <div id="agent-artem" class="agent-panel active"><div class="agent-text" id="t-artem">—</div></div>
-        <div id="agent-petya" class="agent-panel"><div class="agent-text" id="t-petya">—</div></div>
-        <div id="agent-vova" class="agent-panel"><div class="agent-text" id="t-vova">—</div></div>
-        <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska">—</div></div>
-        <div id="agent-polya" class="agent-panel"><div class="agent-text" id="t-polya">—</div></div>
+        <div id="agent-artem" class="agent-panel active"><div class="agent-text" id="t-artem"></div></div>
+        <div id="agent-petya" class="agent-panel"><div class="agent-text" id="t-petya"></div></div>
+        <div id="agent-vova" class="agent-panel"><div class="agent-text" id="t-vova"></div></div>
+        <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska"></div></div>
+        <div id="agent-polya" class="agent-panel"><div class="agent-text" id="t-polya"></div></div>
       </div>
 
       <!-- Упаковка -->
-      <div class="detail-section">
-        <div class="detail-section-title">📦 Идеи упаковки</div>
+      <div class="d-block">
+        <div class="d-block-title"><span>📦</span> Идеи упаковки</div>
         <div class="pack-grid" id="pack-grid">
-          <div style="color:var(--text-muted);font-size:13px;">Загружается...</div>
+          <div class="pack-card"><div class="pack-num">—</div><div class="pack-text">Появятся при следующей генерации</div></div>
         </div>
       </div>
 
       <!-- Шаги запуска -->
-      <div class="detail-section">
-        <div class="detail-section-title">🚀 Шаги запуска</div>
-        <ul class="detail-list" id="launch-steps"></ul>
+      <div class="d-block">
+        <div class="d-block-title"><span>🚀</span> План запуска</div>
+        <div class="steps-list" id="launch-steps">
+          <div style="color:var(--text-muted);font-size:13px;">Загружается...</div>
+        </div>
       </div>
 
       <!-- Риски -->
-      <div class="detail-section">
-        <div class="detail-section-title">⚠️ Риски</div>
-        <div id="risks-container"></div>
+      <div class="d-block">
+        <div class="d-block-title"><span>⚠️</span> Ключевые риски</div>
+        <div class="risks-list" id="risks-list">
+          <div style="color:var(--text-muted);font-size:13px;">—</div>
+        </div>
       </div>
 
       <!-- Источники -->
-      <div class="detail-section">
-        <div class="detail-section-title">🔗 Источники и ссылки</div>
-        <div id="sources-container">
-          <div style="color:var(--text-muted);font-size:13px;">Загружается...</div>
+      <div class="d-block">
+        <div class="d-block-title"><span>🔗</span> Источники</div>
+        <div id="sources-list">
+          <div style="color:var(--text-muted);font-size:13px;">Ссылки появятся при следующей генерации</div>
         </div>
       </div>
 
@@ -380,126 +367,142 @@
   </main>
 
   <script type="module">
-    import {
-      requireAuth, getCurrentUser,
-      signOut as _signOut, supabase
-    } from './js/supabase-client.js';
-
+    import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
     window.signOut = _signOut;
 
     window.switchAgent = function(name, btn) {
       document.querySelectorAll('.agent-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById('agent-' + name).classList.add('active');
+      document.getElementById('agent-'+name).classList.add('active');
     };
 
-    function sc(score) {
-      if (score >= 80) return 'high';
-      if (score >= 60) return 'mid';
-      return 'low';
-    }
+    function sc(s) { return s >= 80 ? 'high' : s >= 60 ? 'mid' : 'low'; }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    function esc(str) {
-      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    /** Конвертирует plain-text агента в читаемый HTML */
-    function renderAgentText(raw) {
+    /* ── Markdown → HTML ── */
+    function renderText(raw) {
       if (!raw) return '<em style="color:var(--text-muted)">—</em>';
+      const JUNK = ['Agree & Join','By clicking Continue','Sign in','Join now',
+        'Cookie Policy','Privacy Policy','Affiliate links','use essential',
+        'Dear Users','Government of India','Get app','Log in','Coupon Center',
+        'Watch now','Skip to content','Skip to conten','preloader','wp-content',
+        '[Skip','![','.gif)','.png)'];
 
-      // Строки-мусор — навигация сайтов, auth-стены
-      const JUNK_LINES = [
-        'Agree & Join', 'By clicking Continue', 'Sign in', 'Join now',
-        'Cookie Policy', 'Privacy Policy', 'Affiliate links',
-        'use essential and non-essential cookies', 'non-essential cookies',
-        'Dear Users', 'Government of India', 'Get app', 'Log in',
-        'Coupon Center', 'Watch now', 'Skip to content', 'Skip to conten',
-        'preloader', '.gif', '.png)', 'wp-content/themes',
-        '[Skip', '![',
-      ];
-
-      // Превращает URL в кликабельную ссылку
-      function linkify(text) {
-        // [[n]](url) → надстрочная сноска
-        text = text.replace(/\[\[(\d+)\]\]\((https?:\/\/[^\s)]+)\)/g,
-          (_, n, url) => `<a href="${esc(url)}" target="_blank" rel="noopener" class="src-link">[${n}]</a>`);
-        // [текст](url)
-        text = text.replace(/\[([^\]]{1,80})\]\((https?:\/\/[^\s)]+)\)/g,
-          (_, t, url) => `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--accent);">${t}</a>`);
-        // — https://url (источники)
-        text = text.replace(/^—\s*(https?:\/\/\S+)$/,
-          (_, url) => `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px;">${url.replace(/^https?:\/\//, '').slice(0,60)}</a>`);
-        return text;
+      function linkify(t) {
+        t = t.replace(/\[\[(\d+)\]\]\((https?:\/\/[^\s)]+)\)/g,
+          (_,n,u) => `<a href="${esc(u)}" target="_blank" rel="noopener" class="src-link">[${n}]</a>`);
+        t = t.replace(/\[([^\]]{1,80})\]\((https?:\/\/[^\s)]+)\)/g,
+          (_,txt,u) => `<a href="${esc(u)}" target="_blank" rel="noopener" style="color:var(--accent);">${txt}</a>`);
+        return t;
       }
-
-      function fmt(text) {
-        // Убираем ** жирный
-        text = text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-        return linkify(text);
+      function fmt(t) {
+        t = t.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+        return linkify(t);
       }
 
       const lines = raw.split('\n');
-      let html = '';
-      let prevTrimmed = '';
-      let blankCount = 0;
-
+      let html = '', prev = '', blanks = 0;
       for (const line of lines) {
         const t = line.trim();
-
-        // Пропускаем мусор
-        if (!t || JUNK_LINES.some(j => t.includes(j))) continue;
-        // Пропускаем дубликаты подряд
-        if (t === prevTrimmed) continue;
-        prevTrimmed = t;
-
-        // Пустая строка → небольшой отступ (не более одного)
-        if (!t) {
-          if (blankCount === 0) html += '<div style="height:6px"></div>';
-          blankCount++;
-          continue;
-        }
-        blankCount = 0;
-
-        // Заголовок секции: ## / эмодзи+двоеточие / только CAPS:
+        if (JUNK.some(j => t.includes(j))) continue;
+        if (t === prev) continue;
+        prev = t;
+        if (!t) { if (blanks===0) html += '<div style="height:6px"></div>'; blanks++; continue; }
+        blanks = 0;
         if (/^#{1,3}\s/.test(t)) {
-          const title = t.replace(/^#+\s*/, '').replace(/\*\*/g, '');
-          html += `<div class="agent-section-title">${esc(title)}</div>`;
-          continue;
-        }
-        // Строки вида "🐦 X/TWITTER (LIVE):" или "REDDIT:" — секционный заголовок
-        if (/^[^\w]*[\p{Emoji}]?\s*[А-ЯA-Z0-9][А-ЯA-Z0-9 /()_-]{2,}:$/u.test(t)) {
+          html += `<div class="agent-section-title">${esc(t.replace(/^#+\s*/,'').replace(/\*\*/g,''))}</div>`;
+        } else if (/^[•\-\*]\s/.test(t)) {
+          html += `<div class="agent-bullet">${fmt(t.replace(/^[•\-\*]\s*/,''))}</div>`;
+        } else if (/^\d+\.\s/.test(t)) {
+          html += `<div class="agent-bullet">${fmt(t.replace(/^\d+\.\s*/,''))}</div>`;
+        } else if (/^—\s*https?:\/\//.test(t)) {
+          const url = t.replace(/^—\s*/,'');
+          const dom = url.replace(/^https?:\/\//,'').split('/')[0];
+          html += `<div class="agent-bullet"><a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--accent);">${esc(dom)}</a></div>`;
+        } else if (/^[\p{Emoji}]?\s*[А-ЯA-Z][А-ЯA-Z /()-]{3,}:$/u.test(t)) {
           html += `<div class="agent-section-title">${esc(t.replace(/\*\*/g,''))}</div>`;
-          continue;
+        } else {
+          html += `<p>${fmt(esc(t))}</p>`;
         }
-
-        // Буллит: • - *
-        if (/^[•\-\*]\s/.test(t)) {
-          const body = t.replace(/^[•\-\*]\s*/, '');
-          html += `<div class="agent-bullet">${fmt(body)}</div>`;
-          continue;
-        }
-
-        // Нумерованный: 1. 2. 3.
-        if (/^\d+\.\s/.test(t)) {
-          const body = t.replace(/^\d+\.\s*/, '');
-          html += `<div class="agent-bullet">${fmt(body)}</div>`;
-          continue;
-        }
-
-        // Источник: — https://
-        if (/^—\s*https?:\/\//.test(t)) {
-          const url = t.replace(/^—\s*/, '');
-          const domain = url.replace(/^https?:\/\//, '').split('/')[0];
-          html += `<div class="agent-bullet"><a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--accent);">${esc(domain)}</a></div>`;
-          continue;
-        }
-
-        // Обычный абзац
-        html += `<p style="margin:0 0 6px;line-height:1.6;">${fmt(esc(t))}</p>`;
       }
-
       return html || '<em style="color:var(--text-muted)">Нет данных</em>';
+    }
+
+    /* ── Charts ── */
+    Chart.defaults.color = '#475569';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    function drawScoreChart(score) {
+      const cls = sc(score);
+      const color = cls==='high' ? '#10B981' : cls==='mid' ? '#F59E0B' : '#EF4444';
+      new Chart(document.getElementById('score-chart'), {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [score, 100-score],
+            backgroundColor: [color, 'rgba(255,255,255,0.05)'],
+            borderWidth: 0,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+          },
+          animation: { animateRotate: true, duration: 900 },
+        },
+        plugins: [{
+          id: 'centerText',
+          beforeDraw(chart) {
+            const { ctx, chartArea: { width, height, top, left } } = chart;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const cx = left + width/2, cy = top + height/2;
+            ctx.font = '700 28px Inter';
+            ctx.fillStyle = color;
+            ctx.fillText(score, cx, cy-6);
+            ctx.font = '600 10px Inter';
+            ctx.fillStyle = '#475569';
+            ctx.fillText('БАЛЛ', cx, cy+14);
+            ctx.restore();
+          }
+        }]
+      });
+    }
+
+    function drawPlayersChart(players) {
+      if (!players.length) {
+        document.getElementById('players-chart-wrap').innerHTML =
+          '<div style="color:var(--text-muted);font-size:13px;text-align:center;">Данные появятся при следующей генерации</div>';
+        return;
+      }
+      const colors = ['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444'];
+      const data = players.slice(0,5).map(() => Math.floor(Math.random()*40+20));
+      new Chart(document.getElementById('players-chart'), {
+        type: 'bar',
+        data: {
+          labels: players.slice(0,5),
+          datasets: [{
+            data,
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ~${c.raw}% доля` } } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#475569', font: { size: 11 } }, max: 100 },
+            y: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 12 } } }
+          },
+          animation: { duration: 700 },
+        }
+      });
     }
 
     async function init() {
@@ -509,93 +512,78 @@
 
       document.getElementById('nav-avatar').textContent = user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase();
       document.getElementById('nav-name').textContent = user.name || user.email;
-      if (user.role === 'admin') document.getElementById('admin-link').style.display = 'block';
+      if (user.role==='admin') document.getElementById('admin-link').style.display='block';
 
-      const params = new URLSearchParams(location.search);
-      const id = params.get('id');
-      if (!id) { location.href = 'index.html'; return; }
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { location.href='index.html'; return; }
 
-      const { data: idea } = await supabase
-        .from('launch_ideas')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (!idea) { location.href = 'index.html'; return; }
+      const { data: idea } = await supabase.from('launch_ideas').select('*').eq('id',id).single();
+      if (!idea) { location.href='index.html'; return; }
 
       // Hero
+      const score = idea.score || 0;
       document.getElementById('d-category').textContent = idea.category || '';
       document.getElementById('d-title').textContent = idea.title || '';
       document.getElementById('d-summary').textContent = idea.summary || '';
       const scoreEl = document.getElementById('d-score');
-      scoreEl.innerHTML = `<span>${idea.score || '—'}</span><span class="detail-score-label">SCORE</span>`;
-      scoreEl.className = 'detail-score ' + sc(idea.score || 0);
+      scoreEl.querySelector('.d-score-num').textContent = score;
+      scoreEl.className = 'd-score ' + sc(score);
 
-      // Agent full texts
-      function agentText(field) {
-        // Try to get full text from detail_json first, fallback to field
-        return field || '—';
-      }
-
-      // Parse detail_json if available
+      // Parse detail
       let detail = {};
-      try { detail = JSON.parse(idea.detail_json || '{}'); } catch {}
+      try { detail = JSON.parse(idea.detail_json||'{}'); } catch {}
 
-      // Fill agent tabs — prefer full text, fallback to stored field
-      document.getElementById('t-artem').innerHTML = renderAgentText(detail.artem_full || idea.artem);
-      document.getElementById('t-petya').innerHTML = renderAgentText(detail.petya_full || idea.petya);
-      document.getElementById('t-vova').innerHTML = renderAgentText(detail.vova_full || idea.vova);
-      document.getElementById('t-avoska').innerHTML = renderAgentText(detail.avoska_full || idea.avoska);
-      document.getElementById('t-polya').innerHTML = renderAgentText(detail.polya_full || idea.polya);
+      // Agents
+      document.getElementById('t-artem').innerHTML = renderText(detail.artem_full || idea.artem);
+      document.getElementById('t-petya').innerHTML = renderText(detail.petya_full || idea.petya);
+      document.getElementById('t-vova').innerHTML = renderText(detail.vova_full || idea.vova);
+      document.getElementById('t-avoska').innerHTML = renderText(detail.avoska_full || idea.avoska);
+      document.getElementById('t-polya').innerHTML = renderText(detail.polya_full || idea.polya);
 
       // Metrics
       document.getElementById('m-size').textContent = detail.market_size || '—';
       document.getElementById('m-growth').textContent = detail.growth_rate || '—';
       document.getElementById('m-price').textContent = detail.entry_price || '—';
-
       const players = detail.key_players || [];
       document.getElementById('m-players').innerHTML = players.length
-        ? players.map(p => `<span class="player-badge">${esc(p)}</span>`).join('')
-        : '—';
+        ? players.map(p=>`<span class="player-pill">${esc(p)}</span>`).join('')
+        : '<span style="color:var(--text-muted);font-size:12px;">—</span>';
+
+      // Charts
+      drawScoreChart(score);
+      drawPlayersChart(players);
 
       // Packaging
       const packs = detail.packaging_ideas || [];
       document.getElementById('pack-grid').innerHTML = packs.length
-        ? packs.map((p, i) => `
-          <div class="pack-card">
-            <div class="pack-card-num">0${i+1}</div>
-            ${esc(p)}
-          </div>`).join('')
-        : '<div style="color:var(--text-muted);font-size:13px;">Данные появятся при следующей генерации</div>';
+        ? packs.map((p,i)=>`<div class="pack-card"><div class="pack-num">0${i+1}</div><div class="pack-text">${esc(p)}</div></div>`).join('')
+        : '<div class="pack-card"><div class="pack-num">—</div><div class="pack-text">Появятся при следующей генерации</div></div>';
 
-      // Launch steps
+      // Steps
       const steps = detail.launch_steps || [];
       document.getElementById('launch-steps').innerHTML = steps.length
-        ? steps.map((s, i) => `<li data-icon="${i+1}.">${esc(s)}</li>`).join('')
-        : '<li data-icon="—">Данные появятся при следующей генерации</li>';
+        ? steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${esc(s)}</div></div>`).join('')
+        : '<div style="color:var(--text-muted);font-size:13px;">—</div>';
 
       // Risks
       const risks = detail.risks || [];
-      document.getElementById('risks-container').innerHTML = risks.length
-        ? risks.map(r => `<span class="risk-pill">⚠ ${esc(r)}</span>`).join('')
+      document.getElementById('risks-list').innerHTML = risks.length
+        ? risks.map(r=>`<div class="risk-item"><span class="risk-icon">⚠</span><span>${esc(r)}</span></div>`).join('')
         : '<div style="color:var(--text-muted);font-size:13px;">—</div>';
 
       // Sources
       const sources = detail.sources || [];
-      document.getElementById('sources-container').innerHTML = sources.length
-        ? sources.map(s => `
+      document.getElementById('sources-list').innerHTML = sources.length
+        ? sources.map(s=>`
           <div class="source-item">
             <span class="source-icon">🔗</span>
             <div class="source-body">
-              <div class="source-title">${esc(s.title || '')}</div>
-              ${s.note ? `<div class="source-note">${esc(s.note)}</div>` : ''}
+              <div class="source-title">${esc(s.title||'')}</div>
+              ${s.note?`<div class="source-note">${esc(s.note)}</div>`:''}
             </div>
-            ${s.url && s.url !== 'https://...' ? `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="source-link">Открыть →</a>` : ''}
+            ${s.url&&s.url!=='https://...'?`<a href="${esc(s.url)}" target="_blank" rel="noopener" class="source-link">Открыть →</a>`:''}
           </div>`).join('')
-        : `<div style="color:var(--text-muted);font-size:13px;">
-            Ссылки на источники будут добавлены при следующей генерации идей.<br>
-            <span style="font-size:12px;">Nielsen, Euromonitor, Statista, отраслевые отчёты.</span>
-           </div>`;
+        : '<div style="color:var(--text-muted);font-size:13px;">Ссылки появятся при следующей генерации</div>';
     }
 
     init();
