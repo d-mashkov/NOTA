@@ -7,10 +7,14 @@
   <link rel="stylesheet" href="css/main.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    /* ── Hero ── */
+    /* ── Hero — iOS 26 Glass ── */
     .d-hero {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.055);
+      backdrop-filter: blur(48px) saturate(180%);
+      -webkit-backdrop-filter: blur(48px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-top-color: rgba(255,255,255,0.22);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
       border-radius: var(--radius);
       padding: 28px 32px;
       margin-bottom: 20px;
@@ -25,7 +29,7 @@
       position: absolute;
       top: 0; right: 0;
       width: 300px; height: 100%;
-      background: radial-gradient(ellipse at 100% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+      background: radial-gradient(ellipse at 100% 50%, rgba(59,130,246,0.1) 0%, transparent 70%);
       pointer-events: none;
     }
     .d-hero-info { flex: 1; min-width: 0; }
@@ -51,9 +55,9 @@
       border: 3px solid;
       position: relative; z-index: 1;
     }
-    .d-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); box-shadow: var(--glow-green); }
-    .d-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
-    .d-score.low  { color: var(--red); border-color: var(--red); background: var(--red-dim); }
+    .d-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 32px rgba(16,185,129,0.5), 0 0 8px rgba(16,185,129,0.25); }
+    .d-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); box-shadow: 0 0 32px rgba(245,158,11,0.5), 0 0 8px rgba(245,158,11,0.25); }
+    .d-score.low  { color: var(--red); border-color: var(--red); background: var(--red-dim); box-shadow: 0 0 32px rgba(239,68,68,0.5), 0 0 8px rgba(239,68,68,0.25); }
     .d-score-num  { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
     .d-score-lbl  { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-top: 2px; }
 
@@ -66,10 +70,14 @@
     .d-grid .full { grid-column: 1 / -1; }
     @media (max-width: 860px) { .d-grid { grid-template-columns: 1fr; } }
 
-    /* ── Блок ── */
+    /* ── Блок — Glass ── */
     .d-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(32px) saturate(170%);
+      -webkit-backdrop-filter: blur(32px) saturate(170%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-top-color: rgba(255,255,255,0.18);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
       border-radius: var(--radius);
       padding: 22px;
     }
@@ -88,10 +96,14 @@
     }
     @media (max-width: 700px) { .metrics-row { grid-template-columns: repeat(2,1fr); } }
     .metric-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-top-color: rgba(255,255,255,0.14);
       border-radius: 10px;
       padding: 14px 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
     }
     .metric-label {
       font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -99,25 +111,68 @@
     }
     .metric-value { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
 
-    /* ── Агент-табы ── */
-    .agent-tabs {
-      display: flex; gap: 5px; margin-bottom: 16px; flex-wrap: wrap;
+    /* ── Агент-табы — горизонтальные вкладки ── */
+    .agent-tabs-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
     }
+    @media (max-width: 640px) { .agent-tabs-row { grid-template-columns: repeat(3,1fr); } }
+
     .agent-tab {
-      padding: 5px 13px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
-      font-size: 12px; font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-top-color: rgba(255,255,255,0.13);
       cursor: pointer;
-      transition: all 0.15s;
-      color: var(--text-muted);
+      transition: all 0.18s ease;
+      text-align: center;
+    }
+    .agent-tab:hover:not(.active) {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.15);
     }
     .agent-tab.active {
-      background: var(--accent); border-color: var(--accent); color: #fff;
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.14);
     }
-    .agent-tab:hover:not(.active) { border-color: var(--border-2); color: var(--text-secondary); }
-    .agent-panel { display: none; }
+    /* Цветная нижняя полоска активного таба */
+    .agent-tab[data-agent="artem"].active  { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #EF4444, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="petya"].active  { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #F59E0B, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="vova"].active   { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #3B82F6, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="avoska"].active { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #10B981, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="polya"].active  { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #A78BFA, inset 0 1px 0 rgba(255,255,255,0.12); }
+
+    .agent-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .agent-tab[data-agent="artem"]  .agent-dot { background: #EF4444; box-shadow: 0 0 6px rgba(239,68,68,0.7); }
+    .agent-tab[data-agent="petya"]  .agent-dot { background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.7); }
+    .agent-tab[data-agent="vova"]   .agent-dot { background: #3B82F6; box-shadow: 0 0 6px rgba(59,130,246,0.7); }
+    .agent-tab[data-agent="avoska"] .agent-dot { background: #10B981; box-shadow: 0 0 6px rgba(16,185,129,0.7); }
+    .agent-tab[data-agent="polya"]  .agent-dot { background: #A78BFA; box-shadow: 0 0 6px rgba(167,139,250,0.7); }
+
+    .agent-tab-name {
+      font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: -0.01em;
+    }
+    .agent-tab:not(.active) .agent-tab-name { color: var(--text-muted); }
+    .agent-tab-role {
+      font-size: 10px; color: var(--text-muted); line-height: 1.3;
+    }
+
+    /* Панель контента */
+    .agent-panel {
+      display: none;
+    }
     .agent-panel.active { display: block; }
     .agent-text { font-size: 13px; color: var(--text-secondary); }
     .agent-text p { margin: 0 0 7px; line-height: 1.65; }
@@ -126,7 +181,7 @@
       font-size: 10px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.08em; color: var(--text-muted);
       margin: 14px 0 7px; padding-bottom: 5px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
     .agent-bullet {
       display: flex; gap: 8px; margin-bottom: 5px; padding-left: 2px;
@@ -146,8 +201,12 @@
     }
     @media (max-width: 600px) { .pack-grid { grid-template-columns: 1fr; } }
     .pack-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-top-color: rgba(255,255,255,0.15);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
       border-radius: 10px;
       padding: 14px;
     }
@@ -162,7 +221,12 @@
     .steps-list { display: flex; flex-direction: column; gap: 10px; }
     .step-item {
       display: flex; align-items: flex-start; gap: 12px;
-      background: var(--surface-2); border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top-color: rgba(255,255,255,0.13);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
       border-radius: 10px; padding: 12px 14px;
     }
     .step-num {
@@ -192,11 +256,18 @@
     .source-item {
       display: flex; align-items: flex-start; gap: 10px;
       padding: 10px 12px;
-      background: var(--surface-2); border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
       border-radius: 9px; margin-bottom: 7px;
-      transition: border-color 0.15s;
+      transition: all 0.18s;
     }
-    .source-item:hover { border-color: var(--accent); }
+    .source-item:hover {
+      border-color: rgba(59,130,246,0.4);
+      box-shadow: 0 0 16px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
     .source-icon { font-size: 14px; flex-shrink: 0; color: var(--text-muted); }
     .source-body { flex: 1; min-width: 0; }
     .source-title { font-size: 13px; font-weight: 600; color: var(--text); }
@@ -211,10 +282,12 @@
     .players-row { display: flex; flex-wrap: wrap; gap: 7px; }
     .player-pill {
       padding: 5px 12px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+      background: rgba(59,130,246,0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(59,130,246,0.2);
       border-radius: 20px;
-      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      font-size: 12px; font-weight: 600; color: var(--accent);
     }
 
     /* ── Chart контейнер ── */
@@ -224,6 +297,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      filter: drop-shadow(0 0 12px rgba(59,130,246,0.2));
+    }
+    /* Glow for chart blocks */
+    .d-block:has(.chart-wrap) {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 0 40px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
     /* ── Back ── */
@@ -233,6 +311,40 @@
       transition: color 0.15s;
     }
     .back-btn:hover { color: var(--accent); }
+
+    /* ── Субскоры ── */
+    .sub-scores { display: flex; flex-direction: column; gap: 11px; }
+    .sub-score-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 38px;
+      align-items: center;
+      gap: 12px;
+    }
+    .sub-score-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sub-score-weight { font-size: 9px; opacity: 0.45; font-weight: 500; letter-spacing: 0; }
+    .sub-score-track {
+      height: 5px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .sub-score-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+    .sub-score-fill.high  { background: var(--green);  box-shadow: 0 0 8px rgba(16,185,129,0.55); }
+    .sub-score-fill.mid   { background: var(--yellow); box-shadow: 0 0 8px rgba(245,158,11,0.55); }
+    .sub-score-fill.low   { background: var(--red);    box-shadow: 0 0 8px rgba(239,68,68,0.55); }
+    .sub-score-val { font-size: 13px; font-weight: 800; text-align: right; letter-spacing: -0.02em; }
+    .sub-score-val.high  { color: var(--green); }
+    .sub-score-val.mid   { color: var(--yellow); }
+    .sub-score-val.low   { color: var(--red); }
   </style>
 </head>
 <body>
@@ -271,6 +383,12 @@
         <span class="d-score-num">—</span>
         <span class="d-score-lbl">балл</span>
       </div>
+    </div>
+
+    <!-- Субскоры -->
+    <div class="d-block full" style="margin-bottom:16px;">
+      <div class="d-block-title"><span>📐</span> Из чего складывается балл</div>
+      <div class="sub-scores" id="sub-scores"></div>
     </div>
 
     <!-- Метрики -->
@@ -314,21 +432,45 @@
         </div>
       </div>
 
-      <!-- Агенты — полный текст -->
+      <!-- Агенты — горизонтальные вкладки -->
       <div class="d-block full">
         <div class="d-block-title"><span>🤖</span> Данные агентов</div>
-        <div class="agent-tabs">
-          <button class="agent-tab active" onclick="switchAgent('artem',this)">🔴 Артём</button>
-          <button class="agent-tab" onclick="switchAgent('petya',this)">🟡 Петя</button>
-          <button class="agent-tab" onclick="switchAgent('vova',this)">🔵 Вова</button>
-          <button class="agent-tab" onclick="switchAgent('avoska',this)">🛒 Авоська</button>
-          <button class="agent-tab" onclick="switchAgent('polya',this)">🟣 Поля</button>
+
+        <!-- Вкладки -->
+        <div class="agent-tabs-row">
+          <button class="agent-tab active" data-agent="artem" onclick="switchAgent('artem',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Артём</div>
+            <div class="agent-tab-role">Соцсети и тренды</div>
+          </button>
+          <button class="agent-tab" data-agent="petya" onclick="switchAgent('petya',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Петя</div>
+            <div class="agent-tab-role">SEO и Яндекс</div>
+          </button>
+          <button class="agent-tab" data-agent="vova" onclick="switchAgent('vova',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Вова</div>
+            <div class="agent-tab-role">WB и Ozon</div>
+          </button>
+          <button class="agent-tab" data-agent="avoska" onclick="switchAgent('avoska',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Авоська</div>
+            <div class="agent-tab-role">FMCG-каналы</div>
+          </button>
+          <button class="agent-tab" data-agent="polya" onclick="switchAgent('polya',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Поля</div>
+            <div class="agent-tab-role">Маркетинг и GTM</div>
+          </button>
         </div>
-        <div id="agent-artem" class="agent-panel active"><div class="agent-text" id="t-artem"></div></div>
-        <div id="agent-petya" class="agent-panel"><div class="agent-text" id="t-petya"></div></div>
-        <div id="agent-vova" class="agent-panel"><div class="agent-text" id="t-vova"></div></div>
+
+        <!-- Панели -->
+        <div id="agent-artem"  class="agent-panel active"><div class="agent-text" id="t-artem"></div></div>
+        <div id="agent-petya"  class="agent-panel"><div class="agent-text" id="t-petya"></div></div>
+        <div id="agent-vova"   class="agent-panel"><div class="agent-text" id="t-vova"></div></div>
         <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska"></div></div>
-        <div id="agent-polya" class="agent-panel"><div class="agent-text" id="t-polya"></div></div>
+        <div id="agent-polya"  class="agent-panel"><div class="agent-text" id="t-polya"></div></div>
       </div>
 
       <!-- Упаковка -->
@@ -370,11 +512,11 @@
     import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
     window.signOut = _signOut;
 
-    window.switchAgent = function(name, btn) {
-      document.querySelectorAll('.agent-tab').forEach(b => b.classList.remove('active'));
+    window.switchAgent = function(name, tabEl) {
+      document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('agent-'+name).classList.add('active');
+      tabEl.classList.add('active');
+      document.getElementById('agent-' + name).classList.add('active');
     };
 
     function sc(s) { return s >= 80 ? 'high' : s >= 60 ? 'mid' : 'low'; }
@@ -427,6 +569,44 @@
         }
       }
       return html || '<em style="color:var(--text-muted)">Нет данных</em>';
+    }
+
+    /* ── Sub-scores ── */
+    const SUB_SCORE_META = {
+      demand:      { label: "Спрос",            weight: "25%" },
+      market:      { label: "Рынок РФ",         weight: "25%" },
+      competition: { label: "Конкуренция",      weight: "20%" },
+      trend:       { label: "Тренд",            weight: "15%" },
+      gtm:         { label: "Выход на рынок",   weight: "15%" },
+    };
+
+    function renderSubScores(subScores) {
+      const el = document.getElementById('sub-scores');
+      if (!subScores || !Object.keys(subScores).length) {
+        el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">Субскоры появятся после следующей генерации</div>';
+        return;
+      }
+      el.innerHTML = Object.entries(subScores).map(([key, val]) => {
+        const cls = val >= 70 ? 'high' : val >= 45 ? 'mid' : 'low';
+        const meta = SUB_SCORE_META[key] || { label: key, weight: '' };
+        return `
+          <div class="sub-score-row">
+            <div class="sub-score-label">
+              ${meta.label}
+              <span class="sub-score-weight">${meta.weight}</span>
+            </div>
+            <div class="sub-score-track">
+              <div class="sub-score-fill ${cls}" data-val="${val}" style="width:0%"></div>
+            </div>
+            <div class="sub-score-val ${cls}">${val}</div>
+          </div>`;
+      }).join('');
+      // Анимируем через requestAnimationFrame
+      requestAnimationFrame(() => {
+        el.querySelectorAll('.sub-score-fill').forEach(bar => {
+          bar.style.width = bar.dataset.val + '%';
+        });
+      });
     }
 
     /* ── Charts ── */
@@ -532,6 +712,9 @@
       // Parse detail
       let detail = {};
       try { detail = JSON.parse(idea.detail_json||'{}'); } catch {}
+
+      // Sub-scores
+      renderSubScores(detail.sub_scores || {});
 
       // Agents
       document.getElementById('t-artem').innerHTML = renderText(detail.artem_full || idea.artem);

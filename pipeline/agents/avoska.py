@@ -82,6 +82,47 @@ def _fetch_link_content(url: str) -> str:
         return ""
 
 
+def _grok_fmcg_insights(query: str) -> str:
+    """Fallback через Grok когда в TG каналах нет данных по теме."""
+    key = os.getenv("GROK_API_KEY", "")
+    if not key:
+        return f"Авоська: в Telegram каналах нет данных по теме «{query}»."
+    try:
+        r = requests.post(
+            "https://api.x.ai/v1/responses",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={
+                "model": "grok-4.3",
+                "tools": [{"type": "web_search"}],
+                "input": [{"role": "user", "content": (
+                    f"Найди свежие профессиональные инсайты и аналитику по теме: {query}\n\n"
+                    f"Контекст: российский FMCG рынок, запуск нового продукта.\n\n"
+                    f"Ответь строго на русском языке. Простые абзацы, без таблиц.\n\n"
+                    f"Напиши:\n"
+                    f"1. Что говорят отраслевые эксперты и аналитики об этой нише\n"
+                    f"2. Какие бренды и продукты активно обсуждают в профессиональном сообществе\n"
+                    f"3. Какие тренды и инсайты важны для запуска в России\n"
+                    f"4. Конкретный вывод — стоит ли входить сейчас\n\n"
+                    f"Максимум 250 слов."
+                )}],
+            },
+            timeout=40,
+        )
+        r.raise_for_status()
+        data = r.json()
+        parts = []
+        for item in data.get("output", []):
+            if item.get("type") == "message":
+                for block in item.get("content", []):
+                    if block.get("type") == "output_text":
+                        parts.append(block.get("text", ""))
+        result = "\n".join(parts).strip()
+        return result + "\n\n🛒 Авоська (поиск по открытым FMCG источникам)" if result else f"Авоська: нет данных по теме «{query}»."
+    except Exception as e:
+        print(f"[Авоська] Grok fallback error: {e}")
+        return f"Авоська: нет данных по теме «{query}»."
+
+
 def analyze_tg_channels(query: str = "") -> str:
     """
     Главная функция Авоськи:
@@ -100,10 +141,16 @@ def analyze_tg_channels(query: str = "") -> str:
     # Фильтруем по теме если нужно
     if query:
         q_lower = query.lower()
-        filtered = [m for m in msgs if q_lower in m['text'].lower()]
+        # Разбиваем запрос на ключевые слова, ищем хотя бы одно вхождение
+        keywords = [w for w in q_lower.replace('—', ' ').split() if len(w) > 3]
+        filtered = [m for m in msgs if any(kw in m['text'].lower() for kw in keywords)]
         if filtered:
             msgs = filtered
             print(f"[Авоська] По теме '{query}': {len(msgs)} сообщений")
+        else:
+            # Нет релевантных сообщений — возвращаем это явно через Grok
+            print(f"[Авоська] По теме '{query}' в TG каналах ничего нет — fallback Grok")
+            return _grok_fmcg_insights(query)
 
     # Берём последние 150 сообщений (самые свежие)
     msgs_sample = msgs[-150:] if len(msgs) > 150 else msgs

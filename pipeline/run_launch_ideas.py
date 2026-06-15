@@ -19,6 +19,7 @@ from pipeline.agents.vova import analyze_marketplace
 from pipeline.agents.avoska import analyze_tg_channels
 from pipeline.agents.polya import build_marketing_strategy
 from pipeline.supabase_client import supabase
+from pipeline.structurer import structure_agent_output, compute_score
 
 # Категории для генерации идей — разнообразные ниши
 IDEA_SEEDS = [
@@ -51,6 +52,9 @@ IDEA_SEEDS = [
     {"title": "Экологичные средства для уборки", "query": "eco cleaning products concentrate refill", "group": "Дом"},
     {"title": "Капсульный стиральный порошок", "query": "laundry pods capsules detergent market 2025", "group": "Дом"},
     {"title": "Умные освежители воздуха", "query": "smart air freshener diffuser auto home fragrance", "group": "Дом"},
+    # Постельное бельё и сон
+    {"title": "Масс-премиум постельное бельё из эвкалиптового Lyocell", "query": "eucalyptus lyocell TENCEL bedding cooling sleep D2C Russia", "group": "Сон"},
+    {"title": "D2C бренд постельного белья — конкурент ИКЕА в сегменте выше среднего", "query": "premium bedding D2C brand sleep recovery Russia market", "group": "Сон"},
 ]
 
 
@@ -63,33 +67,66 @@ def generate_idea(seed: dict):
     print(f"[Ideas] Генерирую идею: {title}")
 
     print(f"[Ideas] → Артём ищет тренды...")
-    artem = search_social_trends(query)
+    artem_raw = search_social_trends(query)
 
     print(f"[Ideas] → Петя анализирует SEO...")
-    petya = compare_trends_global_vs_russia(query)
+    petya_raw = compare_trends_global_vs_russia(query)
 
     print(f"[Ideas] → Вова смотрит маркетплейсы...")
-    vova = analyze_marketplace(title)
+    vova_raw = analyze_marketplace(title)
 
     print(f"[Ideas] → Авоська читает каналы...")
-    avoska = analyze_tg_channels(title)
+    avoska_raw = analyze_tg_channels(title)
 
     print(f"[Ideas] → Поля строит стратегию...")
-    polya = build_marketing_strategy(title, context=f"{artem[:300]}\n{petya[:300]}\n{vova[:300]}")
+    polya_raw = build_marketing_strategy(title, context=f"{artem_raw[:300]}\n{petya_raw[:300]}\n{vova_raw[:300]}")
+
+    # Структурируем вывод каждого агента через Claude Haiku
+    print(f"[Ideas] → Структурируем данные агентов...")
+    structs = {
+        "artem":  structure_agent_output("artem",  artem_raw,  title),
+        "petya":  structure_agent_output("petya",  petya_raw,  title),
+        "vova":   structure_agent_output("vova",   vova_raw,   title),
+        "avoska": structure_agent_output("avoska", avoska_raw, title),
+        "polya":  structure_agent_output("polya",  polya_raw,  title),
+    }
+
+    # Считаем балл по рубрике — не гадаем, а вычисляем
+    computed_score, sub_scores = compute_score(structs)
+    print(f"[Ideas] Субскоры: {sub_scores} → итог: {computed_score}")
 
     # Claude синтезирует общий вывод, скор и детальную аналитику
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
-    synthesis_prompt = f"""Ты — главный аналитик NOTA. Оцени идею запуска продукта в России на основе данных от агентов.
+    # Компактные вердикты из структур для синтез-промпта
+    agent_verdicts = "\n".join([
+        f"🔴 Артём (тренды, сила {structs['artem']['trend_strength']}/100): {structs['artem']['verdict']}",
+        f"   Сигналы: {', '.join(structs['artem']['key_signals'][:3])}",
+        f"🟡 Петя (спрос РФ {structs['petya']['search_demand_ru']}/100, {structs['petya']['trend_direction']}): {structs['petya']['verdict']}",
+        f"   Запросы: {', '.join(structs['petya']['top_queries'][:3])}",
+        f"🔵 Вова (активность {structs['vova']['market_activity']}/100, конкуренция: {structs['vova']['competition_density']}): {structs['vova']['verdict']}",
+        f"   Цена: {structs['vova']['avg_price_range']}  Топ: {', '.join(structs['vova']['top_sellers'][:3]) or '—'}",
+        f"🛒 Авоська (buzz {structs['avoska']['industry_buzz']}/100): {structs['avoska']['verdict']}",
+        f"   Инсайты: {'; '.join(structs['avoska']['key_insights'][:2])}",
+        f"🟣 Поля (GTM {structs['polya']['gtm_clarity']}/100): {structs['polya']['verdict']}",
+        f"   Каналы: {', '.join(structs['polya']['top_channels'][:3])}  Срок: {structs['polya']['time_to_market']}",
+    ])
+
+    synthesis_prompt = f"""Ты — главный аналитик NOTA. Составь итоговую карточку идеи.
+
+ВАЖНО: только про эту конкретную идею — не смешивай категории.
+Балл уже рассчитан по рубрике ({computed_score}/100) — можешь скорректировать не более чем на ±8.
 
 Идея: {title}
 Группа: {group}
+Рассчитанный балл: {computed_score}/100
+Субскоры: спрос={sub_scores['demand']}, рынок={sub_scores['market']}, конкуренция={sub_scores['competition']}, тренд={sub_scores['trend']}, GTM={sub_scores['gtm']}
 
-Данные агентов:
-🔴 Артём (соцсети/тренды): {artem[:700]}
-🟡 Петя (SEO/поиск): {petya[:700]}
-🔵 Вова (маркетплейсы WB/Ozon): {vova[:700]}
-🛒 Авоська (FMCG Telegram-каналы): {avoska[:700]}
-🟣 Поля (маркетинг/GTM): {polya[:700]}
+Вердикты агентов:
+{agent_verdicts}
+
+Дополнительные данные для market_size / growth_rate / key_players / entry_price:
+{vova_raw[:600]}
+{petya_raw[:400]}
 
 Верни JSON (только JSON, без markdown):
 {{
@@ -151,52 +188,60 @@ def generate_idea(seed: dict):
         print(f"[Ideas] Ошибка синтеза: {e}")
         data = {
             "summary": "Перспективная ниша для запуска на российском рынке.",
-            "score": 65,
+            "score": computed_score,
             "category": group,
-            "artem_verdict": artem[:100],
-            "petya_verdict": petya[:100],
-            "vova_verdict": vova[:100],
-            "avoska_verdict": avoska[:100],
-            "polya_verdict": polya[:100],
+            "artem_verdict": structs["artem"]["verdict"],
+            "petya_verdict": structs["petya"]["verdict"],
+            "vova_verdict": structs["vova"]["verdict"],
+            "avoska_verdict": structs["avoska"]["verdict"],
+            "polya_verdict": structs["polya"]["verdict"],
             "market_size": "",
             "growth_rate": "",
-            "key_players": [],
-            "entry_price": "",
+            "key_players": structs["vova"]["top_sellers"],
+            "entry_price": structs["vova"]["avg_price_range"],
             "packaging_ideas": [],
             "launch_steps": [],
             "risks": [],
             "sources": [],
         }
 
-    # detail_json — всё что нужно для страницы детей
+    # detail_json — всё что нужно для страницы детали
     detail_json = {
-        "market_size": data.get("market_size", ""),
-        "growth_rate": data.get("growth_rate", ""),
-        "key_players": data.get("key_players", []),
-        "entry_price": data.get("entry_price", ""),
+        "market_size":     data.get("market_size", ""),
+        "growth_rate":     data.get("growth_rate", ""),
+        "key_players":     data.get("key_players", []),
+        "entry_price":     data.get("entry_price", ""),
         "packaging_ideas": data.get("packaging_ideas", []),
-        "launch_steps": data.get("launch_steps", []),
-        "risks": data.get("risks", []),
-        "sources": data.get("sources", []),
-        "group": group,
-        # Полные тексты агентов (не обрезанные)
-        "artem_full": artem,
-        "petya_full": petya,
-        "vova_full": vova,
-        "avoska_full": avoska,
-        "polya_full": polya,
+        "launch_steps":    data.get("launch_steps", []),
+        "risks":           data.get("risks", []),
+        "sources":         data.get("sources", []),
+        "group":           group,
+        # Субскоры рубрики — видны пользователю
+        "sub_scores": sub_scores,
+        # Структурированные данные агентов
+        "structs": structs,
+        # Полные тексты агентов
+        "artem_full":  artem_raw,
+        "petya_full":  petya_raw,
+        "vova_full":   vova_raw,
+        "avoska_full": avoska_raw,
+        "polya_full":  polya_raw,
     }
 
+    # Балл: computed_score из рубрики + корректировка Claude не более ±8
+    claude_score = data.get("score", computed_score)
+    final_score = max(computed_score - 8, min(computed_score + 8, int(claude_score)))
+
     return {
-        "title": title,
+        "title":    title,
         "category": data.get("category", group),
-        "summary": data.get("summary", ""),
-        "score": data.get("score", 65),
-        "artem": f"🔴 {data.get('artem_verdict', '')}\n\n{artem[:800]}",
-        "petya": f"🟡 {data.get('petya_verdict', '')}\n\n{petya[:800]}",
-        "vova": f"🔵 {data.get('vova_verdict', '')}\n\n{vova[:800]}",
-        "avoska": f"🛒 {data.get('avoska_verdict', '')}\n\n{avoska[:800]}",
-        "polya": f"🟣 {data.get('polya_verdict', '')}\n\n{polya[:800]}",
+        "summary":  data.get("summary", ""),
+        "score":    final_score,
+        "artem":  f"{structs['artem']['verdict']}\n\n{artem_raw[:800]}",
+        "petya":  f"{structs['petya']['verdict']}\n\n{petya_raw[:800]}",
+        "vova":   f"{structs['vova']['verdict']}\n\n{vova_raw[:800]}",
+        "avoska": f"{structs['avoska']['verdict']}\n\n{avoska_raw[:800]}",
+        "polya":  f"{structs['polya']['verdict']}\n\n{polya_raw[:800]}",
         "detail_json": json.dumps(detail_json, ensure_ascii=False),
         "status": "active",
     }

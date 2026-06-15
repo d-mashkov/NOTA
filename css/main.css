@@ -39,12 +39,30 @@
   --shadow-sm:   0 1px 3px rgba(0,0,0,0.4);
   --shadow:      0 4px 20px rgba(0,0,0,0.5);
   --shadow-lg:   0 8px 40px rgba(0,0,0,0.6);
-  --glow-accent: 0 0 24px rgba(59,130,246,0.2);
-  --glow-green:  0 0 24px rgba(16,185,129,0.2);
+
+  /* iOS 26 Liquid Glass */
+  --glass-bg:      rgba(255,255,255,0.055);
+  --glass-bg-2:    rgba(255,255,255,0.08);
+  --glass-border:  rgba(255,255,255,0.13);
+  --glass-border-2:rgba(255,255,255,0.22);
+  --glass-spec:    rgba(255,255,255,0.18);  /* specular top highlight */
+  --glass-blur:    blur(40px);
+  --glass-sat:     saturate(180%);
+
+  /* Glow effects */
+  --glow-accent:  0 0 32px rgba(59,130,246,0.35), 0 0 8px rgba(59,130,246,0.15);
+  --glow-green:   0 0 32px rgba(16,185,129,0.35), 0 0 8px rgba(16,185,129,0.15);
+  --glow-yellow:  0 0 32px rgba(245,158,11,0.35),  0 0 8px rgba(245,158,11,0.15);
+  --glow-red:     0 0 32px rgba(239,68,68,0.35),   0 0 8px rgba(239,68,68,0.15);
+  --glow-sm-accent: 0 0 16px rgba(59,130,246,0.25);
+  --glow-sm-green:  0 0 16px rgba(16,185,129,0.25);
+  --glow-sm-yellow: 0 0 16px rgba(245,158,11,0.25);
+  --glow-sm-red:    0 0 16px rgba(239,68,68,0.25);
 
   --radius-sm:   8px;
   --radius:      14px;
   --radius-lg:   20px;
+  --radius-xl:   24px;
 }
 
 /* --- Сброс --- */
@@ -66,10 +84,11 @@ img { max-width: 100%; }
    НАВИГАЦИЯ
    ============================================ */
 .nav {
-  background: rgba(10,11,15,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10,11,15,0.6);
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 1px 0 var(--glass-spec), 0 4px 32px rgba(0,0,0,0.35);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -170,13 +189,21 @@ img { max-width: 100%; }
    КАРТОЧКИ
    ============================================ */
 .card {
-  background: var(--surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-sat);
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-spec);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-spec);
   overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.card:hover { border-color: var(--border-2); }
+.card:hover {
+  border-color: var(--glass-border-2);
+  background: var(--glass-bg-2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 var(--glass-spec);
+}
 .card-body { padding: 20px; }
 .card-link { display: block; cursor: pointer; }
 
@@ -352,11 +379,14 @@ img { max-width: 100%; }
 .auth-card {
   width: 100%;
   max-width: 400px;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-sat);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 var(--glass-spec);
   padding: 40px 36px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-spec);
 }
 .auth-logo {
   display: flex;
@@ -674,3 +704,91 @@ img { max-width: 100%; }
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* ============================================
+   iOS 26 LIQUID GLASS UTILITIES
+   ============================================ */
+.glass {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-sat);
+  border: 1px solid var(--glass-border) !important;
+  border-top-color: var(--glass-spec) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 var(--glass-spec) !important;
+}
+.glass-2 {
+  background: var(--glass-bg-2) !important;
+  backdrop-filter: var(--glass-blur) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-sat);
+  border: 1px solid var(--glass-border-2) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 var(--glass-spec) !important;
+}
+
+/* Glow utilities */
+.glow-accent { box-shadow: var(--glow-accent) !important; }
+.glow-green  { box-shadow: var(--glow-green) !important; }
+.glow-yellow { box-shadow: var(--glow-yellow) !important; }
+.glow-red    { box-shadow: var(--glow-red) !important; }
+
+/* Signal / avoska cards — glass treatment */
+.signal-card,
+.avoska-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-top-color: rgba(255,255,255,0.14);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.signal-card:hover,
+.avoska-card:hover {
+  background: var(--glass-bg-2);
+  border-color: var(--glass-border-2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+/* Sidebar/note blocks glass */
+.sidebar-card,
+.note-block,
+.note-hero {
+  background: var(--glass-bg);
+  backdrop-filter: blur(32px) saturate(170%);
+  -webkit-backdrop-filter: blur(32px) saturate(170%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-spec);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-spec);
+}
+
+/* Form inputs glass */
+.form-input,
+.comment-input {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+}
+.form-input:focus,
+.comment-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2), var(--glow-sm-accent);
+}
+
+/* Glow on score rings */
+.idea-score.high { box-shadow: var(--glow-sm-green) !important; }
+.idea-score.mid  { box-shadow: var(--glow-sm-yellow) !important; }
+.idea-score.low  { box-shadow: var(--glow-sm-red) !important; }
+
+/* Ambient background glows */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(59,130,246,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 85% 75%, rgba(16,185,129,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 60% 10%, rgba(139,92,246,0.04) 0%, transparent 60%);
+}
+.page { position: relative; z-index: 1; }
