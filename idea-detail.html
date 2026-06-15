@@ -113,12 +113,16 @@
 
     /* ── Агент-табы — горизонтальные вкладки ── */
     .agent-tabs-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 20px;
     }
-    @media (max-width: 640px) { .agent-tabs-row { grid-template-columns: repeat(3,1fr); } }
+    .agent-tab { flex: 1 1 110px; }
+    .agent-tabs-sep {
+      width: 1px; background: rgba(255,255,255,0.08);
+      margin: 4px 2px; flex-shrink: 0; align-self: stretch;
+    }
 
     .agent-tab {
       display: flex;
@@ -416,39 +420,11 @@
     }
     .author-save-status.show { opacity: 1; }
 
-    /* ── Страничные вкладки (Аналитика / Роудмэп / ВельюЧейн) ── */
-    .page-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
-    .page-tab {
-      padding: 9px 22px;
-      border-radius: 10px;
-      font-size: 13px; font-weight: 700;
-      cursor: pointer;
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-top-color: rgba(255,255,255,0.13);
-      color: var(--text-muted);
-      transition: all 0.18s ease;
-      letter-spacing: -0.01em;
-    }
-    .page-tab:hover:not(.active) {
-      color: var(--text);
-      background: rgba(255,255,255,0.07);
-    }
-    .page-tab.active {
-      color: var(--text);
-      background: rgba(59,130,246,0.12);
-      border-color: rgba(59,130,246,0.3);
-      box-shadow: 0 0 20px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
-    }
-
-    .page-panel { display: none; }
-    .page-panel.active { display: block; }
+    /* Цвет таба роудмэп/vc */
+    .agent-tab[data-agent="roadmap"].active  { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #6366F1, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="valuechain"].active { box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 2px 0 #F59E0B, inset 0 1px 0 rgba(255,255,255,0.12); }
+    .agent-tab[data-agent="roadmap"]    .agent-dot { background: #6366F1; box-shadow: 0 0 6px rgba(99,102,241,0.7); }
+    .agent-tab[data-agent="valuechain"] .agent-dot { background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.7); }
 
     /* ── Роудмэп ── */
     .roadmap-list { display: flex; flex-direction: column; gap: 14px; }
@@ -494,54 +470,74 @@
       .roadmap-phase-left { width: auto; flex-direction: row; align-items: center; gap: 10px; }
     }
 
-    /* ── ВельюЧейн ── */
-    .vc-header {
-      display: flex; align-items: center; justify-content: space-between;
+    /* ── ВельюЧейн: unit-экономика ── */
+    .vc-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
       margin-bottom: 20px;
     }
-    .vc-retail-price {
-      font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -0.03em;
+    @media (max-width: 600px) { .vc-summary { grid-template-columns: 1fr 1fr; } }
+    .vc-kpi {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-top-color: rgba(255,255,255,0.14);
+      border-radius: 10px; padding: 12px 14px;
     }
-    .vc-retail-label {
+    .vc-kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 5px; }
+    .vc-kpi-val   { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; color: var(--text); }
+    .vc-kpi-val.green { color: var(--green); text-shadow: 0 0 16px rgba(16,185,129,0.4); }
+    .vc-kpi-val.yellow { color: var(--yellow); }
+
+    /* Затраты на единицу */
+    .vc-costs-grid {
+      display: flex; flex-wrap: wrap; gap: 7px;
+      margin-bottom: 20px;
+    }
+    .vc-cost-pill {
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .vc-cost-pill b { color: var(--text); font-weight: 700; }
+
+    /* Таблица сценариев */
+    .vc-section-label {
       font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
     }
-    .vc-items { display: flex; flex-direction: column; gap: 10px; }
-    .vc-item {
-      display: grid;
-      grid-template-columns: 200px 1fr 50px;
-      align-items: center;
-      gap: 14px;
+    .vc-table { width: 100%; border-collapse: collapse; }
+    .vc-table th {
+      text-align: left; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted);
+      padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
     }
-    @media (max-width: 600px) { .vc-item { grid-template-columns: 140px 1fr 40px; } }
-    .vc-label {
-      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    .vc-table th:not(:first-child) { text-align: right; }
+    .vc-table td {
+      padding: 10px; font-size: 13px; color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
     }
-    .vc-label small { display: block; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-top: 1px; }
-    .vc-track {
-      height: 8px;
-      background: rgba(255,255,255,0.07);
-      border-radius: 4px;
-      overflow: hidden;
+    .vc-table td:not(:first-child) { text-align: right; }
+    .vc-table tr:last-child td { border-bottom: none; }
+    .vc-table tr:hover td { background: rgba(255,255,255,0.025); }
+    .vc-table .vol-label { font-weight: 700; color: var(--text); font-size: 14px; }
+    .vc-table .profit-val { font-weight: 800; color: var(--green); }
+    .vc-table .margin-badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 5px; font-size: 11px; font-weight: 700;
     }
-    .vc-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.8s cubic-bezier(.4,0,.2,1);
-      width: 0%;
+    .vc-table .margin-badge.high  { background: rgba(16,185,129,0.12); color: var(--green); }
+    .vc-table .margin-badge.mid   { background: rgba(245,158,11,0.12); color: var(--yellow); }
+    .vc-table .margin-badge.low   { background: rgba(239,68,68,0.12);  color: var(--red); }
+    .vc-note {
+      margin-top: 14px; padding: 10px 12px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.55;
     }
-    .vc-pct { font-size: 13px; font-weight: 800; color: var(--text); text-align: right; }
-
-    .vc-fill:nth-child(1) { background: #3B82F6; box-shadow: 0 0 8px rgba(59,130,246,0.5); }
-
-    /* colour by index via JS – use data-color attr */
-    .vc-fill[data-color="0"] { background: #3B82F6; box-shadow: 0 0 8px rgba(59,130,246,0.5); }
-    .vc-fill[data-color="1"] { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
-    .vc-fill[data-color="2"] { background: #8B5CF6; box-shadow: 0 0 8px rgba(139,92,246,0.5); }
-    .vc-fill[data-color="3"] { background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
-    .vc-fill[data-color="4"] { background: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
-    .vc-fill[data-color="5"] { background: #F97316; box-shadow: 0 0 8px rgba(249,115,22,0.5); }
-    .vc-fill[data-color="6"] { background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
   </style>
 </head>
 <body>
@@ -568,16 +564,6 @@
 
   <main class="page">
     <a href="index.html" class="back-btn">← Назад к идеям</a>
-
-    <!-- Страничные табы -->
-    <div class="page-tabs">
-      <button class="page-tab active" onclick="switchPage('analytics',this)">Аналитика</button>
-      <button class="page-tab" onclick="switchPage('roadmap',this)">Роудмэп</button>
-      <button class="page-tab" onclick="switchPage('valuechain',this)">ВельюЧейн</button>
-    </div>
-
-    <!-- ═══ АНАЛИТИКА ═══ -->
-    <div id="page-analytics" class="page-panel active">
 
     <!-- Hero -->
     <div class="d-hero">
@@ -670,14 +656,39 @@
             <div class="agent-tab-name">Поля</div>
             <div class="agent-tab-role">Маркетинг и GTM</div>
           </button>
+          <div class="agent-tabs-sep"></div>
+          <button class="agent-tab" data-agent="roadmap" onclick="switchAgent('roadmap',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">Роудмэп</div>
+            <div class="agent-tab-role">Дорожная карта</div>
+          </button>
+          <button class="agent-tab" data-agent="valuechain" onclick="switchAgent('valuechain',this)">
+            <div class="agent-dot"></div>
+            <div class="agent-tab-name">ВельюЧейн</div>
+            <div class="agent-tab-role">Сколько заработаем</div>
+          </button>
         </div>
 
-        <!-- Панели -->
+        <!-- Панели агентов -->
         <div id="agent-artem"  class="agent-panel active"><div class="agent-text" id="t-artem"></div></div>
         <div id="agent-petya"  class="agent-panel"><div class="agent-text" id="t-petya"></div></div>
         <div id="agent-vova"   class="agent-panel"><div class="agent-text" id="t-vova"></div></div>
         <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska"></div></div>
         <div id="agent-polya"  class="agent-panel"><div class="agent-text" id="t-polya"></div></div>
+
+        <!-- Роудмэп -->
+        <div id="agent-roadmap" class="agent-panel">
+          <div class="roadmap-list" id="roadmap-list">
+            <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
+          </div>
+        </div>
+
+        <!-- ВельюЧейн: unit-экономика -->
+        <div id="agent-valuechain" class="agent-panel">
+          <div id="vc-content">
+            <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
+          </div>
+        </div>
       </div>
 
       <!-- Упаковка -->
@@ -713,36 +724,6 @@
       </div>
 
     </div><!-- /d-grid -->
-    </div><!-- /page-analytics -->
-
-    <!-- ═══ РОУДМЭП ═══ -->
-    <div id="page-roadmap" class="page-panel">
-      <div class="d-block full">
-        <div class="d-block-title"><span>🗺</span> Дорожная карта запуска</div>
-        <div class="roadmap-list" id="roadmap-list">
-          <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ ВЕЛЬЮЧЕЙН ═══ -->
-    <div id="page-valuechain" class="page-panel">
-      <div class="d-block full">
-        <div class="d-block-title"><span>💰</span> Ценовая модель (без ФОТа)</div>
-        <div class="vc-header">
-          <div>
-            <div class="vc-retail-label">Розничная цена</div>
-            <div class="vc-retail-price" id="vc-retail-price">—</div>
-          </div>
-          <div style="font-size:11px;color:var(--text-muted);text-align:right;line-height:1.6;">
-            Структура себестоимости<br>и маржинальность
-          </div>
-        </div>
-        <div class="vc-items" id="vc-items">
-          <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
-        </div>
-      </div>
-    </div>
 
     <!-- ═══ АВТОРСКАЯ ОЦЕНКА (только admin) ═══ -->
     <div class="author-zone" id="author-zone">
@@ -768,13 +749,6 @@
   <script type="module">
     import { requireAuth, getCurrentUser, signOut as _signOut, supabase } from './js/supabase-client.js';
     window.signOut = _signOut;
-
-    window.switchPage = function(panel, tabEl) {
-      document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
-      tabEl.classList.add('active');
-      document.getElementById('page-' + panel).classList.add('active');
-    };
 
     window.switchAgent = function(name, tabEl) {
       document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active'));
@@ -972,31 +946,92 @@
         </div>`).join('');
     }
 
-    /* ── ВельюЧейн ── */
+    /* ── ВельюЧейн: unit-экономика ── */
+    function fmt_rub(n) {
+      if (!n && n !== 0) return '—';
+      return Number(n).toLocaleString('ru-RU') + ' ₽';
+    }
+
     function renderValueChain(vc) {
-      const el = document.getElementById('vc-items');
-      const priceEl = document.getElementById('vc-retail-price');
-      if (!vc || !vc.items || !vc.items.length) {
+      const el = document.getElementById('vc-content');
+      if (!vc || !vc.selling_price) {
         el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">Появится при следующей генерации</div>';
         return;
       }
-      priceEl.textContent = vc.retail_price || '—';
-      el.innerHTML = vc.items.map((item, i) => `
-        <div class="vc-item">
-          <div class="vc-label">
-            ${esc(item.label || '')}
-            ${item.note ? `<small>${esc(item.note)}</small>` : ''}
+
+      const uc = vc.unit_costs || {};
+      const price = vc.selling_price || 0;
+      const margin_pct = vc.gross_margin_pct || 0;
+      const margin_rub = Math.round(price * margin_pct / 100);
+
+      // Считаем затраты на единицу для пилюль
+      const cost_items = [];
+      if (uc.raw_materials)    cost_items.push({ label: 'Сырьё',           val: uc.raw_materials });
+      if (uc.manufacturing)    cost_items.push({ label: 'Производство',    val: uc.manufacturing });
+      if (uc.packaging)        cost_items.push({ label: 'Упаковка',         val: uc.packaging });
+      if (uc.logistics)        cost_items.push({ label: 'Логистика',        val: uc.logistics });
+      if (uc.marketplace_fee_pct) cost_items.push({ label: 'Комиссия МП',  val: Math.round(price * uc.marketplace_fee_pct / 100), note: `${uc.marketplace_fee_pct}%` });
+      if (uc.marketing_pct)    cost_items.push({ label: 'Маркетинг',       val: Math.round(price * uc.marketing_pct / 100), note: `${uc.marketing_pct}%` });
+
+      const scenarios = vc.scenarios || [];
+
+      el.innerHTML = `
+        <!-- KPI-карточки -->
+        <div class="vc-summary">
+          <div class="vc-kpi">
+            <div class="vc-kpi-label">Розничная цена</div>
+            <div class="vc-kpi-val">${fmt_rub(price)}</div>
           </div>
-          <div class="vc-track">
-            <div class="vc-fill" data-color="${i % 7}" data-pct="${item.pct || 0}" style="width:0%"></div>
+          <div class="vc-kpi">
+            <div class="vc-kpi-label">Маржа на единицу</div>
+            <div class="vc-kpi-val green">${fmt_rub(margin_rub)}</div>
           </div>
-          <div class="vc-pct">${item.pct || 0}%</div>
-        </div>`).join('');
-      requestAnimationFrame(() => {
-        el.querySelectorAll('.vc-fill').forEach(bar => {
-          bar.style.width = bar.dataset.pct + '%';
-        });
-      });
+          <div class="vc-kpi">
+            <div class="vc-kpi-label">Валовая маржа %</div>
+            <div class="vc-kpi-val ${margin_pct >= 35 ? 'green' : margin_pct >= 20 ? 'yellow' : ''}">${margin_pct}%</div>
+          </div>
+        </div>
+
+        <!-- Затраты на единицу -->
+        ${cost_items.length ? `
+        <div class="vc-section-label">💸 Затраты на 1 единицу</div>
+        <div class="vc-costs-grid">
+          ${cost_items.map(c => `
+            <div class="vc-cost-pill">${esc(c.label)}: <b>${fmt_rub(c.val)}${c.note ? ` (${c.note})` : ''}</b></div>
+          `).join('')}
+        </div>` : ''}
+
+        <!-- Сценарии по объёму -->
+        ${scenarios.length ? `
+        <div class="vc-section-label">📈 Прибыль при разных объёмах (в месяц)</div>
+        <table class="vc-table">
+          <thead>
+            <tr>
+              <th>Объём</th>
+              <th>Выручка</th>
+              <th>Затраты</th>
+              <th>Прибыль</th>
+              <th>Маржа</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scenarios.map(s => {
+              const mp = s.margin_pct || 0;
+              const cls = mp >= 35 ? 'high' : mp >= 20 ? 'mid' : 'low';
+              return `
+              <tr>
+                <td><span class="vol-label">${Number(s.volume).toLocaleString('ru-RU')} шт</span></td>
+                <td>${fmt_rub(s.revenue)}</td>
+                <td>${fmt_rub(s.total_costs)}</td>
+                <td class="profit-val">${fmt_rub(s.gross_profit)}</td>
+                <td><span class="margin-badge ${cls}">${mp}%</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>` : ''}
+
+        ${vc.notes ? `<div class="vc-note">ℹ️ ${esc(vc.notes)}</div>` : ''}
+      `;
     }
 
     /* ── Авторская оценка ── */
@@ -1133,10 +1168,8 @@
         renderAuthorState();
       }
 
-      // Roadmap
+      // Roadmap + ValueChain (встроены в таб агентов)
       renderRoadmap(detail.roadmap || []);
-
-      // ValueChain
       renderValueChain(detail.value_chain || {});
 
       // Sources

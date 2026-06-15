@@ -181,16 +181,25 @@ def generate_idea(seed: dict):
     }}
   ],
   "value_chain": {{
-    "retail_price": "рекомендуемая розничная цена (напр. 890 ₽)",
-    "items": [
-      {{"label": "Сырьё / материалы", "pct": 25, "note": "краткий комментарий"}},
-      {{"label": "Производство", "pct": 15, "note": "краткий комментарий"}},
-      {{"label": "Упаковка", "pct": 8, "note": "краткий комментарий"}},
-      {{"label": "Логистика", "pct": 7, "note": "краткий комментарий"}},
-      {{"label": "Комиссия МП / дистриб.", "pct": 15, "note": "краткий комментарий"}},
-      {{"label": "Маркетинг", "pct": 10, "note": "краткий комментарий"}},
-      {{"label": "Валовая маржа", "pct": 20, "note": "остаток до EBITDA без ФОТа"}}
-    ]
+    "selling_price": 890,
+    "currency": "₽",
+    "gross_margin_pct": 35,
+    "unit_costs": {{
+      "raw_materials": 120,
+      "manufacturing": 80,
+      "packaging": 45,
+      "logistics": 60,
+      "marketplace_fee_pct": 15,
+      "marketing_pct": 10
+    }},
+    "scenarios": [
+      {{"volume": 500,   "revenue": 445000,   "total_costs": 288750,   "gross_profit": 156250,   "margin_pct": 35}},
+      {{"volume": 1000,  "revenue": 890000,   "total_costs": 578500,   "gross_profit": 311500,   "margin_pct": 35}},
+      {{"volume": 5000,  "revenue": 4450000,  "total_costs": 2892500,  "gross_profit": 1557500,  "margin_pct": 35}},
+      {{"volume": 10000, "revenue": 8900000,  "total_costs": 5785000,  "gross_profit": 3115000,  "margin_pct": 35}},
+      {{"volume": 50000, "revenue": 44500000, "total_costs": 28925000, "gross_profit": 15575000, "margin_pct": 35}}
+    ],
+    "notes": "Расчёт без ФОТа. Основан на реальных данных рынка РФ для данной категории. При объёме от 5000 ед./мес. возможна экономия на сырье 5-10%."
   }}
 }}"""
 
