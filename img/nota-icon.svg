@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Фон иконки: тёмный с лёгким градиентом -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1C1F2A"/>
+      <stop offset="100%" stop-color="#0B0D13"/>
+    </linearGradient>
+    <!-- Градиент буквы N: серебристый диагональный -->
+    <linearGradient id="n-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="40%"  stop-color="#C8CDD8"/>
+      <stop offset="70%"  stop-color="#8A909E"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </linearGradient>
+    <!-- Бликовый градиент (левый верх) -->
+    <linearGradient id="shine" x1="0%" y1="0%" x2="60%" y2="60%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Обводка: тонкая серебристая рамка -->
+    <linearGradient id="border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.14"/>
+    </linearGradient>
+    <clipPath id="round-clip">
+      <rect width="100" height="100" rx="22" ry="22"/>
+    </clipPath>
+  </defs>
+
+  <!-- Фон -->
+  <rect width="100" height="100" rx="22" ry="22" fill="url(#bg-grad)"/>
+
+  <!-- Блик (верхний левый угол) -->
+  <rect width="100" height="100" rx="22" ry="22" fill="url(#shine)" clip-path="url(#round-clip)"/>
+
+  <!-- Буква N — основные диагональные стойки -->
+  <!-- Левая вертикаль -->
+  <rect x="18" y="18" width="14" height="64" rx="3" fill="url(#n-grad)"/>
+  <!-- Правая вертикаль -->
+  <rect x="68" y="18" width="14" height="64" rx="3" fill="url(#n-grad)"/>
+  <!-- Диагональ (полигон от верх-лево до низ-право) -->
+  <polygon points="18,18 32,18 82,82 68,82" fill="url(#n-grad)"/>
+
+  <!-- Обводка поверх -->
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="21.5" ry="21.5"
+        fill="none" stroke="url(#border-grad)" stroke-width="1.5"/>
+</svg>

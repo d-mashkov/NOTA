@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NOTA — Карточка</title>
   <link rel="stylesheet" href="css/main.css" />
+  <link rel="icon" type="image/svg+xml" href="img/nota-icon.svg">
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <div class="nav-logo-icon">Н</div>
+      <img src="img/nota-icon.svg" class="nav-logo-icon" alt="NOTA">
       NOTA
     </a>
     <div class="nav-links">
@@ -52,7 +53,16 @@
         <p class="note-hero-desc" id="hero-desc">...</p>
       </div>
 
-      <!-- Блоки 20 NOTы -->
+      <!-- Подпись команды -->
+      <div id="nota-team-badge" style="margin-bottom:20px;padding:12px 16px;background:rgba(0,229,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;font-size:12px;color:var(--text-muted);line-height:2;">
+        <span style="font-weight:600;color:var(--text-secondary);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">Отчёт подготовлен</span><br>
+        🔴 <b>Артём</b> (тренд-разведчик) &nbsp;·&nbsp;
+        🟡 <b>Петя</b> (SEO-аналитик) &nbsp;·&nbsp;
+        🟢 <b>Денис</b> (опер. директор)
+        <span id="nota-badge-date" style="opacity:0.5;margin-left:8px;"></span>
+      </div>
+
+      <!-- Блоки NOTы -->
       <div id="note-blocks">
         <!-- JS -->
       </div>
@@ -280,6 +290,12 @@
 
     document.title = `NOTA — ${note.title}`;
     document.getElementById('breadcrumb-title').textContent = note.title;
+
+    // Подпись команды с датой
+    const badgeDate = note.created_at
+      ? new Date(note.created_at).toLocaleDateString('ru', {day:'numeric', month:'long', year:'numeric'})
+      : '';
+    document.getElementById('nota-badge-date').textContent = badgeDate ? `· ${badgeDate}` : '';
 
     // Герой
     document.getElementById('hero-meta').innerHTML = [

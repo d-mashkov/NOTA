@@ -115,14 +115,9 @@ img { max-width: 100%; }
 .nav-logo-icon {
   width: 30px;
   height: 30px;
-  background: var(--accent);
   border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 800;
-  font-size: 13px;
+  display: block;
+  flex-shrink: 0;
 }
 .nav-links {
   display: flex;
