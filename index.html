@@ -386,6 +386,120 @@
     }
     .ideas-empty-icon { font-size: 36px; margin-bottom: 12px; }
     .ideas-empty-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+
+    /* ── Принято-состояние строки поиска ── */
+    .search-accepted {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: rgba(16,185,129,0.08);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(16,185,129,0.28);
+      border-top-color: rgba(16,185,129,0.38);
+      box-shadow: 0 0 24px rgba(16,185,129,0.12), inset 0 1px 0 rgba(16,185,129,0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      animation: fadeInUp 0.4s ease;
+    }
+    .search-accepted.show { display: flex; }
+    .search-accepted-icon {
+      font-size: 24px;
+      animation: spin-in 0.5s ease;
+    }
+    .search-accepted-body { flex: 1; }
+    .search-accepted-title {
+      font-size: 13px; font-weight: 700; color: var(--green);
+      margin-bottom: 2px;
+    }
+    .search-accepted-sub {
+      font-size: 12px; color: var(--text-muted);
+    }
+    .search-accepted-niche {
+      font-weight: 700; color: var(--text);
+    }
+    .search-accepted-btn {
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .search-accepted-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+
+    /* ── Pending-карточка ── */
+    .idea-card-pending {
+      background: rgba(59,130,246,0.06);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-top-color: rgba(59,130,246,0.35);
+      box-shadow: 0 4px 24px rgba(59,130,246,0.15), inset 0 1px 0 rgba(59,130,246,0.1);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: fadeInUp 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .idea-card-pending::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: scan 2s ease-in-out infinite;
+    }
+    @keyframes scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .pending-spinner {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 2px solid rgba(59,130,246,0.2);
+      border-top-color: var(--accent);
+      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pending-body { flex: 1; min-width: 0; }
+    .pending-label {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--accent); margin-bottom: 4px;
+    }
+    .pending-title {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .pending-status {
+      font-size: 11px; color: var(--text-muted);
+    }
+    .pending-eta {
+      font-size: 10px; color: var(--accent);
+      margin-top: 2px; font-weight: 600;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin-in {
+      from { transform: scale(0) rotate(-90deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -422,14 +536,22 @@
     <!-- Admin inputs -->
     <div id="search-bar" style="display:none" class="admin-inputs">
 
-      <!-- Текстовый поиск ниши -->
-      <div class="search-bar">
+      <!-- Строка ввода ниши -->
+      <div id="search-input-bar" class="search-bar">
         <span style="font-size:15px;color:var(--text-muted)">🔍</span>
         <input type="text" id="req-name" placeholder="Введи нишу для анализа..." onkeydown="if(event.key==='Enter') submitRequest()" />
-        <button onclick="submitRequest()">Анализировать</button>
+        <button id="analyze-btn" onclick="submitRequest()">Анализировать</button>
       </div>
 
-      <div id="req-status" style="display:none;font-size:12px;color:var(--yellow);"></div>
+      <!-- Принято-состояние -->
+      <div id="search-accepted" class="search-accepted">
+        <div class="search-accepted-icon">✅</div>
+        <div class="search-accepted-body">
+          <div class="search-accepted-title">Запрос принят — агенты работают</div>
+          <div class="search-accepted-sub">Анализируем нишу <span id="accepted-niche" class="search-accepted-niche"></span> · ≈ 10–15 мин</div>
+        </div>
+        <button class="search-accepted-btn" onclick="resetSearchBar()">+ Ещё ниша</button>
+      </div>
     </div>
 
     <!-- Toolbar -->
@@ -585,14 +707,147 @@
       buildGroupFilters(allIdeas);
     };
 
+    // ── Analyze niche ──────────────────────────────────────────
+
+    const API_BASE = `${location.protocol}//${location.hostname}`;
+    const pendingPollers = {}; // id → intervalId
+
     window.submitRequest = async function() {
-      const name = document.getElementById('req-name').value.trim();
-      if (!name) return;
-      const st = document.getElementById('req-status');
-      st.style.display = 'block';
-      st.textContent = `⏳ «${name}» добавлена в очередь — появится при следующем запуске агентов`;
-      document.getElementById('req-name').value = '';
+      const input = document.getElementById('req-name');
+      const niche = input.value.trim();
+      if (!niche) return;
+
+      const btn = document.getElementById('analyze-btn');
+      btn.textContent = '⏳ Отправляем...';
+      btn.disabled = true;
+
+      try {
+        const resp = await fetch(`${API_BASE}/api/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ niche }),
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const { id } = await resp.json();
+
+        // Показываем "принято"
+        document.getElementById('search-input-bar').style.display = 'none';
+        const accepted = document.getElementById('search-accepted');
+        accepted.classList.add('show');
+        document.getElementById('accepted-niche').textContent = `«${niche}»`;
+        input.value = '';
+
+        // Добавляем pending-карточку в начало грида
+        addPendingCard(id, niche);
+
+        // Запускаем поллинг
+        startPolling(id);
+
+      } catch (e) {
+        btn.textContent = 'Анализировать';
+        btn.disabled = false;
+        alert('Ошибка отправки запроса. Проверь соединение.');
+        console.error(e);
+      }
     };
+
+    window.resetSearchBar = function() {
+      document.getElementById('search-input-bar').style.display = 'flex';
+      const accepted = document.getElementById('search-accepted');
+      accepted.classList.remove('show');
+      const btn = document.getElementById('analyze-btn');
+      btn.textContent = 'Анализировать';
+      btn.disabled = false;
+      document.getElementById('req-name').focus();
+    };
+
+    function addPendingCard(id, niche) {
+      const grid = document.getElementById('ideas-grid');
+      const el = document.createElement('div');
+      el.className = 'idea-card-pending';
+      el.id = `pending-${id}`;
+      el.innerHTML = `
+        <div class="pending-spinner"></div>
+        <div class="pending-body">
+          <div class="pending-label">Анализируется</div>
+          <div class="pending-title">${esc(niche)}</div>
+          <div class="pending-status">5 агентов изучают рынок, тренды и конкурентов...</div>
+          <div class="pending-eta">⏱ Примерно 10–15 минут</div>
+        </div>`;
+      // Вставляем в начало грида
+      grid.insertBefore(el, grid.firstChild);
+    }
+
+    function startPolling(id) {
+      // Проверяем каждые 30 секунд
+      const poll = setInterval(async () => {
+        try {
+          const resp = await fetch(`${API_BASE}/api/idea/${id}`);
+          if (!resp.ok) return;
+          const idea = await resp.json();
+
+          if (idea.status === 'active') {
+            clearInterval(poll);
+            delete pendingPollers[id];
+            replacePendingCard(id, idea);
+          } else if (idea.status === 'failed') {
+            clearInterval(poll);
+            delete pendingPollers[id];
+            showPendingError(id, idea.summary);
+          }
+        } catch (e) {
+          console.error('Polling error:', e);
+        }
+      }, 30_000);
+      pendingPollers[id] = poll;
+    }
+
+    function replacePendingCard(id, idea) {
+      const el = document.getElementById(`pending-${id}`);
+      if (!el) return;
+
+      const cls = sc(idea.score || 0);
+      const dateStr = idea.created_at
+        ? new Date(idea.created_at).toLocaleDateString('ru-RU', {day:'numeric', month:'short', year:'numeric'})
+        : '';
+
+      // Создаём нормальную карточку
+      const a = document.createElement('a');
+      a.href = `idea-detail.html?id=${idea.id}`;
+      a.className = 'idea-card';
+      a.style.animation = 'fadeInUp 0.5s ease';
+      a.innerHTML = `
+        <div class="idea-card-body">
+          <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
+          <div class="idea-card-title">${esc(idea.title)}</div>
+          <div class="idea-card-meta">нажми для аналитики</div>
+          ${dateStr ? `<div class="idea-card-date">${dateStr}</div>` : ''}
+        </div>
+        <div class="idea-score ${cls}" data-score="${idea.score||0}">
+          <span class="idea-score-num">${idea.score||'—'}</span>
+          <span class="idea-score-lbl">балл</span>
+        </div>
+        <span class="idea-arrow">›</span>`;
+
+      el.parentNode.replaceChild(a, el);
+
+      // Добавляем в allIdeas и сбрасываем поиск
+      allIdeas.unshift(idea);
+      resetSearchBar();
+    }
+
+    function showPendingError(id, msg) {
+      const el = document.getElementById(`pending-${id}`);
+      if (!el) return;
+      el.style.borderColor = 'rgba(239,68,68,0.3)';
+      el.style.background = 'rgba(239,68,68,0.06)';
+      el.querySelector('.pending-label').style.color = 'var(--red)';
+      el.querySelector('.pending-label').textContent = 'Ошибка';
+      el.querySelector('.pending-status').textContent = msg || 'Не удалось проанализировать нишу';
+      el.querySelector('.pending-eta').textContent = '';
+      el.querySelector('.pending-spinner').style.display = 'none';
+    }
 
     // ── JSON Upload ──
     let _parsedJsonSeed = null;

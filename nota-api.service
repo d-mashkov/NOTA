@@ -1,0 +1,16 @@
+[Unit]
+Description=NOTA API (Flask/Gunicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/nota
+ExecStart=/var/www/nota/venv/bin/gunicorn -w 2 -b 127.0.0.1:5000 pipeline.api:app
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

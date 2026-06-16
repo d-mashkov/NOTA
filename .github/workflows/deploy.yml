@@ -18,4 +18,17 @@ jobs:
             mkdir -p /run/sshd
             cd /var/www/nota
             git pull origin main
+            venv/bin/pip install -q flask flask-cors gunicorn
+            # Настраиваем сервис если ещё нет
+            if [ ! -f /etc/systemd/system/nota-api.service ]; then
+              cp nota-api.service /etc/systemd/system/nota-api.service
+              systemctl daemon-reload
+              systemctl enable nota-api
+            fi
+            systemctl restart nota-api || true
+            # Nginx: добавляем proxy для /api/ если ещё нет
+            if ! grep -q "proxy_pass.*5000" /etc/nginx/sites-available/nota; then
+              sed -i 's|location / {|location /api/ {\n        proxy_pass http://127.0.0.1:5000/api/;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n    }\n\n    location / {|' /etc/nginx/sites-available/nota
+              nginx -t && systemctl reload nginx
+            fi
             echo "✅ Deploy complete"
