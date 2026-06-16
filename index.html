@@ -728,7 +728,7 @@
         .order('created_at', { ascending: false });
 
       allIdeas = data || [];
-      renderIdeas(allIdeas);
+      applyFiltersAndSort();
       buildGroupFilters(allIdeas);
     }
 
