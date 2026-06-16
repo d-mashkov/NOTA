@@ -484,10 +484,10 @@
         return `
         <a href="idea-detail.html?id=${idea.id}" class="idea-card">
           <div class="idea-card-body">
-            ${badge}
             <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
             <div class="idea-card-title">${esc(idea.title)}</div>
             <div class="idea-card-meta">${esc(group)} · нажми для аналитики</div>
+            ${badge}
           </div>
           <div class="idea-score ${cls}" data-score="${idea.score||0}">
             <span class="idea-score-num">${idea.score||'—'}</span>
