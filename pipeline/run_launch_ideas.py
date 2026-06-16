@@ -294,7 +294,7 @@ def generate_idea(seed: dict):
     }
 
 
-TARGET_TOTAL = 20  # сколько идей хотим держать в базе
+TARGET_TOTAL = 30  # сколько идей хотим держать в базе
 
 
 def run(limit: int = None):

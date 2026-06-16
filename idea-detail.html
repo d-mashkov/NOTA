@@ -427,7 +427,7 @@
     .agent-tab[data-agent="roadmap"]    .agent-dot { background: #6366F1; box-shadow: 0 0 6px rgba(99,102,241,0.7); }
     .agent-tab[data-agent="valuechain"] .agent-dot { background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.7); }
 
-    /* ── Роудмэп ── */
+    /* ── Роадмап ── */
     .roadmap-list { display: flex; flex-direction: column; gap: 14px; }
     .roadmap-phase {
       background: rgba(255,255,255,0.05);
@@ -471,7 +471,7 @@
       .roadmap-phase-left { width: auto; flex-direction: row; align-items: center; gap: 10px; }
     }
 
-    /* ── ВельюЧейн: unit-экономика ── */
+    /* ── Велью Чейн: unit-экономика ── */
     .vc-summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -660,12 +660,12 @@
           <div class="agent-tabs-sep"></div>
           <button class="agent-tab" data-agent="roadmap" onclick="switchAgent('roadmap',this)">
             <div class="agent-dot"></div>
-            <div class="agent-tab-name">Роудмэп</div>
+            <div class="agent-tab-name">Роадмап</div>
             <div class="agent-tab-role">Дорожная карта</div>
           </button>
           <button class="agent-tab" data-agent="valuechain" onclick="switchAgent('valuechain',this)">
             <div class="agent-dot"></div>
-            <div class="agent-tab-name">ВельюЧейн</div>
+            <div class="agent-tab-name">Велью Чейн</div>
             <div class="agent-tab-role">Сколько заработаем</div>
           </button>
         </div>
@@ -677,14 +677,14 @@
         <div id="agent-avoska" class="agent-panel"><div class="agent-text" id="t-avoska"></div></div>
         <div id="agent-polya"  class="agent-panel"><div class="agent-text" id="t-polya"></div></div>
 
-        <!-- Роудмэп -->
+        <!-- Роадмап -->
         <div id="agent-roadmap" class="agent-panel">
           <div class="roadmap-list" id="roadmap-list">
             <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
           </div>
         </div>
 
-        <!-- ВельюЧейн: unit-экономика -->
+        <!-- Велью Чейн: unit-экономика -->
         <div id="agent-valuechain" class="agent-panel">
           <div id="vc-content">
             <div style="color:var(--text-muted);font-size:13px;">Появится при следующей генерации</div>
@@ -924,7 +924,7 @@
       });
     }
 
-    /* ── Роудмэп ── */
+    /* ── Роадмап ── */
     function renderRoadmap(roadmap) {
       const el = document.getElementById('roadmap-list');
       if (!roadmap || !roadmap.length) {
@@ -947,7 +947,7 @@
         </div>`).join('');
     }
 
-    /* ── ВельюЧейн: unit-экономика ── */
+    /* ── Велью Чейн: unit-экономика ── */
     function fmt_rub(n) {
       if (!n && n !== 0) return '—';
       return Number(n).toLocaleString('ru-RU') + ' ₽';

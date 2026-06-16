@@ -93,6 +93,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .idea-card-date {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
     .idea-card-meta {
       font-size: 11px;
       color: var(--text-muted);
@@ -481,12 +486,16 @@
         const badge = reviewed
           ? `<div class="author-badge">✓ Прочитано${stars ? `<span class="author-badge-stars">${stars}</span>` : ''}</div>`
           : '';
+        const dateStr = idea.created_at
+          ? new Date(idea.created_at).toLocaleDateString('ru-RU', {day:'numeric', month:'short', year:'numeric'})
+          : '';
         return `
         <a href="idea-detail.html?id=${idea.id}" class="idea-card">
           <div class="idea-card-body">
             <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
             <div class="idea-card-title">${esc(idea.title)}</div>
             <div class="idea-card-meta">${esc(group)} · нажми для аналитики</div>
+            ${dateStr ? `<div class="idea-card-date">${dateStr}</div>` : ''}
             ${badge}
           </div>
           <div class="idea-score ${cls}" data-score="${idea.score||0}">
@@ -532,7 +541,7 @@
       const { data } = await supabase
         .from('launch_ideas').select('*')
         .eq('status','active')
-        .order('score', { ascending: false });
+        .order('created_at', { ascending: false });
 
       allIdeas = data || [];
       renderIdeas(allIdeas);
@@ -675,7 +684,7 @@
       const { data } = await supabase
         .from('launch_ideas').select('*')
         .eq('status','active')
-        .order('score', { ascending: false });
+        .order('created_at', { ascending: false });
 
       allIdeas = data || [];
       renderIdeas(allIdeas);
