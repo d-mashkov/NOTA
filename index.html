@@ -190,19 +190,35 @@
       color: white;
       box-shadow: 0 0 20px rgba(59,130,246,0.4);
     }
-    .refresh-btn {
-      padding: 6px 14px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text-muted);
-      border-radius: 8px;
+    .refresh-btn { display: none; }
+
+    /* ── Sort buttons ── */
+    .sort-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sort-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
       cursor: pointer;
-      transition: all 0.15s;
-      display: none;
+      transition: all 0.18s;
+      white-space: nowrap;
     }
-    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sort-btn:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text-secondary);
+    }
+    .sort-btn.active {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.25);
+      color: var(--text);
+    }
 
     /* ── Admin inputs ── */
     .admin-inputs {
@@ -421,7 +437,11 @@
       <div class="toolbar-left" id="group-filters">
         <button class="group-filter active" data-group="all" onclick="filterGroup('all',this)">Все</button>
       </div>
-      <button class="refresh-btn" id="refresh-btn" onclick="loadIdeas()">↻ Обновить</button>
+      <div class="sort-btns">
+        <button class="sort-btn active" data-sort="date" onclick="setSort('date',this)">По дате ↓</button>
+        <button class="sort-btn" data-sort="score" onclick="setSort('score',this)">По баллам</button>
+        <button class="sort-btn" data-sort="reviewed" onclick="setSort('reviewed',this)">Прочитанные</button>
+      </div>
     </div>
 
     <!-- Grid -->
@@ -527,11 +547,32 @@
     window.filterGroup = function(group, btn) {
       document.querySelectorAll('.group-filter').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const filtered = group === 'all' ? allIdeas : allIdeas.filter(i => {
-        try { return JSON.parse(i.detail_json||'{}').group === group; } catch { return false; }
-      });
-      renderIdeas(filtered);
+      applyFiltersAndSort();
     };
+
+    let currentSort = 'date';
+
+    window.setSort = function(sort, btn) {
+      currentSort = sort;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFiltersAndSort();
+    };
+
+    function applyFiltersAndSort() {
+      const activeGroup = document.querySelector('.group-filter.active')?.dataset.group || 'all';
+      let ideas = activeGroup === 'all' ? [...allIdeas] : allIdeas.filter(i => {
+        try { return JSON.parse(i.detail_json||'{}').group === activeGroup; } catch { return false; }
+      });
+      if (currentSort === 'score') {
+        ideas.sort((a, b) => (b.score || 0) - (a.score || 0));
+      } else if (currentSort === 'date') {
+        ideas.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      } else if (currentSort === 'reviewed') {
+        ideas.sort((a, b) => (b.author_reviewed ? 1 : 0) - (a.author_reviewed ? 1 : 0));
+      }
+      renderIdeas(ideas);
+    }
 
     window.loadIdeas = async function() {
       const btn = document.getElementById('refresh-btn');
