@@ -317,39 +317,51 @@
     }
     .back-btn:hover { color: var(--accent); }
 
-    /* ── Субскоры ── */
-    .sub-scores { display: flex; flex-direction: column; gap: 11px; }
-    .sub-score-row {
-      display: grid;
-      grid-template-columns: 140px 1fr 38px;
+    /* ── Субскоры — круговая диаграмма ── */
+    .sub-donut-wrap {
+      display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin-top: 20px;
+      flex-wrap: wrap;
     }
-    .sub-score-label {
-      font-size: 11px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.06em;
-      display: flex; align-items: center; justify-content: space-between;
+    .sub-donut-svg-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 120px; height: 120px;
     }
-    .sub-score-weight { font-size: 9px; opacity: 0.45; font-weight: 500; letter-spacing: 0; }
-    .sub-score-track {
-      height: 5px;
-      background: rgba(255,255,255,0.07);
-      border-radius: 3px;
-      overflow: hidden;
+    .sub-donut-svg-wrap svg { transform: rotate(-90deg); }
+    .sub-donut-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-width: 180px;
     }
-    .sub-score-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.8s cubic-bezier(.4,0,.2,1);
-      width: 0%;
+    .sub-donut-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .sub-score-fill.high  { background: var(--green);  box-shadow: 0 0 8px rgba(16,185,129,0.55); }
-    .sub-score-fill.mid   { background: var(--yellow); box-shadow: 0 0 8px rgba(245,158,11,0.55); }
-    .sub-score-fill.low   { background: var(--red);    box-shadow: 0 0 8px rgba(239,68,68,0.55); }
-    .sub-score-val { font-size: 13px; font-weight: 800; text-align: right; letter-spacing: -0.02em; }
-    .sub-score-val.high  { color: var(--green); }
-    .sub-score-val.mid   { color: var(--yellow); }
-    .sub-score-val.low   { color: var(--red); }
+    .sub-donut-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sub-donut-label {
+      flex: 1;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .sub-donut-val {
+      font-size: 13px; font-weight: 800;
+      letter-spacing: -0.02em;
+      min-width: 28px; text-align: right;
+    }
 
     /* ── Авторская оценка ── */
     .author-zone {
@@ -575,17 +587,13 @@
         <div class="d-category" id="d-category">—</div>
         <div class="d-title" id="d-title">Загружаем...</div>
         <div class="d-summary" id="d-summary"></div>
+        <!-- Субскоры — круговая диаграмма под текстом -->
+        <div class="sub-donut-wrap" id="sub-donut-wrap" style="display:none"></div>
       </div>
       <div class="d-score" id="d-score">
         <span class="d-score-num">—</span>
         <span class="d-score-lbl">балл</span>
       </div>
-    </div>
-
-    <!-- Субскоры -->
-    <div class="d-block full" style="margin-bottom:16px;">
-      <div class="d-block-title"><span>📐</span> Из чего складывается балл</div>
-      <div class="sub-scores" id="sub-scores"></div>
     </div>
 
     <!-- Метрики -->
@@ -823,30 +831,81 @@
     };
 
     function renderSubScores(subScores) {
-      const el = document.getElementById('sub-scores');
-      if (!subScores || !Object.keys(subScores).length) {
-        el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">Субскоры появятся после следующей генерации</div>';
-        return;
-      }
-      el.innerHTML = Object.entries(subScores).map(([key, val]) => {
-        const cls = val >= 70 ? 'high' : val >= 45 ? 'mid' : 'low';
+      const wrap = document.getElementById('sub-donut-wrap');
+      if (!subScores || !Object.keys(subScores).length) return;
+
+      const entries = Object.entries(subScores).map(([key, val]) => {
         const meta = SUB_SCORE_META[key] || { label: key, weight: '' };
+        return { key, val: Number(val) || 0, label: meta.label, weight: parseFloat(meta.weight) || 20 };
+      });
+
+      // Цвета сегментов
+      const COLORS = ['#3B82F6','#10B981','#F59E0B','#A855F7','#F43F5E'];
+
+      // SVG donut — каждый сегмент пропорционален весу × значению
+      const R = 52, r = 34, cx = 60, cy = 60;
+      const circumference = 2 * Math.PI * R;
+      // Полный круг = сумма (weight × val / 100)
+      const totalWeight = entries.reduce((s, e) => s + e.weight, 0);
+
+      let svgSegs = '';
+      let offset = 0;
+      const gap = 2; // gap between segments in degrees → convert to stroke units
+      const gapUnits = (gap / 360) * circumference;
+
+      entries.forEach((e, i) => {
+        const fraction = e.weight / totalWeight;
+        const segLen = fraction * circumference - gapUnits;
+        const fillLen = segLen * (e.val / 100);
+        const emptyLen = circumference - fillLen;
+        const color = COLORS[i % COLORS.length];
+
+        svgSegs += `
+          <circle cx="${cx}" cy="${cy}" r="${R}"
+            fill="none" stroke="rgba(255,255,255,0.05)"
+            stroke-width="${R - r}"
+            stroke-dasharray="${segLen} ${circumference - segLen}"
+            stroke-dashoffset="${-offset}" />
+          <circle cx="${cx}" cy="${cy}" r="${R}"
+            fill="none" stroke="${color}"
+            stroke-width="${R - r}"
+            stroke-dasharray="${fillLen} ${emptyLen}"
+            stroke-dashoffset="${-offset}"
+            class="donut-seg" data-target="${fillLen}"
+            style="stroke-dasharray: 0 ${circumference}; transition: stroke-dasharray 0.9s cubic-bezier(.4,0,.2,1) ${i * 0.12}s; filter: drop-shadow(0 0 6px ${color}88)" />`;
+        offset += segLen + gapUnits;
+      });
+
+      // Средний балл по взвешенным субскорам
+      const avgScore = Math.round(
+        entries.reduce((s, e) => s + e.val * (e.weight / totalWeight), 0)
+      );
+
+      // Легенда
+      const legend = entries.map((e, i) => {
+        const color = COLORS[i % COLORS.length];
+        const cls = e.val >= 70 ? 'var(--green)' : e.val >= 45 ? 'var(--yellow)' : 'var(--red)';
         return `
-          <div class="sub-score-row">
-            <div class="sub-score-label">
-              ${meta.label}
-              <span class="sub-score-weight">${meta.weight}</span>
-            </div>
-            <div class="sub-score-track">
-              <div class="sub-score-fill ${cls}" data-val="${val}" style="width:0%"></div>
-            </div>
-            <div class="sub-score-val ${cls}">${val}</div>
+          <div class="sub-donut-item">
+            <div class="sub-donut-dot" style="background:${color};box-shadow:0 0 6px ${color}88"></div>
+            <div class="sub-donut-label">${esc(e.label)}</div>
+            <div class="sub-donut-val" style="color:${cls}">${e.val}</div>
           </div>`;
       }).join('');
-      // Анимируем через requestAnimationFrame
+
+      wrap.innerHTML = `
+        <div class="sub-donut-svg-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">${svgSegs}</svg>
+        </div>
+        <div class="sub-donut-legend">${legend}</div>`;
+
+      wrap.style.display = 'flex';
+
+      // Анимируем сегменты после отрисовки
       requestAnimationFrame(() => {
-        el.querySelectorAll('.sub-score-fill').forEach(bar => {
-          bar.style.width = bar.dataset.val + '%';
+        wrap.querySelectorAll('.donut-seg').forEach(seg => {
+          const target = parseFloat(seg.dataset.target);
+          seg.style.strokeDasharray = `${target} ${circumference - target}`;
         });
       });
     }
