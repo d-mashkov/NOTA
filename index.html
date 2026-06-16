@@ -339,9 +339,7 @@
 
     /* ── Авторская метка на карточке ── */
     .author-badge {
-      position: absolute;
-      top: 10px; right: 10px;
-      display: flex; align-items: center; gap: 5px;
+      display: inline-flex; align-items: center; gap: 5px;
       padding: 3px 9px;
       background: rgba(16,185,129,0.12);
       border: 1px solid rgba(16,185,129,0.28);
@@ -350,6 +348,8 @@
       color: var(--green);
       box-shadow: 0 0 10px rgba(16,185,129,0.15);
       pointer-events: none;
+      margin-bottom: 6px;
+      align-self: flex-start;
     }
     .author-badge-stars {
       letter-spacing: -1px;
@@ -483,8 +483,8 @@
           : '';
         return `
         <a href="idea-detail.html?id=${idea.id}" class="idea-card">
-          ${badge}
           <div class="idea-card-body">
+            ${badge}
             <div class="idea-card-cat">${esc(idea.category || 'FMCG')}</div>
             <div class="idea-card-title">${esc(idea.title)}</div>
             <div class="idea-card-meta">${esc(group)} · нажми для аналитики</div>
