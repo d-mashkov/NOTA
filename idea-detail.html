@@ -56,9 +56,9 @@
       border: 3px solid;
       position: relative; z-index: 1;
     }
-    .d-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 32px rgba(16,185,129,0.5), 0 0 8px rgba(16,185,129,0.25); }
-    .d-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); box-shadow: 0 0 32px rgba(245,158,11,0.5), 0 0 8px rgba(245,158,11,0.25); }
-    .d-score.low  { color: var(--red); border-color: var(--red); background: var(--red-dim); box-shadow: 0 0 32px rgba(239,68,68,0.5), 0 0 8px rgba(239,68,68,0.25); }
+    .d-score.high { color: var(--green); border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 0 6px rgba(16,185,129,0.12), 0 0 0 12px rgba(16,185,129,0.06); }
+    .d-score.mid  { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); box-shadow: 0 0 0 6px rgba(245,158,11,0.12), 0 0 0 12px rgba(245,158,11,0.06); }
+    .d-score.low  { color: var(--red); border-color: var(--red); background: var(--red-dim); box-shadow: 0 0 0 6px rgba(239,68,68,0.12), 0 0 0 12px rgba(239,68,68,0.06); }
     .d-score-num  { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
     .d-score-lbl  { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-top: 2px; }
 
@@ -318,49 +318,79 @@
     .back-btn:hover { color: var(--accent); }
 
     /* ── Субскоры — круговая диаграмма ── */
-    .sub-donut-wrap {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    .sub-donut-svg-wrap {
-      position: relative;
-      flex-shrink: 0;
-      width: 120px; height: 120px;
-    }
-    .sub-donut-svg-wrap svg { transform: rotate(-90deg); }
-    .sub-donut-legend {
-      flex: 1;
+    /* Right column: score + donut stacked */
+    .d-hero-right {
       display: flex;
       flex-direction: column;
-      gap: 9px;
-      min-width: 180px;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .sub-donut-wrap {
+      position: relative;
+      width: 88px; height: 88px;
+    }
+    .sub-donut-svg-wrap {
+      width: 88px; height: 88px;
+    }
+    .sub-donut-svg-wrap svg { transform: rotate(-90deg); }
+
+    /* Tooltip on hover */
+    .sub-donut-tooltip {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15,15,25,0.92);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 6px 10px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      z-index: 10;
+      text-align: center;
+    }
+    .sub-donut-tooltip.visible { opacity: 1; }
+    .sub-donut-tooltip-label {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .sub-donut-tooltip-val {
+      font-size: 18px; font-weight: 900; letter-spacing: -0.03em;
+    }
+
+    /* Legend below hero */
+    .sub-donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
     }
     .sub-donut-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .sub-donut-dot {
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       flex-shrink: 0;
     }
     .sub-donut-label {
       flex: 1;
-      font-size: 11px; font-weight: 600;
+      font-size: 10px; font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
     .sub-donut-val {
-      font-size: 13px; font-weight: 800;
+      font-size: 12px; font-weight: 800;
       letter-spacing: -0.02em;
-      min-width: 28px; text-align: right;
+      min-width: 24px; text-align: right;
     }
 
     /* ── Авторская оценка ── */
@@ -623,12 +653,17 @@
         <div class="d-category" id="d-category">—</div>
         <div class="d-title" id="d-title">Загружаем...</div>
         <div class="d-summary" id="d-summary"></div>
-        <!-- Субскоры — круговая диаграмма под текстом -->
-        <div class="sub-donut-wrap" id="sub-donut-wrap" style="display:none"></div>
+        <!-- Легенда субскоров — под текстом -->
+        <div class="sub-donut-legend" id="sub-donut-legend" style="display:none"></div>
       </div>
-      <div class="d-score" id="d-score">
-        <span class="d-score-num">—</span>
-        <span class="d-score-lbl">балл</span>
+      <!-- Правая колонка: общий балл + доnut -->
+      <div class="d-hero-right">
+        <div class="d-score" id="d-score">
+          <span class="d-score-num">—</span>
+          <span class="d-score-lbl">балл</span>
+        </div>
+        <!-- Субскоры — круговая диаграмма под кружком -->
+        <div class="sub-donut-wrap" id="sub-donut-wrap" style="display:none"></div>
       </div>
     </div>
 
@@ -868,6 +903,7 @@
 
     function renderSubScores(subScores) {
       const wrap = document.getElementById('sub-donut-wrap');
+      const legendEl = document.getElementById('sub-donut-legend');
       if (!subScores || !Object.keys(subScores).length) return;
 
       const entries = Object.entries(subScores).map(([key, val]) => {
@@ -875,73 +911,83 @@
         return { key, val: Number(val) || 0, label: meta.label, weight: parseFloat(meta.weight) || 20 };
       });
 
-      // Цвета сегментов
       const COLORS = ['#3B82F6','#10B981','#F59E0B','#A855F7','#F43F5E'];
 
-      // SVG donut — каждый сегмент пропорционален весу × значению
-      const R = 52, r = 34, cx = 60, cy = 60;
+      // 88×88 SVG — same size as score ring
+      const SIZE = 88, cx = 44, cy = 44, R = 36, strokeW = 11;
+      const r = R - strokeW / 2;
       const circumference = 2 * Math.PI * R;
-      // Полный круг = сумма (weight × val / 100)
       const totalWeight = entries.reduce((s, e) => s + e.weight, 0);
 
       let svgSegs = '';
       let offset = 0;
-      const gap = 2; // gap between segments in degrees → convert to stroke units
-      const gapUnits = (gap / 360) * circumference;
+      const gapUnits = (2.5 / 360) * circumference;
 
       entries.forEach((e, i) => {
         const fraction = e.weight / totalWeight;
         const segLen = fraction * circumference - gapUnits;
         const fillLen = segLen * (e.val / 100);
-        const emptyLen = circumference - fillLen;
         const color = COLORS[i % COLORS.length];
 
-        svgSegs += `
-          <circle cx="${cx}" cy="${cy}" r="${R}"
-            fill="none" stroke="rgba(255,255,255,0.05)"
-            stroke-width="${R - r}"
-            stroke-dasharray="${segLen} ${circumference - segLen}"
-            stroke-dashoffset="${-offset}" />
-          <circle cx="${cx}" cy="${cy}" r="${R}"
-            fill="none" stroke="${color}"
-            stroke-width="${R - r}"
-            stroke-dasharray="${fillLen} ${emptyLen}"
-            stroke-dashoffset="${-offset}"
-            class="donut-seg" data-target="${fillLen}"
-            style="stroke-dasharray: 0 ${circumference}; transition: stroke-dasharray 0.9s cubic-bezier(.4,0,.2,1) ${i * 0.12}s; filter: drop-shadow(0 0 6px ${color}88)" />`;
+        // Track (dim background)
+        svgSegs += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="${strokeW}" stroke-dasharray="${segLen.toFixed(2)} ${(circumference - segLen).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" />`;
+        // Filled arc — no filter, clean glow via stroke only
+        svgSegs += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-dasharray="0 ${circumference.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" stroke-linecap="butt" class="donut-seg" data-target="${fillLen.toFixed(2)}" data-circ="${circumference.toFixed(2)}" data-label="${esc(e.label)}" data-val="${e.val}" data-color="${color}" style="transition: stroke-dasharray 0.85s cubic-bezier(.4,0,.2,1) ${(i * 0.11).toFixed(2)}s" />`;
         offset += segLen + gapUnits;
       });
 
-      // Средний балл по взвешенным субскорам
-      const avgScore = Math.round(
-        entries.reduce((s, e) => s + e.val * (e.weight / totalWeight), 0)
-      );
+      // Tooltip div (inside wrap, absolutely positioned)
+      wrap.innerHTML = `
+        <div class="sub-donut-svg-wrap">
+          <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${svgSegs}</svg>
+        </div>
+        <div class="sub-donut-tooltip" id="sub-donut-tip">
+          <div class="sub-donut-tooltip-label" id="sub-tip-label"></div>
+          <div class="sub-donut-tooltip-val"  id="sub-tip-val"></div>
+        </div>`;
 
-      // Легенда
+      wrap.style.display = 'block';
+
+      // Legend in the info column
       const legend = entries.map((e, i) => {
         const color = COLORS[i % COLORS.length];
         const cls = e.val >= 70 ? 'var(--green)' : e.val >= 45 ? 'var(--yellow)' : 'var(--red)';
         return `
           <div class="sub-donut-item">
-            <div class="sub-donut-dot" style="background:${color};box-shadow:0 0 6px ${color}88"></div>
+            <div class="sub-donut-dot" style="background:${color}"></div>
             <div class="sub-donut-label">${esc(e.label)}</div>
             <div class="sub-donut-val" style="color:${cls}">${e.val}</div>
           </div>`;
       }).join('');
+      legendEl.innerHTML = legend;
+      legendEl.style.display = 'flex';
 
-      wrap.innerHTML = `
-        <div class="sub-donut-svg-wrap">
-          <svg width="120" height="120" viewBox="0 0 120 120">${svgSegs}</svg>
-        </div>
-        <div class="sub-donut-legend">${legend}</div>`;
-
-      wrap.style.display = 'flex';
-
-      // Анимируем сегменты после отрисовки
+      // Animate arcs
       requestAnimationFrame(() => {
         wrap.querySelectorAll('.donut-seg').forEach(seg => {
           const target = parseFloat(seg.dataset.target);
-          seg.style.strokeDasharray = `${target} ${circumference - target}`;
+          const circ = parseFloat(seg.dataset.circ);
+          seg.style.strokeDasharray = `${target} ${circ - target}`;
+        });
+      });
+
+      // Tooltip hover
+      const tip = document.getElementById('sub-donut-tip');
+      const tipLabel = document.getElementById('sub-tip-label');
+      const tipVal = document.getElementById('sub-tip-val');
+
+      wrap.querySelectorAll('.donut-seg').forEach(seg => {
+        seg.style.cursor = 'pointer';
+        seg.addEventListener('mouseenter', () => {
+          const val = seg.dataset.val;
+          const color = seg.dataset.color;
+          tipLabel.textContent = seg.dataset.label;
+          tipVal.textContent = val;
+          tipVal.style.color = color;
+          tip.classList.add('visible');
+        });
+        seg.addEventListener('mouseleave', () => {
+          tip.classList.remove('visible');
         });
       });
     }
