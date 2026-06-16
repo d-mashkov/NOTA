@@ -483,15 +483,17 @@
       .roadmap-phase-left { width: auto; flex-direction: row; align-items: center; gap: 10px; }
     }
 
-    /* ── Велью Чейн: unit-экономика ── */
-    .vc-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
+    /* ── Велью Чейн: redesign ── */
+    .vc-basis { margin-top: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
+    .vc-basis.real { color: var(--green); }
+    .vc-basis.est  { color: var(--yellow); }
+
+    /* KPI-строка */
+    .vc-kpi-row {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
     }
-    @media (max-width: 600px) { .vc-summary { grid-template-columns: 1fr 1fr; } }
     .vc-kpi {
+      flex: 1; min-width: 100px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.09);
       border-top-color: rgba(255,255,255,0.14);
@@ -499,60 +501,94 @@
     }
     .vc-kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 5px; }
     .vc-kpi-val   { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; color: var(--text); }
-    .vc-kpi-val.green { color: var(--green); text-shadow: 0 0 16px rgba(16,185,129,0.4); }
+    .vc-kpi-val.green  { color: var(--green); text-shadow: 0 0 16px rgba(16,185,129,0.4); }
     .vc-kpi-val.yellow { color: var(--yellow); }
-    .vc-basis { margin-top: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
-    .vc-basis.real { color: var(--green); }
-    .vc-basis.est  { color: var(--yellow); }
 
-    /* Затраты на единицу */
-    .vc-costs-grid {
-      display: flex; flex-wrap: wrap; gap: 7px;
+    /* Waterfall-бар */
+    .vc-waterfall {
       margin-bottom: 20px;
     }
-    .vc-cost-pill {
-      padding: 5px 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 8px;
-      font-size: 12px; color: var(--text-secondary);
+    .vc-wf-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin-bottom: 10px;
     }
-    .vc-cost-pill b { color: var(--text); font-weight: 700; }
+    .vc-wf-bar {
+      display: flex; height: 36px; border-radius: 8px;
+      overflow: hidden; gap: 2px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .vc-wf-seg {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+      transition: flex 0.9s cubic-bezier(.4,0,.2,1);
+      white-space: nowrap; overflow: hidden;
+      min-width: 0;
+    }
+    .vc-wf-legend {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
+    }
+    .vc-wf-leg-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .vc-wf-leg-dot {
+      width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+    }
+    .vc-wf-leg-val {
+      color: var(--text-secondary); font-weight: 600; margin-left: 2px;
+    }
 
-    /* Таблица сценариев */
+    /* Сценарии — вертикальные колонки */
+    .vc-scenarios {
+      display: flex; gap: 8px; align-items: flex-end;
+      height: 120px; margin-bottom: 10px;
+    }
+    .vc-sc-col {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 4px; height: 100%;
+      justify-content: flex-end;
+    }
+    .vc-sc-bar-wrap {
+      width: 100%; flex: 1; display: flex; flex-direction: column;
+      justify-content: flex-end; gap: 2px;
+    }
+    .vc-sc-profit {
+      width: 100%; border-radius: 4px 4px 0 0;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(16,185,129,0.4);
+      transition: height 0.8s cubic-bezier(.4,0,.2,1);
+    }
+    .vc-sc-cost {
+      width: 100%; border-radius: 0;
+      background: rgba(255,255,255,0.08);
+    }
+    .vc-sc-vol {
+      font-size: 9px; font-weight: 700; color: var(--text-muted);
+      text-align: center; white-space: nowrap;
+    }
+    .vc-sc-margin {
+      font-size: 9px; font-weight: 800; color: var(--green);
+      text-align: center;
+    }
+    .vc-sc-labels {
+      display: flex; gap: 8px;
+    }
+    .vc-sc-lbl {
+      flex: 1; text-align: center; font-size: 9px;
+      font-weight: 700; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden;
+    }
+
     .vc-section-label {
       font-size: 10px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.08em; color: var(--text-muted);
-      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
     }
-    .vc-table { width: 100%; border-collapse: collapse; }
-    .vc-table th {
-      text-align: left; font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted);
-      padding: 0 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .vc-table th:not(:first-child) { text-align: right; }
-    .vc-table td {
-      padding: 10px; font-size: 13px; color: var(--text-secondary);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      vertical-align: middle;
-    }
-    .vc-table td:not(:first-child) { text-align: right; }
-    .vc-table tr:last-child td { border-bottom: none; }
-    .vc-table tr:hover td { background: rgba(255,255,255,0.025); }
-    .vc-table .vol-label { font-weight: 700; color: var(--text); font-size: 14px; }
-    .vc-table .profit-val { font-weight: 800; color: var(--green); }
-    .vc-table .margin-badge {
-      display: inline-block; padding: 2px 8px;
-      border-radius: 5px; font-size: 11px; font-weight: 700;
-    }
-    .vc-table .margin-badge.high  { background: rgba(16,185,129,0.12); color: var(--green); }
-    .vc-table .margin-badge.mid   { background: rgba(245,158,11,0.12); color: var(--yellow); }
-    .vc-table .margin-badge.low   { background: rgba(239,68,68,0.12);  color: var(--red); }
     .vc-note {
       margin-top: 14px; padding: 10px 12px;
       background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.55;
+      border-radius: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.55;
     }
   </style>
 </head>
@@ -1026,75 +1062,95 @@
       const price = vc.selling_price || 0;
       const margin_pct = vc.gross_margin_pct || 0;
       const margin_rub = Math.round(price * margin_pct / 100);
-
-      // Считаем затраты на единицу для пилюль
-      const cost_items = [];
-      if (uc.raw_materials)    cost_items.push({ label: 'Сырьё',           val: uc.raw_materials });
-      if (uc.manufacturing)    cost_items.push({ label: 'Производство',    val: uc.manufacturing });
-      if (uc.packaging)        cost_items.push({ label: 'Упаковка',         val: uc.packaging });
-      if (uc.logistics)        cost_items.push({ label: 'Логистика',        val: uc.logistics });
-      if (uc.marketplace_fee_pct) cost_items.push({ label: 'Комиссия МП',  val: Math.round(price * uc.marketplace_fee_pct / 100), note: `${uc.marketplace_fee_pct}%` });
-      if (uc.marketing_pct)    cost_items.push({ label: 'Маркетинг',       val: Math.round(price * uc.marketing_pct / 100), note: `${uc.marketing_pct}%` });
-
       const scenarios = vc.scenarios || [];
 
+      // Waterfall segments: each cost as % of selling price
+      const raw   = uc.raw_materials   || 0;
+      const mfg   = uc.manufacturing   || 0;
+      const pack  = uc.packaging       || 0;
+      const logi  = uc.logistics       || 0;
+      const mpfee = uc.marketplace_fee_pct ? Math.round(price * uc.marketplace_fee_pct / 100) : 0;
+      const mktg  = uc.marketing_pct   ? Math.round(price * uc.marketing_pct / 100) : 0;
+      const profit_rub = Math.max(0, margin_rub);
+
+      const wf_segs = [
+        { label: 'Сырьё',      val: raw,        color: '#6366F1' },
+        { label: 'Произв.',    val: mfg,        color: '#8B5CF6' },
+        { label: 'Упаковка',   val: pack,       color: '#A78BFA' },
+        { label: 'Логистика',  val: logi,       color: '#60A5FA' },
+        { label: 'МП',         val: mpfee,      color: '#F59E0B' },
+        { label: 'Маркетинг',  val: mktg,       color: '#F97316' },
+        { label: 'Прибыль',    val: profit_rub, color: '#10B981' },
+      ].filter(s => s.val > 0);
+
+      const total_shown = wf_segs.reduce((a, s) => a + s.val, 0) || price || 1;
+
+      const wf_html = wf_segs.map(s => {
+        const pct = (s.val / total_shown * 100).toFixed(1);
+        return `<div class="vc-wf-seg" style="flex:${pct};background:${s.color}" title="${s.label}: ${fmt_rub(s.val)} (${pct}%)">${pct > 8 ? s.label : ''}</div>`;
+      }).join('');
+
+      const legend_html = wf_segs.map(s =>
+        `<div class="vc-wf-leg-item"><div class="vc-wf-leg-dot" style="background:${s.color}"></div>${s.label}<span class="vc-wf-leg-val">${fmt_rub(s.val)}</span></div>`
+      ).join('');
+
+      // Scenario bar chart
+      const maxRevenue = scenarios.length ? Math.max(...scenarios.map(s => s.revenue || 0)) : 1;
+      const sc_cols_html = scenarios.map(s => {
+        const rev = s.revenue || 0;
+        const profit = Math.max(0, s.gross_profit || 0);
+        const costs = Math.max(0, (s.total_costs || 0));
+        const mp = s.margin_pct || 0;
+        const barH = Math.round((rev / maxRevenue) * 100);
+        const profitH = rev > 0 ? Math.round((profit / rev) * barH) : 0;
+        const costH = barH - profitH;
+        const vol = Number(s.volume);
+        const volLabel = vol >= 1000 ? (vol / 1000) + 'к' : String(vol);
+        return `
+          <div class="vc-sc-col">
+            <div class="vc-sc-margin">${mp}%</div>
+            <div class="vc-sc-bar-wrap">
+              <div class="vc-sc-profit" style="height:${profitH}%"></div>
+              <div class="vc-sc-cost"   style="height:${costH}%"></div>
+            </div>
+            <div class="vc-sc-vol">${volLabel} шт</div>
+          </div>`;
+      }).join('');
+
       el.innerHTML = `
-        <!-- KPI-карточки -->
-        <div class="vc-summary">
+        <!-- KPI -->
+        <div class="vc-kpi-row">
           <div class="vc-kpi">
-            <div class="vc-kpi-label">Розничная цена</div>
+            <div class="vc-kpi-label">Розничная цена${vc.price_source ? ` &nbsp;<span style="font-size:9px;font-weight:600;opacity:.7">${vc.price_is_real ? '🟢 данные' : '🟡 оценка'}</span>` : ''}</div>
             <div class="vc-kpi-val">${fmt_rub(price)}</div>
-            ${vc.price_source ? `<div class="vc-basis ${vc.price_is_real ? 'real' : 'est'}">${vc.price_is_real ? '🟢 данные' : '🟡 оценка'}</div>` : ''}
           </div>
           <div class="vc-kpi">
             <div class="vc-kpi-label">Маржа на единицу</div>
             <div class="vc-kpi-val green">${fmt_rub(margin_rub)}</div>
           </div>
           <div class="vc-kpi">
-            <div class="vc-kpi-label">Валовая маржа %</div>
+            <div class="vc-kpi-label">Валовая маржа</div>
             <div class="vc-kpi-val ${margin_pct >= 35 ? 'green' : margin_pct >= 20 ? 'yellow' : ''}">${margin_pct}%</div>
           </div>
         </div>
 
-        <!-- Затраты на единицу -->
-        ${cost_items.length ? `
-        <div class="vc-section-label">💸 Затраты на 1 единицу</div>
-        <div class="vc-costs-grid">
-          ${cost_items.map(c => `
-            <div class="vc-cost-pill">${esc(c.label)}: <b>${fmt_rub(c.val)}${c.note ? ` (${c.note})` : ''}</b></div>
-          `).join('')}
+        <!-- Waterfall -->
+        <div class="vc-waterfall">
+          <div class="vc-wf-label">Структура цены</div>
+          <div class="vc-wf-bar" id="vc-wf-bar-inner">${wf_html}</div>
+          <div class="vc-wf-legend">${legend_html}</div>
+        </div>
+
+        <!-- Scenarios -->
+        ${scenarios.length ? `
+        <div class="vc-wf-label" style="margin-top:4px">Прибыль по объёму (в месяц)</div>
+        <div class="vc-scenarios">${sc_cols_html}</div>
+        <div style="display:flex;gap:12px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-muted)"><div style="width:8px;height:8px;border-radius:2px;background:var(--green)"></div>Прибыль</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-muted)"><div style="width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,0.08)"></div>Затраты</div>
         </div>` : ''}
 
-        <!-- Сценарии по объёму -->
-        ${scenarios.length ? `
-        <div class="vc-section-label">📈 Прибыль при разных объёмах (в месяц)</div>
-        <table class="vc-table">
-          <thead>
-            <tr>
-              <th>Объём</th>
-              <th>Выручка</th>
-              <th>Затраты</th>
-              <th>Прибыль</th>
-              <th>Маржа</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${scenarios.map(s => {
-              const mp = s.margin_pct || 0;
-              const cls = mp >= 35 ? 'high' : mp >= 20 ? 'mid' : 'low';
-              return `
-              <tr>
-                <td><span class="vol-label">${Number(s.volume).toLocaleString('ru-RU')} шт</span></td>
-                <td>${fmt_rub(s.revenue)}</td>
-                <td>${fmt_rub(s.total_costs)}</td>
-                <td class="profit-val">${fmt_rub(s.gross_profit)}</td>
-                <td><span class="margin-badge ${cls}">${mp}%</span></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>` : ''}
-
-        ${vc.notes ? `<div class="vc-note">ℹ️ ${esc(vc.notes)}</div>` : ''}
+        ${vc.notes ? `<div class="vc-note" style="margin-top:14px">ℹ️ ${esc(vc.notes)}</div>` : ''}
       `;
     }
 
