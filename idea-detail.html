@@ -489,6 +489,9 @@
     .vc-kpi-val   { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; color: var(--text); }
     .vc-kpi-val.green { color: var(--green); text-shadow: 0 0 16px rgba(16,185,129,0.4); }
     .vc-kpi-val.yellow { color: var(--yellow); }
+    .vc-basis { margin-top: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
+    .vc-basis.real { color: var(--green); }
+    .vc-basis.est  { color: var(--yellow); }
 
     /* Затраты на единицу */
     .vc-costs-grid {
@@ -982,6 +985,7 @@
           <div class="vc-kpi">
             <div class="vc-kpi-label">Розничная цена</div>
             <div class="vc-kpi-val">${fmt_rub(price)}</div>
+            ${vc.price_source ? `<div class="vc-basis ${vc.price_is_real ? 'real' : 'est'}">${vc.price_is_real ? '🟢 данные' : '🟡 оценка'}</div>` : ''}
           </div>
           <div class="vc-kpi">
             <div class="vc-kpi-label">Маржа на единицу</div>
@@ -1091,6 +1095,71 @@
       });
     });
 
+    function showStatusScreen({ type, title, sub, agents }) {
+      // Создаём DOM вместо innerHTML чтобы избежать проблем с <script> внутри template literals
+      document.body.style.cssText = 'background:#0a0a0f;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;margin:0';
+      document.body.innerHTML = '';
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .ss-box{text-align:center;max-width:440px;padding:40px 24px}
+        .ss-spinner{width:64px;height:64px;border-radius:50%;border:3px solid rgba(59,130,246,.2);border-top-color:#3b82f6;animation:ssspin 1s linear infinite;margin:0 auto 24px}
+        @keyframes ssspin{to{transform:rotate(360deg)}}
+        .ss-icon{font-size:48px;margin-bottom:16px}
+        .ss-title{font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:8px}
+        .ss-sub{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px}
+        .ss-agents{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+        .ss-agent{padding:4px 12px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:20px;font-size:11px;color:#94a3b8}
+        .ss-back{padding:10px 24px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;text-decoration:none;display:inline-block}
+        .ss-back:hover{background:rgba(255,255,255,.1);color:#f1f5f9}
+      `;
+      document.head.appendChild(style);
+
+      const box = document.createElement('div');
+      box.className = 'ss-box';
+
+      if (type === 'pending') {
+        const spinner = document.createElement('div');
+        spinner.className = 'ss-spinner';
+        box.appendChild(spinner);
+      } else {
+        const icon = document.createElement('div');
+        icon.className = 'ss-icon';
+        icon.textContent = '⚠️';
+        box.appendChild(icon);
+      }
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'ss-title';
+      titleEl.innerHTML = title;
+      box.appendChild(titleEl);
+
+      const subEl = document.createElement('div');
+      subEl.className = 'ss-sub';
+      subEl.innerHTML = sub;
+      box.appendChild(subEl);
+
+      if (agents && agents.length) {
+        const agentsEl = document.createElement('div');
+        agentsEl.className = 'ss-agents';
+        agents.forEach(a => {
+          const span = document.createElement('span');
+          span.className = 'ss-agent';
+          span.textContent = a;
+          agentsEl.appendChild(span);
+        });
+        box.appendChild(agentsEl);
+      }
+
+      const back = document.createElement('a');
+      back.href = 'index.html';
+      back.className = 'ss-back';
+      back.textContent = '← Вернуться к идеям';
+      box.appendChild(back);
+
+      document.body.appendChild(box);
+    }
+
     async function init() {
       await requireAuth();
       const user = await getCurrentUser();
@@ -1108,57 +1177,24 @@
 
       // Если ещё анализируется — показываем экран ожидания
       if (idea.status === 'pending') {
-        document.body.innerHTML = `
-          <style>
-            body { background: #0a0a0f; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; }
-            .wait-box { text-align: center; max-width: 420px; padding: 40px 24px; }
-            .wait-spinner { width: 64px; height: 64px; border-radius: 50%; border: 3px solid rgba(59,130,246,0.2); border-top-color: #3b82f6; animation: spin 1s linear infinite; margin: 0 auto 24px; }
-            @keyframes spin { to { transform: rotate(360deg); } }
-            .wait-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
-            .wait-niche { color: #3b82f6; }
-            .wait-sub { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px; }
-            .wait-agents { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-            .wait-agent { padding: 4px 12px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; font-size: 11px; color: #94a3b8; }
-            .wait-back { padding: 10px 24px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
-            .wait-back:hover { background: rgba(255,255,255,0.1); color: #f1f5f9; }
-          </style>
-          <div class="wait-box">
-            <div class="wait-spinner"></div>
-            <div class="wait-title">Анализируем <span class="wait-niche">«${idea.title}»</span></div>
-            <div class="wait-sub">5 агентов изучают рынок, тренды, маркетплейсы и конкурентов.<br>Обычно занимает 10–15 минут.</div>
-            <div class="wait-agents">
-              <span class="wait-agent">🔴 Артём — тренды</span>
-              <span class="wait-agent">🟡 Петя — спрос РФ</span>
-              <span class="wait-agent">🔵 Вова — маркетплейсы</span>
-              <span class="wait-agent">🛒 Авоська — каналы</span>
-              <span class="wait-agent">🟣 Поля — стратегия</span>
-            </div>
-            <a href="index.html" class="wait-back">← Вернуться к идеям</a>
-          </div>
-          <script>
-            // Автообновление каждые 30 сек
-            setTimeout(() => location.reload(), 30000);
-          </script>`;
+        showStatusScreen({
+          type: 'pending',
+          title: 'Анализируем «' + esc(idea.title) + '»',
+          sub: '5 агентов изучают рынок, тренды, маркетплейсы и конкурентов.<br>Обычно занимает 10–15 минут.',
+          agents: ['🔴 Артём — тренды', '🟡 Петя — спрос РФ', '🔵 Вова — маркетплейсы', '🛒 Авоська — каналы', '🟣 Поля — стратегия'],
+        });
+        // Автообновление каждые 30 сек
+        setTimeout(() => location.reload(), 30000);
         return;
       }
 
       // Если анализ завершился ошибкой
       if (idea.status === 'failed') {
-        document.body.innerHTML = `
-          <style>
-            body { background: #0a0a0f; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; }
-            .err-box { text-align: center; max-width: 420px; padding: 40px 24px; }
-            .err-icon { font-size: 48px; margin-bottom: 16px; }
-            .err-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
-            .err-sub { font-size: 14px; color: #64748b; margin-bottom: 24px; }
-            .err-back { padding: 10px 24px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
-          </style>
-          <div class="err-box">
-            <div class="err-icon">⚠️</div>
-            <div class="err-title">Анализ не удался</div>
-            <div class="err-sub">${idea.summary || 'Попробуй уточнить нишу и отправить запрос снова.'}</div>
-            <a href="index.html" class="err-back">← Вернуться к идеям</a>
-          </div>`;
+        showStatusScreen({
+          type: 'failed',
+          title: 'Анализ не удался',
+          sub: idea.summary || 'Попробуй уточнить нишу и отправить запрос снова.',
+        });
         return;
       }
 
