@@ -19,20 +19,17 @@ export async function getSession() {
 }
 
 export async function requireAuth() {
-  const session = await getSession();
-  if (!session) window.location.href = 'login.html';
-  return session;
+  // Auth временно отключена
+  return true;
 }
 
 export async function getCurrentUser() {
-  const session = await getSession();
-  if (!session) return null;
-  const { data } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', session.user.email)
-    .single();
-  return data;
+  // Auth временно отключена — возвращаем дефолтного пользователя
+  return {
+    email: 'dmashkovjob@gmail.com',
+    name: 'Denis',
+    role: 'admin',
+  };
 }
 
 export async function signOut() {

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOTA — Архитектура системы</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a0f;
+    --bg2: #0c1219;
+    --bg3: #111b26;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff5f;
+    --accent4: #b388ff;
+    --accent5: #ffd740;
+    --text: #e8f4f8;
+    --muted: rgba(232,244,248,0.45);
+    --glow: 0 0 30px rgba(0,229,255,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 80px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .header-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0.3;
+  }
+
+  /* LOGIC CHAIN */
+  .chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 80px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .chain-step {
+    flex-shrink: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 140px;
+    text-align: center;
+    position: relative;
+    transition: all 0.25s;
+  }
+  .chain-step:hover {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+    transform: translateY(-3px);
+  }
+  .chain-step .step-num {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .chain-step .step-label {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .chain-step .step-desc {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .chain-arrow {
+    flex-shrink: 0;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .chain-arrow::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), rgba(0,229,255,0.3));
+    animation: flowRight 2s linear infinite;
+  }
+  .chain-arrow::after {
+    content: '›';
+    color: var(--accent);
+    font-size: 18px;
+    z-index: 1;
+  }
+
+  @keyframes flowRight {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+
+  /* AGENTS GRID */
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 80px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .agent-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .agent-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 20px 20px 0 0;
+  }
+  .agent-card.artem::before { background: var(--accent2); }
+  .agent-card.vova::before { background: var(--accent); }
+  .agent-card.petya::before { background: var(--accent5); }
+  .agent-card.chukcha::before { background: var(--accent3); }
+  .agent-card.yamakasi::before { background: var(--accent4); }
+
+  .agent-card:hover.artem { border-color: rgba(255,107,53,0.4); box-shadow: 0 20px 60px rgba(255,107,53,0.1); }
+  .agent-card:hover.vova { border-color: rgba(0,229,255,0.4); box-shadow: 0 20px 60px rgba(0,229,255,0.1); }
+  .agent-card:hover.petya { border-color: rgba(255,215,64,0.4); box-shadow: 0 20px 60px rgba(255,215,64,0.1); }
+  .agent-card:hover.chukcha { border-color: rgba(127,255,95,0.4); box-shadow: 0 20px 60px rgba(127,255,95,0.1); }
+  .agent-card:hover.yamakasi { border-color: rgba(179,136,255,0.4); box-shadow: 0 20px 60px rgba(179,136,255,0.1); }
+
+  .agent-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .agent-emoji {
+    font-size: 36px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .agent-meta {}
+  .agent-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 3px;
+  }
+  .agent-name.artem { color: var(--accent2); }
+  .agent-name.vova { color: var(--accent); }
+  .agent-name.petya { color: var(--accent5); }
+  .agent-name.chukcha { color: var(--accent3); }
+  .agent-name.yamakasi { color: var(--accent4); }
+
+  .agent-role {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .agent-desc {
+    font-size: 12px;
+    line-height: 1.8;
+    color: rgba(232,244,248,0.75);
+    margin-bottom: 20px;
+    border-left: 2px solid var(--border);
+    padding-left: 14px;
+  }
+
+  .agent-sources {
+    margin-bottom: 16px;
+  }
+  .sources-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .source-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+    font-family: 'Space Mono', monospace;
+  }
+  .tag.artem { border-color: rgba(255,107,53,0.4); color: var(--accent2); background: rgba(255,107,53,0.08); }
+  .tag.vova { border-color: rgba(0,229,255,0.4); color: var(--accent); background: rgba(0,229,255,0.08); }
+  .tag.petya { border-color: rgba(255,215,64,0.4); color: var(--accent5); background: rgba(255,215,64,0.08); }
+  .tag.chukcha { border-color: rgba(127,255,95,0.4); color: var(--accent3); background: rgba(127,255,95,0.08); }
+  .tag.yamakasi { border-color: rgba(179,136,255,0.4); color: var(--accent4); background: rgba(179,136,255,0.08); }
+
+  .agent-stack {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11px;
+  }
+  .stack-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stack-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    color: rgba(232,244,248,0.7);
+  }
+  .stack-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-artem { background: var(--accent2); }
+  .dot-vova { background: var(--accent); }
+  .dot-petya { background: var(--accent5); }
+  .dot-chukcha { background: var(--accent3); }
+  .dot-yamakasi { background: var(--accent4); }
+
+  /* CHUKCHA FULL WIDTH */
+  .agent-card.chukcha-full {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 28px;
+  }
+  .chukcha-full .agent-header { margin-bottom: 0; }
+  .chukcha-full .divider {
+    width: 1px;
+    background: var(--border);
+  }
+
+  /* NOTA SITE CARD */
+  .nota-site {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 80px;
+    animation: fadeUp 0.8s 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .nota-site::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent4), var(--accent2));
+  }
+  .nota-site-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+  }
+  .site-col h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+  .site-feature {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: rgba(232,244,248,0.7);
+  }
+  .site-feature-icon { flex-shrink: 0; }
+
+  /* FULL CHAIN DIAGRAM */
+  .full-chain {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    animation: fadeUp 0.8s 0.6s ease both;
+    margin-bottom: 60px;
+  }
+
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .flow-node {
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid;
+    text-align: center;
+    min-width: 130px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .flow-node:hover {
+    transform: scale(1.03);
+  }
+  .flow-node.input { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.08); }
+  .flow-node.telegram-node { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.05); }
+  .flow-node.chukcha-node { border-color: var(--accent3); color: var(--accent3); background: rgba(127,255,95,0.08); font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; padding: 18px 32px; min-width: 180px; }
+  .flow-node.artem-node { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.08); }
+  .flow-node.vova-node { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.06); }
+  .flow-node.petya-node { border-color: var(--accent5); color: var(--accent5); background: rgba(255,215,64,0.08); }
+  .flow-node.yamakasi-node { border-color: var(--accent4); color: var(--accent4); background: rgba(179,136,255,0.08); }
+  .flow-node.data-node { border-color: var(--border); color: var(--muted); background: rgba(255,255,255,0.02); font-size: 11px; min-width: 100px; }
+  .flow-node.nota-node { border-color: var(--accent4); color: var(--accent4); background: rgba(179,136,255,0.08); }
+  .flow-node.output-node { border-color: var(--accent3); color: var(--accent3); background: rgba(127,255,95,0.06); font-family: 'Unbounded', sans-serif; font-size: 11px; font-weight: 600; }
+
+  .flow-arrow-v {
+    display: flex;
+    justify-content: center;
+    height: 28px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 18px;
+    position: relative;
+  }
+  .flow-arrow-v::before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--accent), transparent);
+    opacity: 0.3;
+    left: 50%;
+  }
+
+  .flow-arrow-h {
+    color: var(--muted);
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  .flow-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin: 4px 0 12px;
+  }
+
+  /* WEEKLY BLOCK */
+  .weekly-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 80px;
+    animation: fadeUp 0.8s 0.7s ease both;
+  }
+
+  .weekly-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .weekly-card h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--accent3);
+  }
+  .weekly-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .weekly-step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(127,255,95,0.15);
+    border: 1px solid rgba(127,255,95,0.3);
+    color: var(--accent3);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* PULSE DOT */
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent3);
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(127,255,95,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(127,255,95,0); }
+  }
+
+  @media (max-width: 900px) {
+    .nota-site-inner { grid-template-columns: 1fr; }
+    .agent-card.chukcha-full { grid-template-columns: 1fr; }
+    .weekly-block { grid-template-columns: 1fr; }
+    .chain { flex-wrap: wrap; justify-content: center; }
+    .chain-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">System Architecture v1.0</div>
+    <h1>NOTA Intelligence</h1>
+    <p>Мульти-агентная система поиска FMCG-трендов для России. <br>5 специализированных агентов + Telegram-бот + веб-сервис.</p>
+  </div>
+
+  <!-- LOGICAL CHAIN -->
+  <div class="section-label">01 — Логическая цепочка</div>
+  <div class="chain">
+    <div class="chain-step">
+      <div class="step-num">ВХОД</div>
+      <div class="step-label">Ты задаёшь вопрос</div>
+      <div class="step-desc">Telegram или веб</div>
+    </div>
+    <div class="chain-arrow"></div>
+    <div class="chain-step">
+      <div class="step-num">РОУТИНГ</div>
+      <div class="step-label">Чукча анализирует</div>
+      <div class="step-desc">Кого подключить?</div>
+    </div>
+    <div class="chain-arrow"></div>
+    <div class="chain-step">
+      <div class="step-num">СБОР</div>
+      <div class="step-label">Агенты ищут</div>
+      <div class="step-desc">Параллельно</div>
+    </div>
+    <div class="chain-arrow"></div>
+    <div class="chain-step">
+      <div class="step-num">СИНТЕЗ</div>
+      <div class="step-label">Claude собирает</div>
+      <div class="step-desc">Один ответ</div>
+    </div>
+    <div class="chain-arrow"></div>
+    <div class="chain-step">
+      <div class="step-num">СОХРАНЕНИЕ</div>
+      <div class="step-label">→ Supabase</div>
+      <div class="step-desc">NOTы + сигналы</div>
+    </div>
+    <div class="chain-arrow"></div>
+    <div class="chain-step">
+      <div class="step-num">ВЫХОД</div>
+      <div class="step-label">Ответ + сайт</div>
+      <div class="step-desc">ТГ + NOTA.app</div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="section-label">02 — Агенты</div>
+  <div class="agents-grid">
+
+    <!-- АРТЁМ -->
+    <div class="agent-card artem">
+      <div class="agent-header">
+        <div class="agent-emoji">🔴</div>
+        <div class="agent-meta">
+          <div class="agent-name artem">Артём</div>
+          <div class="agent-role">Охотник за трендами в соцсетях</div>
+        </div>
+      </div>
+      <div class="agent-desc">
+        Мониторит соцсети: что хайпует в США, Европе, Китае прямо сейчас. Ищет новые форматы продуктов, вирусные категории, контент от инфлюенсеров в сфере FMCG.
+      </div>
+      <div class="agent-sources">
+        <div class="sources-label">Источники данных</div>
+        <div class="source-tags">
+          <span class="tag artem">X / Twitter (Grok)</span>
+          <span class="tag artem">TikTok (Exa)</span>
+          <span class="tag artem">LinkedIn (Exa)</span>
+          <span class="tag artem">YouTube (Exa)</span>
+          <span class="tag artem">Instagram (Exa)</span>
+        </div>
+      </div>
+      <div class="agent-stack">
+        <div class="stack-label">Технический стек</div>
+        <div class="stack-item"><div class="stack-dot dot-artem"></div>Grok API (xAI) — X/Twitter реальное время</div>
+        <div class="stack-item"><div class="stack-dot dot-artem"></div>Exa.ai — нейропоиск по соцсетям</div>
+        <div class="stack-item"><div class="stack-dot dot-artem"></div>Python функция search_social()</div>
+      </div>
+    </div>
+
+    <!-- ВОВА -->
+    <div class="agent-card vova">
+      <div class="agent-header">
+        <div class="agent-emoji">🔵</div>
+        <div class="agent-meta">
+          <div class="agent-name vova">Вова</div>
+          <div class="agent-role">Аналитик официального FMCG рынка</div>
+        </div>
+      </div>
+      <div class="agent-desc">
+        Шерстит официальные источники: отраслевые отчёты, Nielsen, Euromonitor, Forbes, FoodNavigator. Даёт цифры, доли рынка, официальную аналитику по категориям.
+      </div>
+      <div class="agent-sources">
+        <div class="sources-label">Источники данных</div>
+        <div class="source-tags">
+          <span class="tag vova">Nielsen (Exa)</span>
+          <span class="tag vova">Euromonitor (Exa)</span>
+          <span class="tag vova">FoodNavigator (Exa)</span>
+          <span class="tag vova">Forbes (Exa)</span>
+          <span class="tag vova">Mintel (Exa)</span>
+        </div>
+      </div>
+      <div class="agent-stack">
+        <div class="stack-label">Технический стек</div>
+        <div class="stack-item"><div class="stack-dot dot-vova"></div>Exa.ai EN — семантический поиск</div>
+        <div class="stack-item"><div class="stack-dot dot-vova"></div>Domain filtering (site: параметр)</div>
+        <div class="stack-item"><div class="stack-dot dot-vova"></div>Python функция search_fmcg_web()</div>
+      </div>
+    </div>
+
+    <!-- ПЕТЯ -->
+    <div class="agent-card petya">
+      <div class="agent-header">
+        <div class="agent-emoji">🟡</div>
+        <div class="agent-meta">
+          <div class="agent-name petya">Петя</div>
+          <div class="agent-role">Компаратор трендов Запад vs Россия</div>
+        </div>
+      </div>
+      <div class="agent-desc">
+        Находит что уже взлетело на Западе и проверяет — есть ли это в России. Ищет «белые пятна» — ниши где спрос есть, а предложения нет. Главный поставщик идей для запуска.
+      </div>
+      <div class="agent-sources">
+        <div class="sources-label">Источники данных</div>
+        <div class="source-tags">
+          <span class="tag petya">Exa RU + EN</span>
+          <span class="tag petya">Яндекс (через Exa)</span>
+          <span class="tag petya">Google Trends (Exa)</span>
+          <span class="tag petya">ТАСС / РБК (Exa)</span>
+        </div>
+      </div>
+      <div class="agent-stack">
+        <div class="stack-label">Технический стек</div>
+        <div class="stack-item"><div class="stack-dot dot-petya"></div>Exa.ai RU — русскоязычный поиск</div>
+        <div class="stack-item"><div class="stack-dot dot-petya"></div>Exa.ai EN — параллельный поиск</div>
+        <div class="stack-item"><div class="stack-dot dot-petya"></div>Python функция compare_trends()</div>
+      </div>
+    </div>
+
+    <!-- ЯМАКАСИ -->
+    <div class="agent-card yamakasi">
+      <div class="agent-header">
+        <div class="agent-emoji">🟣</div>
+        <div class="agent-meta">
+          <div class="agent-name yamakasi">ЯмакасиТудаси</div>
+          <div class="agent-role">Маркетолог-упаковщик под рынок РФ</div>
+        </div>
+      </div>
+      <div class="agent-desc">
+        Берёт сырую идею и думает как её продать в России. Знает все твои NOTы, предлагает форматы, ЦА, каналы, упаковку, ценообразование. Всегда доступен для диалога в Telegram.
+      </div>
+      <div class="agent-sources">
+        <div class="sources-label">Источники данных</div>
+        <div class="source-tags">
+          <span class="tag yamakasi">Supabase NOTы</span>
+          <span class="tag yamakasi">note_reports</span>
+          <span class="tag yamakasi">История диалога</span>
+          <span class="tag yamakasi">Claude Memory</span>
+        </div>
+      </div>
+      <div class="agent-stack">
+        <div class="stack-label">Технический стек</div>
+        <div class="stack-item"><div class="stack-dot dot-yamakasi"></div>Claude claude-sonnet — анализ и генерация</div>
+        <div class="stack-item"><div class="stack-dot dot-yamakasi"></div>Supabase — контекст всех NOTы</div>
+        <div class="stack-item"><div class="stack-dot dot-yamakasi"></div>Message history — память чата</div>
+      </div>
+    </div>
+
+    <!-- ЧУКЧА -->
+    <div class="agent-card chukcha" style="grid-column: 1 / -1;">
+      <div style="display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; gap: 28px; align-items: start;">
+        <div>
+          <div class="agent-header">
+            <div class="agent-emoji">🟢</div>
+            <div class="agent-meta">
+              <div class="agent-name chukcha">Чукча</div>
+              <div class="agent-role">Оркестратор — мозг системы</div>
+            </div>
+          </div>
+          <div class="agent-desc">
+            Принимает твой вопрос, решает каких агентов запустить, запускает параллельно, ждёт результаты, синтезирует один связный ответ и отправляет тебе.
+          </div>
+        </div>
+        <div style="width:1px; background: var(--border); height: 100%;"></div>
+        <div>
+          <div class="sources-label" style="margin-bottom: 12px;">Что умеет</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Роутинг запроса → нужным агентам</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Параллельный запуск агентов</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Синтез результатов в один ответ</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Еженедельный авто-дайджест</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Сохранение находок → Supabase</div>
+          <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Управление памятью диалога</div>
+        </div>
+        <div style="width:1px; background: var(--border); height: 100%;"></div>
+        <div>
+          <div class="agent-stack" style="background: transparent; padding: 0;">
+            <div class="stack-label">Технический стек</div>
+            <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Claude claude-sonnet (tool_use)</div>
+            <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Anthropic SDK — Python</div>
+            <div class="stack-item"><div class="stack-dot dot-chukcha"></div>python-telegram-bot 20+</div>
+            <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Supabase — хранение результатов</div>
+            <div class="stack-item"><div class="stack-dot dot-chukcha"></div>Railway / VPS — хостинг бота</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NOTA SITE -->
+  <div class="section-label">03 — Сайт NOTA (уже работает)</div>
+  <div class="nota-site">
+    <div style="margin-bottom: 28px;">
+      <div style="font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px;">
+        <span class="pulse-dot"></span>d-mashkov.github.io/NOTA
+      </div>
+      <div style="font-size: 12px; color: var(--muted);">Закрытый веб-сервис. Авторизация по email + пароль. GitHub Pages + Supabase.</div>
+    </div>
+    <div class="nota-site-inner">
+      <div class="site-col">
+        <h3>📊 Dashboard</h3>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Статистика: всего NOTы, средний скор, топ-3</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Форма для нового запроса на анализ</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Pending-карточка со спиннером пока агенты работают</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Быстрый доступ к последним NOTам</div>
+      </div>
+      <div class="site-col">
+        <h3>📋 Лента NOTы</h3>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Все карточки с фильтрами: Запускать / Наблюдать / Пропустить</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Фильтр по стадии: Зарождение / Рост / Хайп</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Скоринг 0–100 с цветовой индикацией</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Детальная карточка: 14 блоков анализа + AI-вывод</div>
+      </div>
+      <div class="site-col">
+        <h3>📰 Новости + Профиль</h3>
+        <div class="site-feature"><span class="site-feature-icon">→</span> 10 еженедельных сигналов из LinkedIn/Reddit</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Сохранённые NOTы — личная коллекция</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Комментарии к карточкам</div>
+        <div class="site-feature"><span class="site-feature-icon">→</span> Админка: управление категориями и запросами</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL FLOW DIAGRAM -->
+  <div class="section-label">04 — Полная схема потока данных</div>
+  <div class="full-chain">
+    <div class="flow-diagram">
+
+      <div class="flow-row">
+        <div class="flow-node input">👤 Денис</div>
+        <div class="flow-arrow-h">—</div>
+        <div class="flow-node telegram-node">📱 Telegram Bot</div>
+        <div class="flow-arrow-h">—</div>
+        <div class="flow-node input">🌐 Сайт NOTA</div>
+      </div>
+
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-label">вопрос / задача</div>
+
+      <div class="flow-row">
+        <div class="flow-node chukcha-node">🟢 ЧУКЧА<br><small style="font-size:10px;opacity:0.7">Claude tool_use</small></div>
+      </div>
+
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-label">роутинг и параллельный запуск</div>
+
+      <div class="flow-row">
+        <div class="flow-node artem-node">🔴 Артём<br><small>Соцсети</small></div>
+        <div class="flow-arrow-h">·</div>
+        <div class="flow-node vova-node">🔵 Вова<br><small>FMCG рынок</small></div>
+        <div class="flow-arrow-h">·</div>
+        <div class="flow-node petya-node">🟡 Петя<br><small>Тренды RU/WW</small></div>
+        <div class="flow-arrow-h">·</div>
+        <div class="flow-node yamakasi-node">🟣 ЯмакасиТудаси<br><small>Маркетолог</small></div>
+      </div>
+
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-label">источники данных</div>
+
+      <div class="flow-row">
+        <div class="flow-node data-node">Grok API<br>X/Twitter</div>
+        <div class="flow-node data-node">Exa.ai<br>TikTok/LI</div>
+        <div class="flow-node data-node">Exa.ai EN<br>Forbes/Nielsen</div>
+        <div class="flow-node data-node">Exa.ai RU<br>Яндекс/РБК</div>
+        <div class="flow-node data-node">Supabase<br>NOTы</div>
+      </div>
+
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-label">синтез чуккой</div>
+
+      <div class="flow-row">
+        <div class="flow-node nota-node">💾 Supabase<br><small>notes + trend_signals</small></div>
+        <div class="flow-arrow-h">→</div>
+        <div class="flow-node output-node">📱 Ответ в Telegram</div>
+        <div class="flow-arrow-h">+</div>
+        <div class="flow-node output-node">🌐 Карточка на сайте</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEKLY AUTOMATION -->
+  <div class="section-label">05 — Автоматизация</div>
+  <div class="weekly-block">
+    <div class="weekly-card">
+      <h3>⚡ По запросу (мгновенно)</h3>
+      <div class="weekly-step">
+        <div class="weekly-step-num">1</div>
+        <div>Пишешь в Telegram: <em>"Найди тренды на растительный белок"</em></div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">2</div>
+        <div>Чукча запускает Артёма + Вову + Петю параллельно</div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">3</div>
+        <div>~15 секунд — получаешь структурированный ответ с источниками</div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">4</div>
+        <div>Интересная находка → Чукча создаёт pending-карточку на сайте</div>
+      </div>
+    </div>
+    <div class="weekly-card">
+      <h3>🕐 Еженедельно (понедельник 09:00)</h3>
+      <div class="weekly-step">
+        <div class="weekly-step-num">1</div>
+        <div>GitHub Actions запускает Python pipeline автоматически</div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">2</div>
+        <div>Все агенты обходят источники по всем активным категориям</div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">3</div>
+        <div>Gemini / Claude генерирует полные NOTы → сохраняет в Supabase</div>
+      </div>
+      <div class="weekly-step">
+        <div class="weekly-step-num">4</div>
+        <div>Чукча отправляет тебе дайджест топ-находок за неделю в Telegram</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; color: var(--muted); font-size: 11px; letter-spacing: 0.1em; padding: 20px 0;">
+    NOTA Intelligence System — v1.0 — 2026
+  </div>
+
+</div>
+</body>
+</html>
