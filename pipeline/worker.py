@@ -6,7 +6,6 @@ Worker — запускается в фоне API для обработки по
 import os
 import sys
 import json
-import re
 
 # Путь к корню проекта
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,35 +14,71 @@ sys.path.insert(0, ROOT)
 from dotenv import load_dotenv
 load_dotenv(os.path.join(ROOT, '.env'), override=True)
 
+import anthropic
 from pipeline.supabase_client import supabase
 from pipeline.run_launch_ideas import generate_idea
 
 
-def classify_group(niche: str) -> str:
-    """Определяет группу по ключевым словам в запросе."""
-    n = niche.lower()
-    if any(w in n for w in ["еда", "питан", "снек", "напит", "сок", "шокол", "сыр", "молок", "кофе", "чай", "food", "drink", "protein"]):
-        return "Питание"
-    if any(w in n for w in ["крем", "шампун", "уход", "beauty", "косметик", "кожа", "волос", "зуб", "дезодор"]):
-        return "Уход"
-    if any(w in n for w in ["гаджет", "трекер", "наушник", "телефон", "смарт", "device", "gadget", "tech"]):
-        return "Гаджеты"
-    if any(w in n for w in ["сигар", "вейп", "никотин", "табак", "снюс", "пауч", "pod"]):
-        return "Никотин"
-    if any(w in n for w in ["дом", "уборк", "стирк", "кухня", "посуд", "cleaning", "home"]):
-        return "Дом"
-    if any(w in n for w in ["сон", "постель", "подушк", "матрас", "lyocell", "tencel", "sleep", "bedding"]):
-        return "Сон"
-    return "FMCG"
+def build_seed_via_claude(niche: str) -> dict:
+    """
+    Использует Claude Haiku чтобы построить хороший seed для пайплайна.
+    Возвращает {"title", "query", "group"}.
+    """
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+    resp = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=400,
+        messages=[{
+            "role": "user",
+            "content": f"""Ты помогаешь анализировать ниши для запуска FMCG/D2C продуктов на российском рынке.
+
+Пользователь хочет проанализировать нишу: «{niche}»
+
+Верни JSON (только JSON, без markdown):
+{{
+  "title": "Красивое название идеи для запуска (3-6 слов, по-русски)",
+  "query": "Поисковый запрос на английском для агентов (15-25 слов) — конкретная категория продукта, ключевые слова рынка, Russia, 2025, бренд/D2C/retail",
+  "group": "одно из: Питание | Уход | Гаджеты | Никотин | Дом | Сон | FMCG"
+}}
+
+Примеры хороших query:
+- "cottage cheese snacks healthy protein Russia FMCG market 2025 retail D2C brand"
+- "natural deodorant aluminum-free biome skincare Russia D2C market 2025"
+- "electric toothbrush sonic smart mid-range Russia retail market 2025"
+"""
+        }]
+    )
+
+    raw = resp.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    data = json.loads(raw.strip())
+
+    return {
+        "title": data.get("title", niche),
+        "query": data.get("query", f"{niche} Russia market 2025 brand"),
+        "group": data.get("group", "FMCG"),
+    }
 
 
-def build_query(niche: str) -> str:
-    """Строит поисковый запрос для агентов из текста ниши."""
-    # Убираем стоп-слова и делаем компактный запрос
-    stop = {"для", "с", "без", "в", "на", "по", "из", "и", "или", "нового", "новые", "новый"}
-    words = [w for w in niche.split() if w.lower() not in stop]
-    base = " ".join(words)
-    return f"{base} Russia market 2025 D2C brand"
+def has_real_data(result: dict) -> bool:
+    """Проверяет что агенты вернули реальные данные, а не заглушки."""
+    try:
+        detail = json.loads(result.get("detail_json", "{}"))
+        structs = detail.get("structs", {})
+
+        # Считаем сколько агентов дали реальные данные (не "Данные ограничены")
+        real_count = 0
+        for agent_name, s in structs.items():
+            verdict = s.get("verdict", "")
+            if verdict and "ограничен" not in verdict and "limited" not in verdict.lower():
+                real_count += 1
+
+        return real_count >= 2  # хотя бы 2 агента вернули что-то реальное
+    except Exception:
+        return False
 
 
 def main():
@@ -57,18 +92,24 @@ def main():
     print(f"[Worker] Запускаю анализ ниши: '{niche}' (id={idea_id})")
 
     try:
-        group = classify_group(niche)
-        query = build_query(niche)
+        # Шаг 1: Claude Haiku строит умный seed
+        print(f"[Worker] → Haiku строит seed...")
+        seed = build_seed_via_claude(niche)
+        print(f"[Worker] seed: title='{seed['title']}' group='{seed['group']}' query='{seed['query'][:60]}...'")
 
-        seed = {
-            "title": niche,
-            "query": query,
-            "group": group,
-        }
-
+        # Шаг 2: Запускаем полный пайплайн
         result = generate_idea(seed)
 
-        # Обновляем запись в Supabase — меняем статус на active
+        # Шаг 3: Проверяем качество данных
+        if not has_real_data(result):
+            print(f"[Worker] ⚠️ Агенты вернули слабые данные, помечаем как failed")
+            supabase.table("launch_ideas").update({
+                "status": "failed",
+                "summary": "Агенты не нашли достаточно данных по этой нише. Попробуй уточнить запрос.",
+            }).eq("id", idea_id).execute()
+            return
+
+        # Шаг 4: Обновляем запись — меняем статус на active
         supabase.table("launch_ideas").update({
             "status": "active",
             "title": result["title"],
@@ -86,8 +127,9 @@ def main():
         print(f"[Worker] ✅ Готово! score={result['score']}")
 
     except Exception as e:
+        import traceback
         print(f"[Worker] ❌ Ошибка: {e}")
-        # Помечаем как failed чтобы фронтенд мог показать ошибку
+        traceback.print_exc()
         try:
             supabase.table("launch_ideas").update({
                 "status": "failed",
