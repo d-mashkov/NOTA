@@ -575,10 +575,6 @@
     }
 
     window.loadIdeas = async function() {
-      const btn = document.getElementById('refresh-btn');
-      btn.textContent = '↻ ...';
-      btn.disabled = true;
-
       const { data } = await supabase
         .from('launch_ideas').select('*')
         .eq('status','active')
@@ -587,8 +583,6 @@
       allIdeas = data || [];
       applyFiltersAndSort();
       buildGroupFilters(allIdeas);
-      btn.textContent = '↻ Обновить';
-      btn.disabled = false;
     };
 
     window.submitRequest = async function() {
@@ -719,7 +713,7 @@
       if (user.role === 'admin') {
         document.getElementById('admin-link').style.display = 'block';
         document.getElementById('search-bar').style.display = 'block';
-        document.getElementById('refresh-btn').style.display = 'block';
+        // refresh-btn removed
       }
 
       const { data } = await supabase
