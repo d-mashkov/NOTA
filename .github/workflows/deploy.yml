@@ -14,7 +14,14 @@ jobs:
           host: 157.22.186.111
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GH_DISPATCH_TOKEN=${{ secrets.GH_DISPATCH_TOKEN }}
           script: |
+            # Добавляем GH_DISPATCH_TOKEN в .env если нет
+            if ! grep -q "GH_DISPATCH_TOKEN" /var/www/nota/.env 2>/dev/null; then
+              echo "GH_DISPATCH_TOKEN=$GH_DISPATCH_TOKEN" >> /var/www/nota/.env
+            else
+              sed -i "s|GH_DISPATCH_TOKEN=.*|GH_DISPATCH_TOKEN=$GH_DISPATCH_TOKEN|" /var/www/nota/.env
+            fi
             mkdir -p /run/sshd
             cd /var/www/nota
             git pull origin main

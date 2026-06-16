@@ -7,7 +7,7 @@ import os
 import sys
 import uuid
 import json
-import subprocess
+import requests
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -21,6 +21,32 @@ from pipeline.supabase_client import supabase
 app = Flask(__name__)
 CORS(app, origins=["*"])
 
+# GitHub repo для dispatch
+GITHUB_OWNER = os.getenv("GITHUB_OWNER", "d-mashkov")
+GITHUB_REPO  = os.getenv("GITHUB_REPO",  "NOTA")
+GITHUB_TOKEN = os.getenv("GH_DISPATCH_TOKEN", "")
+
+
+def trigger_github_actions():
+    """Триггерит workflow process-idea через repository_dispatch."""
+    if not GITHUB_TOKEN:
+        return False
+    try:
+        resp = requests.post(
+            f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/dispatches",
+            headers={
+                "Authorization": f"Bearer {GITHUB_TOKEN}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+            json={"event_type": "process-idea"},
+            timeout=10,
+        )
+        return resp.status_code == 204
+    except Exception as e:
+        print(f"[API] GitHub dispatch error: {e}")
+        return False
+
 
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -31,7 +57,7 @@ def health():
 def analyze():
     """
     Принимает нишу от фронтенда, создаёт pending-запись,
-    запускает pipeline в фоне.
+    триггерит GitHub Actions для обработки.
     Body: {"niche": "Сырки"}
     Returns: {"id": "uuid", "status": "pending"}
     """
@@ -62,20 +88,9 @@ def analyze():
     except Exception as e:
         return jsonify({"error": f"db error: {e}"}), 500
 
-    # Запускаем worker в фоне
-    worker_path = os.path.join(os.path.dirname(__file__), "worker.py")
-    venv_python = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "venv", "bin", "python"
-    )
-    python_bin = venv_python if os.path.exists(venv_python) else sys.executable
-
-    subprocess.Popen(
-        [python_bin, worker_path, idea_id, niche],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        close_fds=True,
-    )
+    # Триггерим GitHub Actions (US runner — Anthropic доступен)
+    dispatched = trigger_github_actions()
+    print(f"[API] Created pending idea '{niche}' ({idea_id[:8]}...) | GH dispatch: {dispatched}")
 
     return jsonify({"id": idea_id, "status": "pending"})
 
